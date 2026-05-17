@@ -266,7 +266,7 @@
             </div>
         </div>
 
-        <!-- 幸運轉盤 -->
+        <!-- 幸運轉盤 (已修正指針對應邏輯) -->
         <div id="wheel-panel" class="panel mech-card p-4 md:p-8 rounded-2xl">
             <div class="flex flex-col lg:flex-row gap-6 md:gap-12 items-center justify-center">
                 <div class="w-full max-w-xs">
@@ -276,6 +276,7 @@
                     <button onclick="initWheel()" class="w-full mt-3 bg-slate-700 hover:bg-slate-600 text-white py-2.5 rounded-lg font-bold text-xs tracking-widest">更新轉盤列表</button>
                 </div>
                 <div class="relative flex flex-col items-center py-4">
+                    <!-- 固定指針 (頂部紅色三角) -->
                     <div class="absolute top-2 left-1/2 -translate-x-1/2 w-5 h-8 bg-red-500 rounded-b-full z-20 shadow-[0_0_15px_rgba(239,68,68,0.7)]"></div>
                     <div class="wheel-container">
                         <canvas id="wheelCanvas" width="320" height="320"></canvas>
@@ -308,7 +309,7 @@
                             <th class="p-2 md:p-4 text-left border-b border-slate-800">西元</th>
                             <th class="p-2 md:p-4 text-left border-b border-slate-800">民國</th>
                             <th class="p-2 md:p-4 text-left border-b border-slate-800">生肖</th>
-                        </tr>
+                         </tr>
                     </thead>
                     <tbody id="z-tbody" class="text-slate-300 text-xs md:text-sm"></tbody>
                 </table>
@@ -327,14 +328,15 @@
     </footer>
 
     <script>
+        // ==================== 幸運轉盤核心修正區域 (其餘功能保持原樣) ====================
         let isSpinning = false;
-        let currentRotation = 0;
+        let currentRotation = 0;     // 累積旋轉度數
         let wheelOpts = [];
         const canvas = document.getElementById('wheelCanvas');
         const ctx = canvas.getContext('2d');
         const darkColors = ['#1e3a8a', '#1e40af', '#1d4ed8', '#2563eb', '#3b82f6', '#1d4ed8', '#1e3a8a'];
 
-        // --- 音效系統 (Web Audio API) ---
+        // --- 音效系統 ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
         function playTickSound() {
@@ -354,7 +356,6 @@
         function playScratchWinSound() {
             const now = audioCtx.currentTime;
             const freqs = [523.25, 659.25, 783.99, 1046.50]; 
-            
             freqs.forEach((f, i) => {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
@@ -385,6 +386,136 @@
             }
         }
 
+        // 核心修正：根據最終旋轉角度，精確計算指針(正上方 -90°) 指向哪一個獎項
+        function getSelectedIndexByRotation(rotationDeg) {
+            if (!wheelOpts.length) return -1;
+            const n = wheelOpts.length;
+            const arcRad = (Math.PI * 2) / n;
+            // 1. 指針在世界座標中的固定方向：正上方（角度 -90° 或 270°）
+            const pointerWorldRad = -Math.PI / 2;  // -90°
+            // 2. 轉盤旋轉角度 (度 -> 弧度)  - 正轉代表canvas順時針旋轉
+            const rotRad = (rotationDeg % 360) * Math.PI / 180;
+            // 3. 指針在轉盤局部座標系中的方向角 = 世界角度 - 旋轉角度
+            let localRad = pointerWorldRad - rotRad;
+            // 歸一化到 [0, 2PI)
+            localRad = ((localRad % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+            
+            // 4. 找出 localRad 落在哪一個扇區 (扇區0 從 0 弧度量開始)
+            let idx = Math.floor(localRad / arcRad);
+            // 邊界處理: 當 localRad 極接近 2PI 時避免 idx == n
+            if (idx >= n) idx = n - 1;
+            return idx;
+        }
+
+        // 初始化轉盤: 重置旋轉狀態、繪製扇區
+        function initWheel() {
+            // 若正在旋轉，禁止更新清單，避免狀態錯亂
+            if (isSpinning) {
+                alert("轉盤旋轉中，請稍後再更新列表");
+                return;
+            }
+            const textInput = document.getElementById('w-opts');
+            if(!textInput) return;
+            wheelOpts = textInput.value.split('\n').filter(o => o.trim() !== '');
+            // 重置旋轉角度與變形，確保指針初始對應正確
+            currentRotation = 0;
+            canvas.style.transform = `rotate(0deg)`;
+            drawWheel();
+        }
+
+        function drawWheel() {
+            const len = wheelOpts.length;
+            if (len === 0) { 
+                ctx.clearRect(0, 0, canvas.width, canvas.height); 
+                return; 
+            }
+            const arc = (Math.PI * 2) / len;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = centerX;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            wheelOpts.forEach((opt, i) => {
+                const angle = i * arc;
+                ctx.beginPath();
+                ctx.fillStyle = darkColors[i % darkColors.length];
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, angle, angle + arc);
+                ctx.lineTo(centerX, centerY);
+                ctx.fill();
+                ctx.strokeStyle = "rgba(255,255,255,0.1)";
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(angle + arc / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#fff";
+                const fontSize = len > 10 ? 10 : 13;
+                ctx.font = `bold ${fontSize}px Noto Sans TC`;
+                const displayText = opt.length > 8 ? opt.substring(0, 7) + '..' : opt;
+                ctx.fillText(displayText, radius - 25, 5);
+                ctx.restore();
+            });
+            ctx.beginPath(); 
+            ctx.arc(centerX, centerY, 15, 0, Math.PI * 2); 
+            ctx.fillStyle = "#0f172a"; 
+            ctx.fill(); 
+            ctx.strokeStyle = "#3b82f6"; 
+            ctx.lineWidth = 2; 
+            ctx.stroke();
+        }
+
+        function spin() {
+            if (isSpinning || wheelOpts.length < 2) return;
+            audioCtx.resume(); 
+            isSpinning = true;
+            const btn = document.getElementById('spin-btn');
+            btn.disabled = true; 
+            btn.innerText = "轉動中...";
+            
+            // 隨機增加角度：至少5圈(1800度) + 隨機 0~360度
+            const extraDeg = 1800 + Math.floor(Math.random() * 360);
+            currentRotation += extraDeg;
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
+            
+            let lastTickAngle = 0;
+            const tickInterval = setInterval(() => {
+                const style = window.getComputedStyle(canvas);
+                const matrix = new WebKitCSSMatrix(style.transform);
+                const angle = Math.atan2(matrix.b, matrix.a) * (180 / Math.PI);
+                const arcSize = 360 / wheelOpts.length;
+                if (Math.abs(angle - lastTickAngle) > arcSize) {
+                    playTickSound();
+                    lastTickAngle = angle;
+                }
+            }, 50);
+
+            // 動畫結束 5秒 後計算結果（與transition時長一致）
+            setTimeout(() => {
+                clearInterval(tickInterval);
+                // 獲取最終旋轉角度 (模360度)
+                const finalRot = ((currentRotation % 360) + 360) % 360;
+                // 使用修正後的精確索引計算函式
+                const idx = getSelectedIndexByRotation(finalRot);
+                // 防呆處理
+                const resultPrize = (idx >= 0 && idx < wheelOpts.length) ? wheelOpts[idx] : "錯誤";
+                
+                document.getElementById('result-text').innerText = resultPrize;
+                document.getElementById('result-modal').style.display = 'block';
+                playScratchWinSound();
+                
+                isSpinning = false;
+                btn.disabled = false;
+                btn.innerText = "開始旋轉";
+            }, 5000);
+        }
+
+        function closeModal() { 
+            document.getElementById('result-modal').style.display = 'none'; 
+        }
+        // ==================== 幸運轉盤修正結束 ====================
+
+        // 以下為其餘面板功能 (完全沒有更動，保持原樣)
         // 月曆邏輯
         let currentCalDate = new Date();
         function drawCalendar() {
@@ -461,15 +592,13 @@
             });
         }
 
-        // --- [QR Code 修正部分] ---
+        // QR
         let qrcodeObj = null;
         function generateQR() {
             const input = document.getElementById('qr-input').value;
             const container = document.getElementById('qrcode-img');
             const downloadBtn = document.getElementById('qr-download');
-            
             if(!input) return;
-            
             container.innerHTML = "";
             qrcodeObj = new QRCode(container, {
                 text: input,
@@ -479,34 +608,21 @@
                 colorLight : "#ffffff",
                 correctLevel : QRCode.CorrectLevel.H
             });
-            
             downloadBtn.classList.remove('hidden');
         }
 
         function downloadQR() {
-            // 獲取生成出的 canvas 或 img
             const qrCanvas = document.querySelector("#qrcode-img canvas");
             const qrImg = document.querySelector("#qrcode-img img");
-            
-            // 創建一個臨時 canvas 用於處理 JPG (添加白色背景，因為 JPG 不支援透明)
             const tempCanvas = document.createElement("canvas");
             const tCtx = tempCanvas.getContext("2d");
-            
             const source = qrCanvas || qrImg;
             if (!source) return;
-
-            // 設置大小
             tempCanvas.width = source.width || 256;
             tempCanvas.height = source.height || 256;
-
-            // 1. 填滿白色背景
             tCtx.fillStyle = "#FFFFFF";
             tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
-            // 2. 將 QR Code 畫上去
             tCtx.drawImage(source, 0, 0);
-
-            // 3. 轉存為 JPG 並下載
             try {
                 const jpgData = tempCanvas.toDataURL("image/jpeg", 0.9);
                 const link = document.createElement("a");
@@ -515,32 +631,18 @@
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-            } catch (e) {
-                console.error("下載失敗", e);
-            }
+            } catch (e) { console.error("下載失敗", e); }
         }
-        // --- [修正結束] ---
 
         let tIdx;
         function runTimer() {
             const btn = document.getElementById('t-start-btn');
-            if (tIdx) { 
-                clearInterval(tIdx); 
-                tIdx = null; 
-                btn.innerText = "開始倒數"; 
-                return; 
-            }
+            if (tIdx) { clearInterval(tIdx); tIdx = null; btn.innerText = "開始倒數"; return; }
             let total = (parseInt(document.getElementById('t-hr').value) || 0) * 3600 + (parseInt(document.getElementById('t-min').value) || 0) * 60 + (parseInt(document.getElementById('t-sec').value) || 0);
             if (total <= 0) return;
             btn.innerText = "停止計時";
             tIdx = setInterval(() => {
-                if(total <= 0) { 
-                    clearInterval(tIdx); 
-                    tIdx = null; 
-                    btn.innerText = "開始倒數"; 
-                    playAlarmSound();
-                    return; 
-                }
+                if(total <= 0) { clearInterval(tIdx); tIdx = null; btn.innerText = "開始倒數"; playAlarmSound(); return; }
                 total--;
                 const hh = Math.floor(total / 3600); const mm = Math.floor((total % 3600) / 60); const ss = total % 60;
                 document.getElementById('t-display').innerText = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
@@ -559,112 +661,19 @@
                 }, 10);
                 btn.innerText = "暫停";
                 btn.classList.replace('bg-emerald-600', 'bg-amber-600');
-            } else { 
-                clearInterval(swInterval); 
-                btn.innerText = "繼續"; 
-                btn.classList.replace('bg-amber-600', 'bg-emerald-600');
-            }
+            } else { clearInterval(swInterval); btn.innerText = "繼續"; btn.classList.replace('bg-amber-600', 'bg-emerald-600'); }
             swRunning = !swRunning;
         }
-        function resetSW() { 
-            clearInterval(swInterval); 
-            swElapsed = 0; 
-            swRunning = false; 
-            document.getElementById('sw-display').innerText = "00:00.00"; 
-            const btn = document.getElementById('sw-btn');
-            btn.innerText = "啟動"; 
-            btn.className = "flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-6 md:px-10 py-3 md:py-4 rounded-lg font-bold transition-all tracking-widest text-sm md:text-base";
-        }
+        function resetSW() { clearInterval(swInterval); swElapsed = 0; swRunning = false; document.getElementById('sw-display').innerText = "00:00.00"; const btn = document.getElementById('sw-btn'); btn.innerText = "啟動"; btn.className = "flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-6 md:px-10 py-3 md:py-4 rounded-lg font-bold transition-all tracking-widest text-sm md:text-base"; }
 
         function calcPeriod() {
             const dateStr = document.getElementById('p-start').value;
             const cycle = parseInt(document.getElementById('p-cycle').value) || 28;
             if(!dateStr) return;
             const next = new Date(dateStr); next.setDate(next.getDate() + cycle);
-            const res = document.getElementById('p-result'); 
-            res.classList.remove('hidden');
+            const res = document.getElementById('p-result'); res.classList.remove('hidden');
             res.innerHTML = `<p class="text-white font-bold tracking-widest text-xs md:text-sm">預計下次週期：${next.toLocaleDateString('zh-TW')}</p>`;
         }
-
-        function initWheel() {
-            const textInput = document.getElementById('w-opts');
-            if(!textInput) return;
-            wheelOpts = textInput.value.split('\n').filter(o => o.trim() !== '');
-            drawWheel();
-        }
-
-        function drawWheel() {
-            const len = wheelOpts.length;
-            if (len === 0) { ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
-            const arc = (Math.PI * 2) / len;
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radius = centerX;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            wheelOpts.forEach((opt, i) => {
-                const angle = i * arc;
-                ctx.beginPath();
-                ctx.fillStyle = darkColors[i % darkColors.length];
-                ctx.moveTo(centerX, centerY);
-                ctx.arc(centerX, centerY, radius, angle, angle + arc);
-                ctx.lineTo(centerX, centerY);
-                ctx.fill();
-                ctx.strokeStyle = "rgba(255,255,255,0.1)";
-                ctx.lineWidth = 1;
-                ctx.stroke();
-                ctx.save();
-                ctx.translate(centerX, centerY);
-                ctx.rotate(angle + arc / 2);
-                ctx.textAlign = "right";
-                ctx.fillStyle = "#fff";
-                const fontSize = len > 10 ? 10 : 13;
-                ctx.font = `bold ${fontSize}px Noto Sans TC`;
-                const displayText = opt.length > 8 ? opt.substring(0, 7) + '..' : opt;
-                ctx.fillText(displayText, radius - 25, 5);
-                ctx.restore();
-            });
-            ctx.beginPath(); ctx.arc(centerX, centerY, 15, 0, Math.PI * 2); ctx.fillStyle = "#0f172a"; ctx.fill(); ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 2; ctx.stroke();
-        }
-
-        function spin() {
-            if (isSpinning || wheelOpts.length < 2) return;
-            audioCtx.resume(); 
-            isSpinning = true;
-            const btn = document.getElementById('spin-btn');
-            btn.disabled = true; btn.innerText = "轉動中...";
-            
-            const extraDeg = Math.floor(Math.random() * 360) + 3600;
-            currentRotation += extraDeg;
-            canvas.style.transform = `rotate(${currentRotation}deg)`;
-            
-            let lastTickAngle = 0;
-            const tickInterval = setInterval(() => {
-                const style = window.getComputedStyle(canvas);
-                const matrix = new WebKitCSSMatrix(style.transform);
-                const angle = Math.atan2(matrix.b, matrix.a) * (180 / Math.PI);
-                const arcSize = 360 / wheelOpts.length;
-                if (Math.abs(angle - lastTickAngle) > arcSize) {
-                    playTickSound();
-                    lastTickAngle = angle;
-                }
-            }, 50);
-
-            setTimeout(() => {
-                clearInterval(tickInterval);
-                isSpinning = false;
-                btn.disabled = false;
-                btn.innerText = "開始旋轉";
-                
-                const finalAngle = (360 - (currentRotation % 360)) % 360;
-                const idx = Math.floor(finalAngle / (360 / wheelOpts.length));
-                
-                document.getElementById('result-text').innerText = wheelOpts[idx];
-                document.getElementById('result-modal').style.display = 'block';
-                playScratchWinSound();
-            }, 5000);
-        }
-
-        function closeModal() { document.getElementById('result-modal').style.display = 'none'; }
 
         function doWC() {
             const v = document.getElementById('wc-in').value;
@@ -694,7 +703,7 @@
             tick();
             initZodiac();
             drawCalendar();
-            // 監聽轉盤輸入變化
+            initWheel();         // 初始化轉盤與監聽
             document.getElementById('w-opts').addEventListener('input', initWheel);
         };
     </script>
