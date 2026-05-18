@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>靠北達德速度版⚡⚡⚡</title>
     <style>
-        /* */
         /* --- 啟動動畫樣式 (僅修改動畫時間為總計 1.5 秒) --- */
         #splash-overlay {
             position: fixed;
@@ -56,7 +55,6 @@
             50% { transform: translateY(-15px); color: #ff4500; }
         }
 
-        /* */
         /* --- 以下為原本的原始碼樣式，完全保留 --- */
         .marquee-container {
             position: fixed;
@@ -260,6 +258,11 @@
     <a href="https://youtube.com/shorts/VVvFNDugpKA?feature=share" target="_blank" class="card tutorial-card">🎬 投稿匿名教學影片</a>
     <a href="https://www.instagram.com/channel/AbaNRbRrwua33brb/" target="_blank" class="card">🔥 靠北達德專區 (IG 頻道)</a>
     <a href="https://www.instagram.com/hbingzhe10.10/" target="_blank" class="card owner-ig">👤 版主個人 IG</a>
+    
+    <!-- 新增項目：問版主問題與提示文字 -->
+    <a href="https://ngl.link/hbingzhe10.101?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAdGRzdgR36rxleHRuA2FlbQIxMQBzcnRjBmFwcF9pZA81NjcwNjczNDMzNTI0MjcAAac9HLxPyQ0RSkSTEhngKCSkbFdacCEKOpHy6BmT6KBh-0NDOpz1YeGnYvt3Sg_aem_RPXhgbbtwSvC25NWd0A-tQ" target="_blank" class="card owner-ig" style="margin-bottom: 5px;">💬 問版主問題</a>
+    <div style="font-size: 13px; color: #fd5d93; text-align: center; font-weight: bold; margin-bottom: 15px;">追蹤版主ig在匿名</div>
+
     <a href="https://www.instagram.com/channel/AbZByxGjVLjC7N7H/" target="_blank" class="card">📸 版主專區 (IG 頻道)</a>
     <a href="https://www.tiktok.com/@hbingzhe10.10" target="_blank" class="card owner-tiktok">🎵 版主抖音 (TikTok)</a>
     
@@ -355,7 +358,6 @@
     window.onload = function() {
         startRealtimeCounter(); 
 
-        /* */
         // 修改處：將延遲時間改為 1500 (1.5 秒)
         setTimeout(() => {
             const splash = document.getElementById('splash-overlay');
