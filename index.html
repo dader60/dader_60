@@ -270,6 +270,13 @@
     <a href="https://tellonym.me/dader_.60?rel=web" target="_blank" rel="noopener noreferrer" class="card" onclick="forceWeb(event)">🔗 匿名投稿連結 🔗</a>
     <a href="https://youtube.com/shorts/VVvFNDugpKA?feature=share" target="_blank" class="card tutorial-card">🎬 投稿匿名教學影片</a>
     
+    <!-- 新增：版主weplay語音房 -->
+    <div class="card" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.15); margin-bottom: 15px;">
+        🎮 版主weplay語音房
+        <div style="font-size: 15px; margin-top: 5px; font-weight: bold;">房號: C820553</div>
+        <button onclick="copyRoomNumber(this)" style="background: white; color: #11998e; border: none; padding: 6px 15px; border-radius: 50px; font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">點我複製</button>
+    </div>
+
     <!-- 新增：達德氣氛組按鈕與提示訊息 -->
     <a href="https://ig.me/j/AbZr_b6PWWH8oqEu/" target="_blank" class="card" style="background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); color: white; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.15);">💬 達德氣氛組</a>
     <div style="font-size: 13px; color: #d32f2f; text-align: center; font-weight: bold; margin-bottom: 15px; margin-top: -5px; line-height: 1.5;">
@@ -387,6 +394,20 @@
         const btn = document.querySelector('.line-id');
         btn.innerText = "✅ 已複製！"; setTimeout(() => btn.innerText = "複製 ID: @768mnxcr", 2000);
     }); }
+
+    // 新增：僅複製 weplay 語音房房號的函數
+    function copyRoomNumber(btn) {
+        const tempTextArea = document.createElement("textarea");
+        tempTextArea.value = "C820553";
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempTextArea);
+        btn.innerText = "✅ 已複製房號！";
+        setTimeout(() => {
+            btn.innerText = "點我複製";
+        }, 2000);
+    }
 
     function forceWeb(e) { e.preventDefault(); window.location.href = "https://tellonym.me/dader_.60?rel=web"; }
 
