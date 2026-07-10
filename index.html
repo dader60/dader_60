@@ -270,11 +270,20 @@
     <a href="https://tellonym.me/dader_.60?rel=web" target="_blank" rel="noopener noreferrer" class="card" onclick="forceWeb(event)">🔗 匿名投稿連結 🔗</a>
     <a href="https://youtube.com/shorts/VVvFNDugpKA?feature=share" target="_blank" class="card tutorial-card">🎬 投稿匿名教學影片</a>
     
-    <!-- 新增：版主weplay語音房 -->
-    <div class="card" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.15); margin-bottom: 15px;">
-        🎮 版主weplay語音房
-        <div style="font-size: 15px; margin-top: 5px; font-weight: bold;">房號: C820553</div>
-        <button onclick="copyRoomNumber(this)" style="background: white; color: #11998e; border: none; padding: 6px 15px; border-radius: 50px; font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">點我複製</button>
+    <!-- weplay語音房專區 -->
+    <div class="card" style="background: linear-gradient(135deg, #25f4ee, #fe0979); color: white; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.15); padding: 15px; text-align: center; margin-bottom: 15px;">
+        <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">🎙️ 版主weplay語音房</div>
+        <div style="font-size: 15px; margin-bottom: 12px; background: rgba(0,0,0,0.2); display: inline-block; padding: 3px 12px; border-radius: 10px; letter-spacing: 1px;">房號: C820553</div>
+        
+        <!-- 點擊我開啟 -->
+        <a href="https://weplay.run/C/qQrv41" target="_blank" class="card" style="background: white; color: #fe0979; border: none; padding: 10px; font-size: 15px; margin-bottom: 10px; display: block; box-shadow: 0 2px 5px rgba(0,0,0,0.15);" title="我在WePlay玩語音交友，房間號C820553，快來玩啊！朋友，快來聊天、組對，我在房間裡等你！">
+            🚀 點擊我開啟
+        </a>
+        
+        <!-- 點我複製 -->
+        <div id="weplay-copy-btn" onclick="copyWePlayRoom()" class="card" style="background: white; color: #25f4ee; border: none; padding: 10px; font-size: 15px; margin: 0; cursor: pointer; display: block; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
+            📋 點我複製房號
+        </div>
     </div>
 
     <!-- 新增：達德氣氛組按鈕與提示訊息 -->
@@ -395,18 +404,18 @@
         btn.innerText = "✅ 已複製！"; setTimeout(() => btn.innerText = "複製 ID: @768mnxcr", 2000);
     }); }
 
-    // 新增：僅複製 weplay 語音房房號的函數
-    function copyRoomNumber(btn) {
-        const tempTextArea = document.createElement("textarea");
-        tempTextArea.value = "C820553";
-        document.body.appendChild(tempTextArea);
-        tempTextArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempTextArea);
-        btn.innerText = "✅ 已複製房號！";
-        setTimeout(() => {
-            btn.innerText = "點我複製";
-        }, 2000);
+    // 新增：WePlay 複製房號功能 (僅複製 C820553)
+    function copyWePlayRoom() {
+        const el = document.createElement('textarea');
+        el.value = 'C820553';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        
+        const btn = document.getElementById('weplay-copy-btn');
+        btn.innerText = "✅ 已複製房號！"; 
+        setTimeout(() => btn.innerText = "📋 點我複製房號", 2000);
     }
 
     function forceWeb(e) { e.preventDefault(); window.location.href = "https://tellonym.me/dader_.60?rel=web"; }
