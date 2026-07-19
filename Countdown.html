@@ -11,6 +11,7 @@
             background-color: #a5d8e1; /* 淺藍色背景 */
             font-family: 'Noto Sans TC', sans-serif;
             padding: 10px;
+            padding-bottom: 70px; /* 為底部固定文字留空間 */
             margin: 0;
             min-height: 100vh;
         }
@@ -73,6 +74,24 @@
             background: linear-gradient(90deg, #eab308 0%, #ca8a04 100%);
             transition: width 1s linear;
         }
+        /* 底部固定文字 */
+        .footer-text {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+            background: rgba(26, 26, 26, 0.85);
+            backdrop-filter: blur(5px);
+            color: #eab308;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.1rem;
+            border-top: 1px solid rgba(234, 179, 8, 0.3);
+            z-index: 999;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+        }
         /* 手機版微調 */
         @media (max-width: 480px) {
             .card {
@@ -80,6 +99,10 @@
             }
             .cards-grid {
                 grid-template-columns: 1fr; /* 強制單欄 */
+            }
+            .footer-text {
+                font-size: 0.7rem;
+                padding: 8px 0;
             }
         }
     </style>
@@ -122,6 +145,7 @@
             { title: "🛶 6/19~6/21 端午連假", targetDate: "2026-06-19T00:00:00", message: "吃粽子、看龍舟 🛶", totalDays: 30 },
             { title: "📑 6/25~6/30 期末考", targetDate: "2026-06-25T00:00:00", message: "最後一戰，考完放暑假！ 🏖️", totalDays: 30 },
             { title: "☀️ 6/30 結業式", targetDate: "2026-06-30T00:00:00", message: "暑假快樂，迎接夏日時光！ 🌊", totalDays: 365 },
+            { title: "📚 8/31 開學日", targetDate: "2026-08-31T00:00:00", message: "新學期新氣象，加油！ 💪", totalDays: 365 },
             { title: "🌕 9/25~9/28 中秋連假/教師節", targetDate: "2026-09-25T00:00:00", message: "中秋人團圓，假期愉快！ 🥮", totalDays: 365 },
             { title: "🎂 10/10 版主生日", targetDate: "2026-10-10T00:00:00", message: "生日快樂！Happy Birthday! 🎉", totalDays: 365 },
             { title: "🇹🇼 10/9~10/11 國慶連假", targetDate: "2026-10-09T00:00:00", message: "國慶連假放鬆去！ 🎈", totalDays: 365 },
@@ -201,5 +225,9 @@
         setInterval(updateCountdowns, 1000);
         updateCountdowns();
     </script>
+
+    <!-- 底部固定文字 -->
+    <div class="footer-text">𝓭𝓪𝓭𝓮𝓻 靠北達德速度版 ⚡️｜版主小編團隊製作</div>
+
 </body>
 </html>
