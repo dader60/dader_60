@@ -262,8 +262,14 @@
     <img src="avatar.jpg" alt="版主頭像" class="profile-pic">
     <h2>靠北達德速度版⚡⚡⚡</h2>
 
-    <div id="custom-live-clock" style="text-align: center; background-color: #000000; color: #ffffff; font-weight: bold; padding: 12px 15px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); font-size: 15px; letter-spacing: 0.5px;">
+    <!-- 原本的動態時鐘區塊 (微調 bottom margin 為 12px 保持美觀間距) -->
+    <div id="custom-live-clock" style="text-align: center; background-color: #000000; color: #ffffff; font-weight: bold; padding: 12px 15px; border-radius: 15px; margin-bottom: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); font-size: 15px; letter-spacing: 0.5px;">
         載入時間中...
+    </div>
+
+    <!-- 新增項目：靠達創立時間與自動天數計算 (時間為2023年05月27號，過一天+1) -->
+    <div id="founding-days-counter" style="text-align: center; background-color: #000000; color: #ffffff; font-weight: bold; padding: 12px 15px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); font-size: 15px; letter-spacing: 0.5px;">
+        靠達創立時間：2023年05月27日 (已創立 <span id="founding-days-num" style="color: #ffdd44; font-size: 17px;">讀取中</span> 天)
     </div>
 
     <a href="https://sites.google.com/view/dader60/%E7%89%88%E8%A6%8F" target="_blank" class="card">📄 版規及簡歷冊</a>
@@ -493,6 +499,18 @@
             const clockElem = document.getElementById("custom-live-clock");
             if (clockElem) {
                 clockElem.innerText = clockText;
+            }
+
+            // 新增功能：動態計算靠達創立天數 (創立時間：2023年05月27日)
+            // 在 JavaScript 中，月份為 0-indexed，5月對應數字 4
+            const foundingDate = new Date(2023, 4, 27, 0, 0, 0); 
+            const diffTime = now.getTime() - foundingDate.getTime();
+            // 計算毫秒差並無條件捨去轉換成完整天數
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            const daysElem = document.getElementById("founding-days-num");
+            if (daysElem) {
+                daysElem.innerText = diffDays;
             }
         }
         updateTime();
