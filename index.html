@@ -88,55 +88,59 @@
         .container { width: 100%; max-width: 400px; }
         .profile-pic { width: 110px; height: 110px; border-radius: 50%; background-color: white; border: 3px solid white; margin: 0; display: block; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
-        /* --- 新增：頭像容器與CD播放器樣式 --- */
+        /* --- 頭像容器：保持原有結構，CD 圖示已移除，改用標題旁的音樂符號 --- */
         .avatar-wrapper {
             position: relative;
             width: 110px;
             height: 110px;
             margin: 10px auto 15px auto;
         }
-        .cd-icon {
-            position: absolute;
-            bottom: -2px;
-            right: -8px;
-            width: 42px;
-            height: 42px;
-            background: radial-gradient(circle, #222 15%, #d1d1d1 18%, #888 38%, #111 58%, #333 100%);
-            border: 2px solid #ffffff;
-            border-radius: 50%;
+        /* 舊的 cd-icon 樣式已移除，改為標題旁的音樂圖示 */
+        /* 音樂符號按鈕樣式 - 放在標題旁 */
+        .music-icon-btn {
+            display: inline-block;
+            font-size: 28px;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            user-select: none;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            animation: cd-rotate 3s linear infinite;
-            animation-play-state: paused;
-        }
-        .cd-icon:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 14px rgba(0,0,0,0.4);
-        }
-        .cd-icon::after {
-            content: '';
-            width: 10px;
-            height: 10px;
-            background: #ffffff;
+            margin-left: 8px;
+            background: rgba(255,255,255,0.6);
             border-radius: 50%;
-            position: absolute;
-            border: 2px solid #333333;
+            width: 44px;
+            height: 44px;
+            line-height: 46px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+            user-select: none;
+            color: #333;
+            vertical-align: middle;
+            border: 2px solid rgba(255,255,255,0.8);
         }
-        .cd-icon.playing {
-            animation-play-state: running;
+        .music-icon-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.2);
         }
-        @keyframes cd-rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .music-icon-btn.playing {
+            color: #ff4500;
+            animation: music-pulse 1.2s ease-in-out infinite;
+        }
+        @keyframes music-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
         }
 
-        h2 { text-align: center; color: #333; text-shadow: 1px 1px 2px white; margin-bottom: 25px; }
+        h2 { 
+            text-align: center; 
+            color: #333; 
+            text-shadow: 1px 1px 2px white; 
+            margin-bottom: 25px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-wrap: wrap;
+            gap: 6px;
+        }
         .card, .line-section, .live-section, .shuttle-section { background: white; border-radius: 20px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: #333; display: block; font-weight: bold; box-sizing: border-box; }
         .owner-ig { background: #fff5f5; border: 2px solid #fd5d93; color: #fd5d93; }
         .owner-tiktok { background: #000000; color: #ffffff; border: 2px solid #25F4EE; }
@@ -308,12 +312,17 @@
 </div>
 
 <div class="container">
-    <!-- 包裹頭像與 CD 符號，頭像位置保持不變 -->
+    <!-- 頭像容器 (CD 符號已移除) -->
     <div class="avatar-wrapper">
         <img src="avatar.jpg" alt="版主頭像" class="profile-pic">
-        <div id="cd-player" class="cd-icon" title="點擊播放/暫停音樂" onclick="toggleAudio()"></div>
+        <!-- 此處不再放置 CD 圖示 -->
     </div>
-    <h2>靠北達德速度版⚡⚡⚡</h2>
+    
+    <!-- 標題與音樂符號放在一起（音樂符號在第三個閃電⚡旁邊的空白處） -->
+    <h2>
+        靠北達德速度版⚡⚡⚡
+        <span id="music-toggle-btn" class="music-icon-btn" title="按一下暫停/播放，快速按兩下換首">🎵</span>
+    </h2>
 
     <!-- 原本的動態時鐘區塊 (微調 bottom margin 為 12px 保持美觀間距) -->
     <div id="custom-live-clock" style="text-align: center; background-color: #000000; color: #ffffff; font-weight: bold; padding: 12px 15px; border-radius: 15px; margin-bottom: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); font-size: 15px; letter-spacing: 0.5px;">
@@ -503,84 +512,113 @@
 </div>
 
 <script>
-    /* --- 新增：背景音樂隨機自動播放與 CD 切換控制邏輯 --- */
+    /* --- 音樂控制：按一下暫停/播放，快速按兩下換首 --- */
     const songs = ['01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3', '06.mp3'];
     let currentSongIndex = Math.floor(Math.random() * songs.length);
     const audio = new Audio(songs[currentSongIndex]);
     let isPlaying = false;
+    let clickTimer = null;  // 用於偵測雙擊
 
-    // 播放隨機音樂功能
-    function playRandomSong() {
-        let nextIndex = Math.floor(Math.random() * songs.length);
-        if (songs.length > 1 && nextIndex === currentSongIndex) {
-            nextIndex = (nextIndex + 1) % songs.length;
-        }
-        currentSongIndex = nextIndex;
-        audio.src = songs[currentSongIndex];
-        audio.play().then(() => {
-            updateCdState(true);
-        }).catch(err => {
-            console.log("自動播放被瀏覽器阻擋:", err);
-            updateCdState(false);
-        });
-    }
+    const musicBtn = document.getElementById('music-toggle-btn');
 
-    // 當一首歌曲結束時，自動切換下一首隨機歌曲
-    audio.onended = function() {
-        playRandomSong();
-    };
-
-    // 更新 CD 旋轉狀態
-    function updateCdState(playing) {
+    // 更新按鈕狀態與動畫
+    function updateMusicUI(playing) {
         isPlaying = playing;
-        const cdElem = document.getElementById('cd-player');
-        if (cdElem) {
+        if (musicBtn) {
             if (playing) {
-                cdElem.classList.add('playing');
+                musicBtn.classList.add('playing');
+                musicBtn.innerText = '🎵';
             } else {
-                cdElem.classList.remove('playing');
+                musicBtn.classList.remove('playing');
+                musicBtn.innerText = '🎵';
             }
         }
     }
 
-    // 點擊 CD 符號手動開關播放/暫停
-    function toggleAudio() {
-        if (isPlaying) {
-            audio.pause();
-            updateCdState(false);
-        } else {
+    // 播放特定歌曲
+    function playSong(index) {
+        if (index >= 0 && index < songs.length) {
+            currentSongIndex = index;
+            audio.src = songs[currentSongIndex];
             audio.play().then(() => {
-                updateCdState(true);
-            }).catch(err => {
-                console.log("播放失敗:", err);
+                updateMusicUI(true);
+            }).catch(() => {
+                updateMusicUI(false);
             });
         }
     }
 
-    // 嘗試自動播放背景音樂（處理現代瀏覽器的 Autoplay 政策）
+    // 切換到下一首隨機歌曲
+    function nextRandomSong() {
+        let nextIndex = Math.floor(Math.random() * songs.length);
+        if (songs.length > 1 && nextIndex === currentSongIndex) {
+            nextIndex = (nextIndex + 1) % songs.length;
+        }
+        playSong(nextIndex);
+    }
+
+    // 點擊處理：判斷單擊或雙擊
+    function handleMusicClick(e) {
+        e.stopPropagation();
+        
+        if (clickTimer) {
+            // 第二次點擊：雙擊 -> 換首
+            clearTimeout(clickTimer);
+            clickTimer = null;
+            // 換首 (快速按兩下)
+            nextRandomSong();
+            return;
+        }
+
+        // 第一次點擊：設定計時器，等待 300ms 判斷是否為雙擊
+        clickTimer = setTimeout(() => {
+            clickTimer = null;
+            // 單擊：切換播放/暫停
+            if (isPlaying) {
+                audio.pause();
+                updateMusicUI(false);
+            } else {
+                audio.play().then(() => {
+                    updateMusicUI(true);
+                }).catch(() => {});
+            }
+        }, 300);
+    }
+
+    // 歌曲結束自動下一首
+    audio.onended = function() {
+        nextRandomSong();
+    };
+
+    // 初始化自動播放（嘗試）
     function initAutoPlay() {
         audio.play().then(() => {
-            updateCdState(true);
+            updateMusicUI(true);
         }).catch(() => {
-            updateCdState(false);
-            // 當被瀏覽器阻擋時，使用者點擊頁面任意位置皆可觸發自動播放
-            const enableAudioOnUserGesture = () => {
+            updateMusicUI(false);
+            // 使用者手勢啟用
+            const enableAudio = () => {
                 if (!isPlaying) {
                     audio.play().then(() => {
-                        updateCdState(true);
+                        updateMusicUI(true);
                     }).catch(() => {});
                 }
-                document.removeEventListener('click', enableAudioOnUserGesture);
-                document.removeEventListener('touchstart', enableAudioOnUserGesture);
+                document.removeEventListener('click', enableAudio);
+                document.removeEventListener('touchstart', enableAudio);
             };
-            document.addEventListener('click', enableAudioOnUserGesture);
-            document.addEventListener('touchstart', enableAudioOnUserGesture);
+            document.addEventListener('click', enableAudio);
+            document.addEventListener('touchstart', enableAudio);
         });
     }
 
+    // 綁定音樂按鈕事件
+    if (musicBtn) {
+        musicBtn.addEventListener('click', handleMusicClick);
+    }
+
+    // 其餘原始功能函數
     const API_KEY = "CWA-E16D81B4-7836-43CA-95E5-51D9A434B120";
 
-    /* 新增：暫停使用系統提示彈窗函式 */
     function showPauseNotice(e) {
         if (e) e.preventDefault();
         let modal = document.getElementById('pause-notice-modal');
@@ -606,7 +644,6 @@
         btn.innerText = "✅ 已複製！"; setTimeout(() => btn.innerText = "複製 ID: @768mnxcr", 2000);
     }); }
 
-    // 新增：OpenChat 社群密碼複製功能 (僅複製數字 20230527)
     function copyOpenChatPassword() {
         const el = document.createElement('textarea');
         el.value = '20230527';
@@ -620,7 +657,6 @@
         setTimeout(() => btn.innerText = "點擊我複製密碼", 2000);
     }
 
-    // 新增：WePlay 複製房號功能 (僅複製 C820553)
     function copyWePlayRoom() {
         const el = document.createElement('textarea');
         el.value = 'C820553';
@@ -636,7 +672,6 @@
 
     function forceWeb(e) { e.preventDefault(); window.location.href = "https://tellonym.me/dader_.60?rel=web"; }
 
-    // 新增：更新時鐘的時間更新函式
     function startLiveClock() {
         function updateTime() {
             const now = new Date();
@@ -656,11 +691,8 @@
                 clockElem.innerText = clockText;
             }
 
-            // 新增功能：動態計算靠達創立天數 (創立時間：2023年05月27日)
-            // 在 JavaScript 中，月份為 0-indexed，5月對應數字 4
             const foundingDate = new Date(2023, 4, 27, 0, 0, 0); 
             const diffTime = now.getTime() - foundingDate.getTime();
-            // 計算毫秒差並無條件捨去轉換成完整天數
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
             
             const daysElem = document.getElementById("founding-days-num");
@@ -674,10 +706,9 @@
 
     window.onload = function() {
         startRealtimeCounter(); 
-        startLiveClock(); // 新增：啟動時鐘
-        initAutoPlay();   // 新增：啟動自動播放音樂
+        startLiveClock();
+        initAutoPlay();  // 背景音樂自動播放
 
-        // 修改處：將延遲時間改為 1500 (1.5 秒)
         setTimeout(() => {
             const splash = document.getElementById('splash-overlay');
             if (splash) {
