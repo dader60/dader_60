@@ -88,32 +88,42 @@
         .container { width: 100%; max-width: 400px; }
         .profile-pic { width: 110px; height: 110px; border-radius: 50%; background-color: white; border: 3px solid white; margin: 0; display: block; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
-        /* --- 頭像容器：保持原有結構，CD 圖示已移除，改用標題旁的音樂符號 --- */
+        /* --- 頭像容器：將音樂控制放在頭像旁邊 --- */
         .avatar-wrapper {
-            position: relative;
-            width: 110px;
-            height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
             margin: 10px auto 15px auto;
         }
-        /* 音樂符號按鈕樣式 - 放在標題旁 */
+        /* 音樂控制區 - 放在頭像旁邊 */
+        .music-control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.7);
+            padding: 6px 12px 6px 8px;
+            border-radius: 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
         .music-icon-btn {
             display: inline-block;
-            font-size: 28px;
+            font-size: 26px;
             cursor: pointer;
-            margin-left: 8px;
-            background: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.5);
             border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            line-height: 46px;
+            width: 40px;
+            height: 40px;
+            line-height: 42px;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             transition: all 0.2s ease;
             user-select: none;
             color: #333;
-            vertical-align: middle;
-            border: 2px solid rgba(255,255,255,0.8);
+            border: 2px solid rgba(255,255,255,0.6);
             font-family: "Times New Roman", serif;
+            flex-shrink: 0;
         }
         .music-icon-btn:hover {
             transform: scale(1.1);
@@ -129,6 +139,47 @@
             50% { transform: scale(1.15); }
             100% { transform: scale(1); }
         }
+        /* 音量滑桿樣式 */
+        .volume-slider {
+            width: 50px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(0,0,0,0.2);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #4A90E2;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+        .volume-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #4A90E2;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+        .volume-slider:hover {
+            background: rgba(0,0,0,0.35);
+        }
+        .volume-icon {
+            font-size: 16px;
+            color: #555;
+            user-select: none;
+            flex-shrink: 0;
+        }
 
         h2 { 
             text-align: center; 
@@ -139,7 +190,7 @@
             align-items: center; 
             justify-content: center; 
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 4px;
         }
         .card, .line-section, .live-section, .shuttle-section { background: white; border-radius: 20px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: #333; display: block; font-weight: bold; box-sizing: border-box; }
         .owner-ig { background: #fff5f5; border: 2px solid #fd5d93; color: #fd5d93; }
@@ -312,17 +363,18 @@
 </div>
 
 <div class="container">
-    <!-- 頭像容器 (CD 符號已移除) -->
+    <!-- 頭像容器 + 音樂控制（放在頭像旁邊） -->
     <div class="avatar-wrapper">
         <img src="avatar.jpg" alt="版主頭像" class="profile-pic">
-        <!-- 此處不再放置 CD 圖示 -->
+        <!-- 音樂控制區：♪ 符號 + 音量滑桿 -->
+        <span class="music-control-group">
+            <span id="music-toggle-btn" class="music-icon-btn" title="按一下暫停/播放，快速按兩下換首">♪</span>
+            <span class="volume-icon">🔊</span>
+            <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.8">
+        </span>
     </div>
     
-    <!-- 標題與音樂符號放在一起（音樂符號在第三個閃電⚡旁邊的空白處） -->
-    <h2>
-        靠北達德速度版⚡⚡⚡
-        <span id="music-toggle-btn" class="music-icon-btn" title="按一下暫停/播放，快速按兩下換首">♪</span>
-    </h2>
+    <h2>靠北達德速度版⚡⚡⚡</h2>
 
     <!-- 原本的動態時鐘區塊 (微調 bottom margin 為 12px 保持美觀間距) -->
     <div id="custom-live-clock" style="text-align: center; background-color: #000000; color: #ffffff; font-weight: bold; padding: 12px 15px; border-radius: 15px; margin-bottom: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); font-size: 15px; letter-spacing: 0.5px;">
@@ -512,7 +564,7 @@
 </div>
 
 <script>
-    /* --- 音樂控制：按一下暫停/播放，快速按兩下換首 --- */
+    /* --- 音樂控制：按一下暫停/播放，快速按兩下換首，音量滑桿控制音量 --- */
     const songs = ['01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3', '06.mp3'];
     let currentSongIndex = Math.floor(Math.random() * songs.length);
     const audio = new Audio(songs[currentSongIndex]);
@@ -520,6 +572,15 @@
     let clickTimer = null;  // 用於偵測雙擊
 
     const musicBtn = document.getElementById('music-toggle-btn');
+    const volumeSlider = document.getElementById('volume-slider');
+
+    // 設定初始音量
+    audio.volume = parseFloat(volumeSlider.value);
+
+    // 音量滑桿控制
+    volumeSlider.addEventListener('input', function() {
+        audio.volume = parseFloat(this.value);
+    });
 
     // 更新按鈕狀態與動畫
     function updateMusicUI(playing) {
@@ -565,7 +626,6 @@
             // 第二次點擊：雙擊 -> 換首
             clearTimeout(clickTimer);
             clickTimer = null;
-            // 換首 (快速按兩下)
             nextRandomSong();
             return;
         }
