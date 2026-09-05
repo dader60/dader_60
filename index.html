@@ -86,7 +86,56 @@
         body { font-family: "Microsoft JhengHei", Arial, sans-serif; background-color: #ADD8E6; margin: 0; display: flex; flex-direction: column; align-items: center; padding: 55px 20px 80px 20px; }
         
         .container { width: 100%; max-width: 400px; }
-        .profile-pic { width: 110px; height: 110px; border-radius: 50%; background-color: white; border: 3px solid white; margin: 10px auto 15px auto; display: block; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .profile-pic { width: 110px; height: 110px; border-radius: 50%; background-color: white; border: 3px solid white; margin: 0; display: block; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        /* --- 新增：頭像容器與CD播放器樣式 --- */
+        .avatar-wrapper {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin: 10px auto 15px auto;
+        }
+        .cd-icon {
+            position: absolute;
+            bottom: -2px;
+            right: -8px;
+            width: 42px;
+            height: 42px;
+            background: radial-gradient(circle, #222 15%, #d1d1d1 18%, #888 38%, #111 58%, #333 100%);
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            user-select: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            animation: cd-rotate 3s linear infinite;
+            animation-play-state: paused;
+        }
+        .cd-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+        }
+        .cd-icon::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #ffffff;
+            border-radius: 50%;
+            position: absolute;
+            border: 2px solid #333333;
+        }
+        .cd-icon.playing {
+            animation-play-state: running;
+        }
+        @keyframes cd-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         h2 { text-align: center; color: #333; text-shadow: 1px 1px 2px white; margin-bottom: 25px; }
         .card, .line-section, .live-section, .shuttle-section { background: white; border-radius: 20px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: #333; display: block; font-weight: bold; box-sizing: border-box; }
         .owner-ig { background: #fff5f5; border: 2px solid #fd5d93; color: #fd5d93; }
@@ -226,9 +275,6 @@
 </head>
 <body>
 
-<!-- 隱藏的背景音樂播放器元件 -->
-<audio id="bgm-player" preload="auto"></audio>
-
 <div id="splash-overlay">
     <div class="splash-logo-box">
         <img src="avatar.jpg" alt="Logo" class="splash-logo">
@@ -262,7 +308,11 @@
 </div>
 
 <div class="container">
-    <img src="avatar.jpg" alt="版主頭像" class="profile-pic">
+    <!-- 包裹頭像與 CD 符號，頭像位置保持不變 -->
+    <div class="avatar-wrapper">
+        <img src="avatar.jpg" alt="版主頭像" class="profile-pic">
+        <div id="cd-player" class="cd-icon" title="點擊播放/暫停音樂" onclick="toggleAudio()"></div>
+    </div>
     <h2>靠北達德速度版⚡⚡⚡</h2>
 
     <!-- 原本的動態時鐘區塊 (微調 bottom margin 為 12px 保持美觀間距) -->
@@ -453,6 +503,81 @@
 </div>
 
 <script>
+    /* --- 新增：背景音樂隨機自動播放與 CD 切換控制邏輯 --- */
+    const songs = ['1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3', '6.mp3'];
+    let currentSongIndex = Math.floor(Math.random() * songs.length);
+    const audio = new Audio(songs[currentSongIndex]);
+    let isPlaying = false;
+
+    // 播放隨機音樂功能
+    function playRandomSong() {
+        let nextIndex = Math.floor(Math.random() * songs.length);
+        if (songs.length > 1 && nextIndex === currentSongIndex) {
+            nextIndex = (nextIndex + 1) % songs.length;
+        }
+        currentSongIndex = nextIndex;
+        audio.src = songs[currentSongIndex];
+        audio.play().then(() => {
+            updateCdState(true);
+        }).catch(err => {
+            console.log("自動播放被瀏覽器阻擋:", err);
+            updateCdState(false);
+        });
+    }
+
+    // 當一首歌曲結束時，自動切換下一首隨機歌曲
+    audio.onended = function() {
+        playRandomSong();
+    };
+
+    // 更新 CD 旋轉狀態
+    function updateCdState(playing) {
+        isPlaying = playing;
+        const cdElem = document.getElementById('cd-player');
+        if (cdElem) {
+            if (playing) {
+                cdElem.classList.add('playing');
+            } else {
+                cdElem.classList.remove('playing');
+            }
+        }
+    }
+
+    // 點擊 CD 符號手動開關播放/暫停
+    function toggleAudio() {
+        if (isPlaying) {
+            audio.pause();
+            updateCdState(false);
+        } else {
+            audio.play().then(() => {
+                updateCdState(true);
+            }).catch(err => {
+                console.log("播放失敗:", err);
+            });
+        }
+    }
+
+    // 嘗試自動播放背景音樂（處理現代瀏覽器的 Autoplay 政策）
+    function initAutoPlay() {
+        audio.play().then(() => {
+            updateCdState(true);
+        }).catch(() => {
+            updateCdState(false);
+            // 當被瀏覽器阻擋時，使用者點擊頁面任意位置皆可觸發自動播放
+            const enableAudioOnUserGesture = () => {
+                if (!isPlaying) {
+                    audio.play().then(() => {
+                        updateCdState(true);
+                    }).catch(() => {});
+                }
+                document.removeEventListener('click', enableAudioOnUserGesture);
+                document.removeEventListener('touchstart', enableAudioOnUserGesture);
+            };
+            document.addEventListener('click', enableAudioOnUserGesture);
+            document.addEventListener('touchstart', enableAudioOnUserGesture);
+        });
+    }
+
     const API_KEY = "CWA-E16D81B4-7836-43CA-95E5-51D9A434B120";
 
     /* 新增：暫停使用系統提示彈窗函式 */
@@ -547,56 +672,10 @@
         setInterval(updateTime, 1000);
     }
 
-    /* -----------------------------------------------------------
-       ⚡ 背景音樂隨機播放機制 ⚡
-    ----------------------------------------------------------- */
-    const playlist = ['1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3', '6.mp3'];
-    let lastPlayedIndex = -1; // 記錄上一首，避免連續重複播同一首
-
-    function getRandomIndex() {
-        if (playlist.length <= 1) return 0;
-        let randomIndex;
-        do {
-            randomIndex = Math.floor(Math.random() * playlist.length);
-        } while (randomIndex === lastPlayedIndex);
-        return randomIndex;
-    }
-
-    function playRandomSong() {
-        const audioPlayer = document.getElementById('bgm-player');
-        if (!audioPlayer) return;
-
-        const index = getRandomIndex();
-        lastPlayedIndex = index;
-        audioPlayer.src = playlist[index];
-        
-        audioPlayer.play().then(() => {
-            console.log("隨機播放背景音樂：", playlist[index]);
-        }).catch(err => {
-            console.log("等待使用者點擊畫面觸發播放...");
-        });
-    }
-
-    // 歌曲播放完畢後，自動隨機換下一首
-    const audioPlayer = document.getElementById('bgm-player');
-    if (audioPlayer) {
-        audioPlayer.addEventListener('ended', playRandomSong);
-    }
-
-    // 解鎖播放權限的觸發函式（當使用者點擊全螢幕任何地方時執行一次）
-    function unlockAndPlayAudio() {
-        playRandomSong();
-        document.removeEventListener('click', unlockAndPlayAudio);
-        document.removeEventListener('touchstart', unlockAndPlayAudio);
-    }
-
     window.onload = function() {
         startRealtimeCounter(); 
         startLiveClock(); // 新增：啟動時鐘
-
-        // 綁定點擊事件以解鎖瀏覽器背景音樂封鎖
-        document.addEventListener('click', unlockAndPlayAudio);
-        document.addEventListener('touchstart', unlockAndPlayAudio);
+        initAutoPlay();   // 新增：啟動自動播放音樂
 
         // 修改處：將延遲時間改為 1500 (1.5 秒)
         setTimeout(() => {
