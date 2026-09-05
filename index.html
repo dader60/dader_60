@@ -130,14 +130,14 @@
             background: rgba(255,255,255,0.9);
             box-shadow: 0 4px 14px rgba(0,0,0,0.2);
         }
+        /* 播放時旋轉 + 顏色變化 */
         .music-icon-btn.playing {
             color: #ff4500;
-            animation: music-pulse 1.2s ease-in-out infinite;
+            animation: spin-music 1.5s linear infinite;
         }
-        @keyframes music-pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
+        @keyframes spin-music {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         /* 音量滑桿樣式 */
         .volume-slider {
@@ -370,7 +370,7 @@
         <span class="music-control-group">
             <span id="music-toggle-btn" class="music-icon-btn" title="按一下暫停/播放，快速按兩下換首">♪</span>
             <span class="volume-icon">🔊</span>
-            <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.8">
+            <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
         </span>
     </div>
     
@@ -574,15 +574,16 @@
     const musicBtn = document.getElementById('music-toggle-btn');
     const volumeSlider = document.getElementById('volume-slider');
 
-    // 設定初始音量
-    audio.volume = parseFloat(volumeSlider.value);
+    // 設定初始音量為一半 (0.5)
+    audio.volume = 0.5;
+    volumeSlider.value = 0.5;
 
     // 音量滑桿控制
     volumeSlider.addEventListener('input', function() {
         audio.volume = parseFloat(this.value);
     });
 
-    // 更新按鈕狀態與動畫
+    // 更新按鈕狀態（播放時旋轉，暫停時停止旋轉）
     function updateMusicUI(playing) {
         isPlaying = playing;
         if (musicBtn) {
