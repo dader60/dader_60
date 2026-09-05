@@ -95,7 +95,6 @@
             height: 110px;
             margin: 10px auto 15px auto;
         }
-        /* 舊的 cd-icon 樣式已移除，改為標題旁的音樂圖示 */
         /* 音樂符號按鈕樣式 - 放在標題旁 */
         .music-icon-btn {
             display: inline-block;
@@ -114,6 +113,7 @@
             color: #333;
             vertical-align: middle;
             border: 2px solid rgba(255,255,255,0.8);
+            font-family: "Times New Roman", serif;
         }
         .music-icon-btn:hover {
             transform: scale(1.1);
@@ -321,7 +321,7 @@
     <!-- 標題與音樂符號放在一起（音樂符號在第三個閃電⚡旁邊的空白處） -->
     <h2>
         靠北達德速度版⚡⚡⚡
-        <span id="music-toggle-btn" class="music-icon-btn" title="按一下暫停/播放，快速按兩下換首">🎵</span>
+        <span id="music-toggle-btn" class="music-icon-btn" title="按一下暫停/播放，快速按兩下換首">♪</span>
     </h2>
 
     <!-- 原本的動態時鐘區塊 (微調 bottom margin 為 12px 保持美觀間距) -->
@@ -527,10 +527,10 @@
         if (musicBtn) {
             if (playing) {
                 musicBtn.classList.add('playing');
-                musicBtn.innerText = '🎵';
+                musicBtn.innerText = '♪';
             } else {
                 musicBtn.classList.remove('playing');
-                musicBtn.innerText = '🎵';
+                musicBtn.innerText = '♪';
             }
         }
     }
