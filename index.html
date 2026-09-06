@@ -99,12 +99,18 @@
             justify-content: center;
             gap: 16px;
         }
-        /* 音樂符號區域 - 獨立區塊 */
+        /* 音樂符號區域 */
         .music-icon-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 6px;
+        }
+        /* 音樂符號 + 音量（同一行） */
+        .music-top-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         /* 音樂符號 - 播放時七彩旋轉 */
         .music-icon-display {
@@ -128,6 +134,49 @@
             71% { color: #4400ff; }
             85% { color: #ff00ff; }
             100% { transform: rotate(360deg); color: #ff0000; }
+        }
+
+        /* 音量滑桿 - 在音符旁邊 */
+        .volume-slider {
+            width: 50px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(0,0,0,0.2);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #4A90E2;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+        .volume-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #4A90E2;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+        .volume-slider:hover {
+            background: rgba(0,0,0,0.35);
+        }
+        .volume-icon {
+            font-size: 18px;
+            color: #555;
+            user-select: none;
+            flex-shrink: 0;
         }
 
         /* 控制按鈕區 - 在音符正下方 */
@@ -171,42 +220,6 @@
         }
         .ctrl-btn.play-btn:hover {
             background: rgba(74, 144, 226, 0.4);
-        }
-
-        .volume-slider {
-            width: 44px;
-            height: 4px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: rgba(0,0,0,0.2);
-            border-radius: 2px;
-            outline: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #4A90E2;
-            border: 2px solid white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-            cursor: pointer;
-        }
-        .volume-slider::-moz-range-thumb {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #4A90E2;
-            border: 2px solid white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-            cursor: pointer;
-        }
-        .volume-slider:hover {
-            background: rgba(0,0,0,0.35);
         }
 
         h2 { 
@@ -394,15 +407,18 @@
     <div class="avatar-wrapper">
         <div class="avatar-row">
             <img src="avatar.jpg" alt="版主頭像" class="profile-pic">
-            <!-- 音樂符號 + 控制按鈕（在音符下方） -->
+            <!-- 音樂符號 + 音量（同排） + 控制按鈕（在音符下方） -->
             <div class="music-icon-wrapper">
-                <span id="music-icon-display" class="music-icon-display">♪</span>
+                <div class="music-top-row">
+                    <span id="music-icon-display" class="music-icon-display">♪</span>
+                    <span class="volume-icon">🔊</span>
+                    <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
+                </div>
                 <!-- 控制按鈕區 - 在音符正下方 -->
                 <div class="music-controls">
                     <button class="ctrl-btn" id="prev-btn" title="上一首">⏮</button>
                     <button class="ctrl-btn play-btn" id="play-btn" title="播放/暫停">▶</button>
                     <button class="ctrl-btn" id="next-btn" title="下一首">⏭</button>
-                    <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
                 </div>
             </div>
         </div>
@@ -567,8 +583,13 @@
 </div>
 
 <script>
-    /* --- 音樂控制：播放/暫停、上一首、下一首，隨機+循環播放 --- */
-    const songs = ['01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3', '06.mp3', '07.mp3', '08.mp3', '09.mp3', '10.mp3', '11.mp3', '12.mp3', '13.mp3', '14.mp3', '15.mp3', '16.mp3', '17.mp3', '18.mp3', '19.mp3', '20.mp3'];
+    /* --- 音樂控制：播放/暫停、上一首、下一首，隨機+循環播放（20首） --- */
+    const songs = [
+        '01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3',
+        '06.mp3', '07.mp3', '08.mp3', '09.mp3', '10.mp3',
+        '11.mp3', '12.mp3', '13.mp3', '14.mp3', '15.mp3',
+        '16.mp3', '17.mp3', '18.mp3', '19.mp3', '20.mp3'
+    ];
     let currentSongIndex = 0;
     let lastPlayedIndex = -1;
     let remainingIndices = [];
