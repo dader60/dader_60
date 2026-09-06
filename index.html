@@ -679,6 +679,24 @@
         playNext();
     };
 
+    // 頁面關閉或離開時暫停音樂
+    function stopAudioOnUnload() {
+        if (audio) {
+            audio.pause();
+            updateMusicUI(false);
+        }
+    }
+
+    // 監聽頁面卸載事件（使用者關閉分頁、重新整理、點擊連結離開）
+    window.addEventListener('beforeunload', stopAudioOnUnload);
+    // 監聽頁面隱藏事件（手機切換應用程式等）
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden && isPlaying) {
+            audio.pause();
+            updateMusicUI(false);
+        }
+    });
+
     // 初始化自動播放（嘗試）
     function initAutoPlay() {
         // 隨機選擇第一首
