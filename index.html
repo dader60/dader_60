@@ -564,12 +564,17 @@
 </div>
 
 <script>
-    /* --- 音樂控制：按一下暫停/播放，快速按兩下換首，音量滑桿控制音量 --- */
+    /* --- 音樂控制：隨機播放 + 清單循環（同時運作） --- */
     const songs = ['01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3', '06.mp3', '07.mp3'];
-    let currentSongIndex = Math.floor(Math.random() * songs.length);
+    let currentSongIndex = 0;
+    let lastPlayedIndex = -1;
+    
+    // 用於實現「7首不重複隨機，播完重新洗牌」的邏輯
+    let remainingIndices = []; // 剩餘尚未播放的歌曲索引
+    
     const audio = new Audio(songs[currentSongIndex]);
     let isPlaying = false;
-    let clickTimer = null;  // 用於偵測雙擊
+    let clickTimer = null;
 
     const musicBtn = document.getElementById('music-toggle-btn');
     const volumeSlider = document.getElementById('volume-slider');
@@ -597,26 +602,49 @@
         }
     }
 
-    // 播放特定歌曲
-    function playSong(index) {
-        if (index >= 0 && index < songs.length) {
-            currentSongIndex = index;
-            audio.src = songs[currentSongIndex];
-            audio.play().then(() => {
-                updateMusicUI(true);
-            }).catch(() => {
-                updateMusicUI(false);
-            });
+    // 初始化剩餘清單（全部歌曲隨機打亂）
+    function initRemainingList() {
+        remainingIndices = songs.map((_, i) => i);
+        // Fisher-Yates 洗牌
+        for (let i = remainingIndices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [remainingIndices[i], remainingIndices[j]] = [remainingIndices[j], remainingIndices[i]];
+        }
+        // 確保第一首不等於上一首（如果有的話）
+        if (remainingIndices.length > 1 && remainingIndices[0] === lastPlayedIndex) {
+            [remainingIndices[0], remainingIndices[1]] = [remainingIndices[1], remainingIndices[0]];
         }
     }
 
-    // 切換到下一首隨機歌曲
-    function nextRandomSong() {
-        let nextIndex = Math.floor(Math.random() * songs.length);
-        if (songs.length > 1 && nextIndex === currentSongIndex) {
-            nextIndex = (nextIndex + 1) % songs.length;
+    // 取得下一首歌的索引（隨機不重複 + 循環）
+    function getNextSongIndex() {
+        // 如果剩餘清單為空，重新洗牌
+        if (!remainingIndices || remainingIndices.length === 0) {
+            initRemainingList();
         }
-        playSong(nextIndex);
+        // 從剩餘清單中取出第一首
+        const nextIndex = remainingIndices.shift();
+        return nextIndex;
+    }
+
+    // 播放下一首
+    function playNext() {
+        const newIndex = getNextSongIndex();
+        lastPlayedIndex = currentSongIndex;
+        currentSongIndex = newIndex;
+        
+        audio.src = songs[currentSongIndex];
+        audio.play().then(() => {
+            updateMusicUI(true);
+        }).catch(() => {
+            updateMusicUI(false);
+        });
+    }
+
+    // 切換到下一首（供雙擊換首使用）
+    function nextRandomSong() {
+        audio.pause();
+        playNext();
     }
 
     // 點擊處理：判斷單擊或雙擊
@@ -648,11 +676,22 @@
 
     // 歌曲結束自動下一首
     audio.onended = function() {
-        nextRandomSong();
+        playNext();
     };
 
     // 初始化自動播放（嘗試）
     function initAutoPlay() {
+        // 隨機選擇第一首
+        currentSongIndex = Math.floor(Math.random() * songs.length);
+        lastPlayedIndex = currentSongIndex;
+        
+        // 初始化剩餘清單（移除第一首）
+        initRemainingList();
+        const idx = remainingIndices.indexOf(currentSongIndex);
+        if (idx > -1) remainingIndices.splice(idx, 1);
+        
+        audio.src = songs[currentSongIndex];
+        
         audio.play().then(() => {
             updateMusicUI(true);
         }).catch(() => {
