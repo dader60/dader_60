@@ -136,6 +136,28 @@
             100% { transform: rotate(360deg); color: #ff0000; }
         }
 
+        /* 音量圖示 - 會動態縮放 */
+        .volume-icon {
+            font-size: 22px;
+            user-select: none;
+            flex-shrink: 0;
+            transition: transform 0.15s ease;
+            display: inline-block;
+        }
+        .volume-icon.small {
+            transform: scale(0.7);
+        }
+        .volume-icon.medium {
+            transform: scale(0.85);
+        }
+        .volume-icon.large {
+            transform: scale(1.0);
+        }
+        .volume-icon.muted {
+            transform: scale(0.8);
+            opacity: 0.6;
+        }
+
         /* 音量滑桿 - 在音符旁邊 */
         .volume-slider {
             width: 50px;
@@ -171,12 +193,6 @@
         }
         .volume-slider:hover {
             background: rgba(0,0,0,0.35);
-        }
-        .volume-icon {
-            font-size: 18px;
-            color: #555;
-            user-select: none;
-            flex-shrink: 0;
         }
 
         /* 控制按鈕區 - 在音符正下方 */
@@ -466,7 +482,7 @@
             <div class="music-icon-wrapper">
                 <div class="music-top-row">
                     <span id="music-icon-display" class="music-icon-display">♪</span>
-                    <span class="volume-icon">🔊</span>
+                    <span id="volume-icon" class="volume-icon large">🔉</span>
                     <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
                 </div>
                 <!-- 控制按鈕區 - 在音符正下方 -->
@@ -654,14 +670,39 @@
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const volumeSlider = document.getElementById('volume-slider');
+    const volumeIcon = document.getElementById('volume-icon');
 
     // 設定初始音量
     audio.volume = 0.5;
     volumeSlider.value = 0.5;
+    updateVolumeIcon(0.5);
+
+    // 更新音量圖示
+    function updateVolumeIcon(value) {
+        const val = parseFloat(value);
+        // 移除所有class
+        volumeIcon.classList.remove('small', 'medium', 'large', 'muted');
+        
+        if (val === 0) {
+            volumeIcon.textContent = '🔇';
+            volumeIcon.classList.add('muted');
+        } else if (val > 0 && val <= 0.3) {
+            volumeIcon.textContent = '🔉';
+            volumeIcon.classList.add('small');
+        } else if (val > 0.3 && val <= 0.7) {
+            volumeIcon.textContent = '🔉';
+            volumeIcon.classList.add('medium');
+        } else {
+            volumeIcon.textContent = '🔉';
+            volumeIcon.classList.add('large');
+        }
+    }
 
     // 音量控制
     volumeSlider.addEventListener('input', function() {
-        audio.volume = parseFloat(this.value);
+        const val = parseFloat(this.value);
+        audio.volume = val;
+        updateVolumeIcon(val);
     });
 
     // 更新播放按鈕圖示
