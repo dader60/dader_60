@@ -22,13 +22,11 @@
             width: 150px;
             border-radius: 50%;
             filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
-            /* 修改處：動畫總長改為 1.5 秒 (0.75s + 0.75s) */
             animation: 
                 logo-spin-h 0.75s linear 0s 1,
                 logo-spin-v 0.75s linear 0.75s 1;
         }
         
-        /* 逐字波動樣式 */
         .wave-text {
             display: flex;
             gap: 2px;
@@ -55,7 +53,6 @@
             50% { transform: translateY(-15px); color: #ff4500; }
         }
 
-        /* --- 以下為原本的原始碼樣式，完全保留 --- */
         .marquee-container {
             position: fixed;
             top: 0;
@@ -88,60 +85,96 @@
         .container { width: 100%; max-width: 400px; }
         .profile-pic { width: 110px; height: 110px; border-radius: 50%; background-color: white; border: 3px solid white; margin: 0; display: block; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
-        /* --- 頭像容器：將音樂控制放在頭像旁邊 --- */
+        /* --- 頭像與音樂控制區域 --- */
         .avatar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            margin: 10px auto 15px auto;
+        }
+        .avatar-row {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 16px;
-            margin: 10px auto 15px auto;
         }
-        /* 音樂控制區 - 放在頭像旁邊 */
-        .music-control-group {
+        /* 音樂符號區域 - 獨立區塊 */
+        .music-icon-wrapper {
             display: flex;
+            flex-direction: column;
             align-items: center;
             gap: 6px;
+        }
+        /* 音樂符號 - 播放時七彩旋轉 */
+        .music-icon-display {
+            font-size: 42px;
+            font-family: "Times New Roman", serif;
+            color: #888;
+            transition: color 0.3s ease;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .music-icon-display.playing {
+            color: #ff4500;
+            animation: spin-rainbow 2s linear infinite;
+        }
+        @keyframes spin-rainbow {
+            0% { transform: rotate(0deg); color: #ff0000; }
+            14% { color: #ff8800; }
+            28% { color: #ffff00; }
+            42% { color: #00ff00; }
+            57% { color: #0088ff; }
+            71% { color: #4400ff; }
+            85% { color: #ff00ff; }
+            100% { transform: rotate(360deg); color: #ff0000; }
+        }
+
+        /* 控制按鈕區 - 在音符正下方 */
+        .music-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             background: rgba(255,255,255,0.7);
-            padding: 6px 12px 6px 8px;
+            padding: 6px 16px 6px 12px;
             border-radius: 30px;
             box-shadow: 0 2px 12px rgba(0,0,0,0.1);
             backdrop-filter: blur(4px);
             border: 1px solid rgba(255,255,255,0.5);
         }
-        .music-icon-btn {
-            display: inline-block;
-            font-size: 26px;
+        .ctrl-btn {
+            font-size: 20px;
             cursor: pointer;
-            background: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.6);
+            border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            line-height: 42px;
-            text-align: center;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.2s ease;
             user-select: none;
             color: #333;
-            border: 2px solid rgba(255,255,255,0.6);
-            font-family: "Times New Roman", serif;
             flex-shrink: 0;
         }
-        .music-icon-btn:hover {
-            transform: scale(1.1);
+        .ctrl-btn:hover {
             background: rgba(255,255,255,0.9);
-            box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+            transform: scale(1.1);
         }
-        /* 播放時旋轉 + 顏色變化 */
-        .music-icon-btn.playing {
-            color: #ff4500;
-            animation: spin-music 1.5s linear infinite;
+        .ctrl-btn:active {
+            transform: scale(0.9);
         }
-        @keyframes spin-music {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .ctrl-btn.play-btn {
+            font-size: 24px;
+            background: rgba(74, 144, 226, 0.2);
         }
-        /* 音量滑桿樣式 */
+        .ctrl-btn.play-btn:hover {
+            background: rgba(74, 144, 226, 0.4);
+        }
+
         .volume-slider {
-            width: 50px;
+            width: 44px;
             height: 4px;
             -webkit-appearance: none;
             appearance: none;
@@ -150,12 +183,13 @@
             outline: none;
             cursor: pointer;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background: #4A90E2;
             border: 2px solid white;
@@ -163,8 +197,8 @@
             cursor: pointer;
         }
         .volume-slider::-moz-range-thumb {
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background: #4A90E2;
             border: 2px solid white;
@@ -173,12 +207,6 @@
         }
         .volume-slider:hover {
             background: rgba(0,0,0,0.35);
-        }
-        .volume-icon {
-            font-size: 16px;
-            color: #555;
-            user-select: none;
-            flex-shrink: 0;
         }
 
         h2 { 
@@ -345,7 +373,6 @@
         <span style="animation-delay: 0.8s;">德</span>
         <span style="animation-delay: 0.9s;">⚡</span>
     </div>
-    <!-- 在下一行新增多元匿名系統並套用相同的波動動畫效果 -->
     <div class="wave-text" style="margin-top: 10px;">
         <span style="animation-delay: 1.0s;">多</span>
         <span style="animation-delay: 1.1s;">元</span>
@@ -363,25 +390,30 @@
 </div>
 
 <div class="container">
-    <!-- 頭像容器 + 音樂控制（放在頭像旁邊） -->
+    <!-- 頭像 + 音樂符號(上方) + 控制按鈕(在音符下方) -->
     <div class="avatar-wrapper">
-        <img src="avatar.jpg" alt="版主頭像" class="profile-pic">
-        <!-- 音樂控制區：♪ 符號 + 音量滑桿 -->
-        <span class="music-control-group">
-            <span id="music-toggle-btn" class="music-icon-btn" title="按一下暫停/播放，快速按兩下換首">♪</span>
-            <span class="volume-icon">🔊</span>
-            <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
-        </span>
+        <div class="avatar-row">
+            <img src="avatar.jpg" alt="版主頭像" class="profile-pic">
+            <!-- 音樂符號 + 控制按鈕（在音符下方） -->
+            <div class="music-icon-wrapper">
+                <span id="music-icon-display" class="music-icon-display">♪</span>
+                <!-- 控制按鈕區 - 在音符正下方 -->
+                <div class="music-controls">
+                    <button class="ctrl-btn" id="prev-btn" title="上一首">⏮</button>
+                    <button class="ctrl-btn play-btn" id="play-btn" title="播放/暫停">▶</button>
+                    <button class="ctrl-btn" id="next-btn" title="下一首">⏭</button>
+                    <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
+                </div>
+            </div>
+        </div>
     </div>
     
     <h2>靠北達德速度版⚡⚡⚡</h2>
 
-    <!-- 原本的動態時鐘區塊 (微調 bottom margin 為 12px 保持美觀間距) -->
     <div id="custom-live-clock" style="text-align: center; background-color: #000000; color: #ffffff; font-weight: bold; padding: 12px 15px; border-radius: 15px; margin-bottom: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); font-size: 15px; letter-spacing: 0.5px;">
         載入時間中...
     </div>
 
-    <!-- 新增項目：靠達創立時間與自動天數計算 (時間為2023年05月27號，過一天+1) -->
     <div id="founding-days-counter" style="text-align: center; background-color: #000000; color: #ffffff; font-weight: bold; padding: 12px 15px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); font-size: 15px; letter-spacing: 0.5px;">
         靠達創立時間：2023年05月27日 (已創立 <span id="founding-days-num" style="color: #ffdd44; font-size: 17px;">讀取中</span> 天)
     </div>
@@ -390,13 +422,9 @@
     <a href="https://tellonym.me/dader_.60?rel=web" target="_blank" rel="noopener noreferrer" class="card" onclick="forceWeb(event)">🔗 匿名投稿連結 🔗</a>
     <a href="https://youtube.com/shorts/VVvFNDugpKA?feature=share" target="_blank" class="card tutorial-card">🎬 投稿匿名教學影片</a>
     
-    <!-- 新增按鈕：投訴系統 (放置於投稿匿名教學影片下方) -->
     <a href="https://dader60.github.io/dader/" target="_blank" class="card">🚨 投訴系統</a>
-    
-    <!-- 新增按鈕：達德日常討論群 (放置於投訴系統下方) -->
     <a href="https://ig.me/j/l3p1iGOTZDJVhtjJ/" target="_blank" class="card">💬 達德日常討論群</a>
     
-    <!-- 💖 聘職靠達小編表單美化區塊 -->
     <div class="card" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; box-shadow: 0 4px 12px rgba(56, 239, 125, 0.25); padding: 18px; margin-bottom: 15px; text-align: center; box-sizing: border-box;">
         <div style="font-size: 18px; font-weight: bold; margin-bottom: 12px; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px;">
             📝 聘職靠達小編表單
@@ -410,23 +438,17 @@
         </a>
     </div>
     
-    <!-- weplay語音房專區 -->
     <div class="card" style="background: linear-gradient(135deg, #25f4ee, #fe0979); color: white; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.15); padding: 15px; text-align: center; margin-bottom: 15px;">
         <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">🎙️ 版主weplay語音房</div>
         <div style="font-size: 15px; margin-bottom: 12px; background: rgba(0,0,0,0.2); display: inline-block; padding: 3px 12px; border-radius: 10px; letter-spacing: 1px;">房號: C820553</div>
-        
-        <!-- 點擊我開啟 -->
-        <a href="https://weplay.run/C/qQrv41" target="_blank" class="card" style="background: white; color: #fe0979; border: none; padding: 10px; font-size: 15px; margin-bottom: 10px; display: block; box-shadow: 0 2px 5px rgba(0,0,0,0.15);" title="我在WePlay玩語音交友，房間號C820553，快來玩啊！朋友，快來聊天、組對，我在房間裡等你！">
+        <a href="https://weplay.run/C/qQrv41" target="_blank" class="card" style="background: white; color: #fe0979; border: none; padding: 10px; font-size: 15px; margin-bottom: 10px; display: block; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
             🚀 點擊我開啟
         </a>
-        
-        <!-- 點我複製 -->
         <div id="weplay-copy-btn" onclick="copyWePlayRoom()" class="card" style="background: white; color: #25f4ee; border: none; padding: 10px; font-size: 15px; margin: 0; cursor: pointer; display: block; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
             📋 點我複製房號
         </div>
     </div>
 
-    <!-- 整合後的達德氣氛組專屬美化區塊 -->
     <div class="card" style="background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); color: white; border: none; box-shadow: 0 4px 12px rgba(253, 29, 29, 0.25); padding: 18px; margin-bottom: 15px; text-align: left; box-sizing: border-box;">
         <div style="font-size: 18px; font-weight: bold; margin-bottom: 12px; text-align: center; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px;">
             💬 達德氣氛組
@@ -444,11 +466,8 @@
 
     <a href="https://www.instagram.com/channel/AbaNRbRrwua33brb/" target="_blank" class="card">🔥 靠北達德專區 (IG 頻道)</a>
     <a href="https://www.instagram.com/hbingzhe10.10/" target="_blank" class="card owner-ig">👤 版主個人 IG</a>
-    
-    <!-- 已與「問版主問題」上下對調：版主專區搬移至上方 -->
     <a href="https://www.instagram.com/channel/AbZByxGjVLjC7N7H/" target="_blank" class="card">📸 版主專區 (IG 頻道)</a>
 
-    <!-- 問版主問題：已更新標題為(目前暫停使用)，且點擊時顯示系統提示彈窗 -->
     <div class="card owner-ig" style="text-align: center; padding: 18px; margin-bottom: 15px;">
         <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">💬 問版主問題(目前暫停使用)</div>
         <div style="font-size: 13.5px; color: #fd5d93; font-weight: bold; margin-bottom: 15px; line-height: 1.5;">
@@ -459,16 +478,10 @@
         </a>
     </div>
 
-    <!-- 💖 依您要求，在「問版主問題」描述文字下方新增「情感語錄」按鈕 -->
     <a href="https://www.instagram.com/love_dader?igsh=M3dpaXBrMjZmcHYw" target="_blank" class="card owner-ig">💖 情感語錄</a>
-
     <a href="https://www.tiktok.com/@hbingzhe10.10" target="_blank" class="card owner-tiktok">🎵 版主抖音 (TikTok)</a>
-    
-    <!-- ⚠️ 依您要求，在版主抖音下方新增此按鈕（已更新為正確網址連結） -->
     <a href="https://www.tiktok.com/@dader_.60?is_from_webapp=1&sender_device=pc" target="_blank" class="card owner-tiktok">🎵 靠北達德抖音</a>
-    
     <a href="toolbox.html" target="_blank" class="card toolbox-card">🧰 萬用工具箱 </a>
-
     <a href="https://www.dgpa.gov.tw/typh/daily/nds.html" target="_blank" class="card typhoon-card">🌀 停班課查詢</a>
 
     <div class="shuttle-section">
@@ -489,23 +502,19 @@
         <div class="line-id" onclick="copyID()">複製 ID: @768mnxcr</div>
     </div>
 
-    <!-- ⚡ 新增區塊：靠達消息第一線賴社群 ⚡ -->
     <div class="line-section" style="border: 2px solid #06c755;">
         <strong>靠達消息第一線賴社群 ⚡</strong><br>
         <img src="LINE OpenChat-QR.jpg" class="qrcode-img">
         <div style="font-size: 13.5px; color: #d32f2f; font-weight: bold; margin: 10px 0; line-height: 1.5;">
             密碼為靠達創立西元年月日20230517<br>請先複製密碼再點擊我進入
         </div>
-        <!-- 點擊我複製密碼按鈕 (只複製數字 20230527) -->
         <div id="openchat-copy-btn" onclick="copyOpenChatPassword()" class="line-id" style="background: #00b900; color: white; display: inline-block; cursor: pointer; margin-bottom: 12px; padding: 10px 25px;">
             點擊我複製密碼
         </div>
-        <!-- 點擊我進入連結 -->
         <a href="https://line.me/ti/g2/Wdby5SjN-wFsSrEkIu7ljopZGlxLx7Fghls74A?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" style="color: #00b900; text-decoration: none; display: block; font-weight: bold; margin-top: 5px;">👉 點擊我進入 👈</a>
     </div>
 
     <a href="Countdown.html" target="_blank" class="card countdown-card">📅 倒數日系統 ⏳</a>
-
     <a href="weather.html" target="_blank" class="card weather-card">☀️ 天氣即時查詢系統 ☁️</a>
 
     <div class="live-section">
@@ -513,17 +522,12 @@
         <div class="video-container">
             <iframe src="https://www.youtube.com/embed/KyT4qSK8lJo?autoplay=1&mute=1&rel=0&iv_load_policy=3&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
         </div>
-        
-        <!-- 已成功移動到此處：地震提醒文字放置於「新聞網最新地震觀測」上方 -->
         <span class="eq-warning">⚠️地震發生時請保持冷靜，注意安全！</span>
         <span class="eq-warning">地震三步驟：趴下、掩護、穩住</span>
-        
-        <!-- 新增的「新聞網最新地震觀測」直播區塊 -->
         <span class="video-label">新聞網最新地震觀測</span>
         <div class="video-container">
             <iframe src="https://www.youtube.com/embed/0eOhU2J_MXE?si=EqHRXn5lwmV3sT_g&autoplay=1&mute=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
-        
         <span class="mute-hint">🔊 由於自動播放，影片預設靜音，如需聲音請點擊播放器手動開啟。</span>
     </div>
 
@@ -533,7 +537,6 @@
         <div class="video-container"><iframe src="https://www.youtube.com/embed/2VU1H3JQDe0?autoplay=1&mute=1&rel=0&iv_load_policy=3&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
         <span class="video-label">八卦山美景即時影像</span>
         <div class="video-container"><iframe src="https://www.youtube.com/embed/RaTbGYKMUtk?autoplay=1&mute=1&rel=0&iv_load_policy=3&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
-        
         <span class="video-label">台灣彰化溪湖即時影像</span>
         <div class="video-container"><iframe src="https://www.youtube.com/embed/7vNt6dkNt6I?autoplay=1&mute=1&rel=0&iv_load_policy=3&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
         <span class="video-label">彰化王功漁港即時影像</span>
@@ -564,114 +567,128 @@
 </div>
 
 <script>
-    /* --- 音樂控制：隨機播放 + 清單循環（同時運作） --- */
-    const songs = ['01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3', '06.mp3', '07.mp3'];
+    /* --- 音樂控制：播放/暫停、上一首、下一首，隨機+循環播放 --- */
+    const songs = ['01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3', '06.mp3', '07.mp3', '08.mp3', '09.mp3', '10.mp3', '11.mp3', '12.mp3', '13.mp3', '14.mp3', '15.mp3', '16.mp3', '17.mp3', '18.mp3', '19.mp3', '20.mp3'];
     let currentSongIndex = 0;
     let lastPlayedIndex = -1;
+    let remainingIndices = [];
     
-    // 用於實現「7首不重複隨機，播完重新洗牌」的邏輯
-    let remainingIndices = []; // 剩餘尚未播放的歌曲索引
-    
-    const audio = new Audio(songs[currentSongIndex]);
+    const audio = new Audio();
     let isPlaying = false;
-    let clickTimer = null;
 
-    const musicBtn = document.getElementById('music-toggle-btn');
+    const musicIcon = document.getElementById('music-icon-display');
+    const playBtn = document.getElementById('play-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
     const volumeSlider = document.getElementById('volume-slider');
 
-    // 設定初始音量為一半 (0.5)
+    // 設定初始音量
     audio.volume = 0.5;
     volumeSlider.value = 0.5;
 
-    // 音量滑桿控制
+    // 音量控制
     volumeSlider.addEventListener('input', function() {
         audio.volume = parseFloat(this.value);
     });
 
-    // 更新按鈕狀態（播放時旋轉，暫停時停止旋轉）
-    function updateMusicUI(playing) {
-        isPlaying = playing;
-        if (musicBtn) {
-            if (playing) {
-                musicBtn.classList.add('playing');
-                musicBtn.innerText = '♪';
-            } else {
-                musicBtn.classList.remove('playing');
-                musicBtn.innerText = '♪';
-            }
+    // 更新播放按鈕圖示
+    function updatePlayButton() {
+        if (isPlaying) {
+            playBtn.textContent = '⏸';
+            playBtn.title = '暫停';
+        } else {
+            playBtn.textContent = '▶';
+            playBtn.title = '播放';
         }
     }
 
-    // 初始化剩餘清單（全部歌曲隨機打亂）
+    // 更新音樂符號（播放時七彩旋轉，暫停時灰色靜止）
+    function updateMusicIcon() {
+        if (isPlaying) {
+            musicIcon.classList.add('playing');
+        } else {
+            musicIcon.classList.remove('playing');
+        }
+    }
+
+    // 更新所有UI
+    function updateUI() {
+        updatePlayButton();
+        updateMusicIcon();
+    }
+
+    // 初始化剩餘清單（隨機洗牌）
     function initRemainingList() {
         remainingIndices = songs.map((_, i) => i);
-        // Fisher-Yates 洗牌
         for (let i = remainingIndices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [remainingIndices[i], remainingIndices[j]] = [remainingIndices[j], remainingIndices[i]];
         }
-        // 確保第一首不等於上一首（如果有的話）
         if (remainingIndices.length > 1 && remainingIndices[0] === lastPlayedIndex) {
             [remainingIndices[0], remainingIndices[1]] = [remainingIndices[1], remainingIndices[0]];
         }
     }
 
-    // 取得下一首歌的索引（隨機不重複 + 循環）
+    // 取得下一首隨機不重複
     function getNextSongIndex() {
-        // 如果剩餘清單為空，重新洗牌
         if (!remainingIndices || remainingIndices.length === 0) {
             initRemainingList();
         }
-        // 從剩餘清單中取出第一首
-        const nextIndex = remainingIndices.shift();
-        return nextIndex;
+        return remainingIndices.shift();
     }
 
-    // 播放下一首
+    // 播放指定索引的歌曲
+    function playSong(index) {
+        if (index >= 0 && index < songs.length) {
+            currentSongIndex = index;
+            audio.src = songs[currentSongIndex];
+            audio.play().then(() => {
+                isPlaying = true;
+                updateUI();
+            }).catch(() => {
+                isPlaying = false;
+                updateUI();
+            });
+        }
+    }
+
+    // 播放下一首（隨機不重複，循環）
     function playNext() {
         const newIndex = getNextSongIndex();
         lastPlayedIndex = currentSongIndex;
-        currentSongIndex = newIndex;
-        
-        audio.src = songs[currentSongIndex];
-        audio.play().then(() => {
-            updateMusicUI(true);
-        }).catch(() => {
-            updateMusicUI(false);
-        });
+        playSong(newIndex);
     }
 
-    // 切換到下一首（供雙擊換首使用）
-    function nextRandomSong() {
-        audio.pause();
-        playNext();
-    }
-
-    // 點擊處理：判斷單擊或雙擊
-    function handleMusicClick(e) {
-        e.stopPropagation();
-        
-        if (clickTimer) {
-            // 第二次點擊：雙擊 -> 換首
-            clearTimeout(clickTimer);
-            clickTimer = null;
-            nextRandomSong();
-            return;
+    // 播放上一首
+    function playPrev() {
+        if (lastPlayedIndex >= 0 && lastPlayedIndex !== currentSongIndex) {
+            remainingIndices.push(currentSongIndex);
+            const prev = lastPlayedIndex;
+            lastPlayedIndex = currentSongIndex;
+            playSong(prev);
+        } else {
+            const newIndex = getNextSongIndex();
+            lastPlayedIndex = currentSongIndex;
+            playSong(newIndex);
         }
+    }
 
-        // 第一次點擊：設定計時器，等待 300ms 判斷是否為雙擊
-        clickTimer = setTimeout(() => {
-            clickTimer = null;
-            // 單擊：切換播放/暫停
-            if (isPlaying) {
-                audio.pause();
-                updateMusicUI(false);
+    // 切換播放/暫停
+    function togglePlay() {
+        if (isPlaying) {
+            audio.pause();
+            isPlaying = false;
+            updateUI();
+        } else {
+            if (!audio.src || audio.ended) {
+                playSong(currentSongIndex);
             } else {
                 audio.play().then(() => {
-                    updateMusicUI(true);
+                    isPlaying = true;
+                    updateUI();
                 }).catch(() => {});
             }
-        }, 300);
+        }
     }
 
     // 歌曲結束自動下一首
@@ -679,46 +696,28 @@
         playNext();
     };
 
-    // 頁面關閉或離開時暫停音樂
-    function stopAudioOnUnload() {
-        if (audio) {
-            audio.pause();
-            updateMusicUI(false);
-        }
-    }
-
-    // 監聽頁面卸載事件（使用者關閉分頁、重新整理、點擊連結離開）
-    window.addEventListener('beforeunload', stopAudioOnUnload);
-    // 監聽頁面隱藏事件（手機切換應用程式等）
-    document.addEventListener('visibilitychange', function() {
-        if (document.hidden && isPlaying) {
-            audio.pause();
-            updateMusicUI(false);
-        }
-    });
-
-    // 初始化自動播放（嘗試）
-    function initAutoPlay() {
-        // 隨機選擇第一首
+    // 初始化播放
+    function initAudio() {
         currentSongIndex = Math.floor(Math.random() * songs.length);
         lastPlayedIndex = currentSongIndex;
-        
-        // 初始化剩餘清單（移除第一首）
         initRemainingList();
         const idx = remainingIndices.indexOf(currentSongIndex);
         if (idx > -1) remainingIndices.splice(idx, 1);
         
         audio.src = songs[currentSongIndex];
+        audio.load();
         
         audio.play().then(() => {
-            updateMusicUI(true);
+            isPlaying = true;
+            updateUI();
         }).catch(() => {
-            updateMusicUI(false);
-            // 使用者手勢啟用
+            isPlaying = false;
+            updateUI();
             const enableAudio = () => {
                 if (!isPlaying) {
                     audio.play().then(() => {
-                        updateMusicUI(true);
+                        isPlaying = true;
+                        updateUI();
                     }).catch(() => {});
                 }
                 document.removeEventListener('click', enableAudio);
@@ -729,10 +728,42 @@
         });
     }
 
-    // 綁定音樂按鈕事件
-    if (musicBtn) {
-        musicBtn.addEventListener('click', handleMusicClick);
+    // 頁面離開時暫停音樂
+    function stopAudioOnUnload() {
+        if (audio) {
+            audio.pause();
+            isPlaying = false;
+            updateUI();
+        }
     }
+    window.addEventListener('beforeunload', stopAudioOnUnload);
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden && isPlaying) {
+            audio.pause();
+            isPlaying = false;
+            updateUI();
+        }
+    });
+
+    // 綁定按鈕事件
+    playBtn.addEventListener('click', togglePlay);
+    nextBtn.addEventListener('click', function() {
+        audio.pause();
+        playNext();
+    });
+    prevBtn.addEventListener('click', function() {
+        audio.pause();
+        playPrev();
+    });
+
+    // 鍵盤快捷鍵（空白鍵播放/暫停）
+    document.addEventListener('keydown', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (e.code === 'Space') {
+            e.preventDefault();
+            togglePlay();
+        }
+    });
 
     // 其餘原始功能函數
     const API_KEY = "CWA-E16D81B4-7836-43CA-95E5-51D9A434B120";
@@ -769,7 +800,6 @@
         el.select();
         document.execCommand('copy');
         document.body.removeChild(el);
-        
         const btn = document.getElementById('openchat-copy-btn');
         btn.innerText = "✅ 密碼已複製！"; 
         setTimeout(() => btn.innerText = "點擊我複製密碼", 2000);
@@ -782,7 +812,6 @@
         el.select();
         document.execCommand('copy');
         document.body.removeChild(el);
-        
         const btn = document.getElementById('weplay-copy-btn');
         btn.innerText = "✅ 已複製房號！"; 
         setTimeout(() => btn.innerText = "📋 點我複製房號", 2000);
@@ -799,24 +828,15 @@
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
-            
             const days = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
             const dayOfWeek = days[now.getDay()];
-
             const clockText = `${year}年${month}月${date}日 ${hours}點${minutes}分${seconds}秒 ${dayOfWeek}`;
             const clockElem = document.getElementById("custom-live-clock");
-            if (clockElem) {
-                clockElem.innerText = clockText;
-            }
-
+            if (clockElem) clockElem.innerText = clockText;
             const foundingDate = new Date(2023, 4, 27, 0, 0, 0); 
-            const diffTime = now.getTime() - foundingDate.getTime();
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            
+            const diffDays = Math.floor((now.getTime() - foundingDate.getTime()) / (1000 * 60 * 60 * 24));
             const daysElem = document.getElementById("founding-days-num");
-            if (daysElem) {
-                daysElem.innerText = diffDays;
-            }
+            if (daysElem) daysElem.innerText = diffDays;
         }
         updateTime();
         setInterval(updateTime, 1000);
@@ -825,7 +845,7 @@
     window.onload = function() {
         startRealtimeCounter(); 
         startLiveClock();
-        initAutoPlay();  // 背景音樂自動播放
+        initAudio();
 
         setTimeout(() => {
             const splash = document.getElementById('splash-overlay');
@@ -863,11 +883,9 @@
             firebase.initializeApp(firebaseConfig);
             const db = firebase.database();
             const viewsRef = db.ref('total_views');
-
             viewsRef.transaction((currentValue) => {
                 return (currentValue || 0) + 1;
             });
-
             viewsRef.on('value', (snapshot) => {
                 const count = snapshot.val();
                 const viewElem = document.getElementById('total_view_display');
