@@ -98,61 +98,7 @@
             align-items: center;
             justify-content: center;
             gap: 16px;
-            position: relative;
         }
-
-        /* --- 飄浮音符動畫容器 --- */
-        .floating-notes {
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            height: 80px;
-            pointer-events: none;
-            overflow: visible;
-            z-index: 5;
-        }
-        .floating-notes .note {
-            position: absolute;
-            font-size: 28px;
-            opacity: 0;
-            transform: translateY(20px) scale(0.8);
-            transition: none;
-            animation: none;
-            left: 50%;
-            top: 100%;
-        }
-        .floating-notes .note:nth-child(1) { margin-left: -40px; animation-delay: 0s; }
-        .floating-notes .note:nth-child(2) { margin-left: 20px; animation-delay: 1.2s; }
-        .floating-notes .note:nth-child(3) { margin-left: -50px; animation-delay: 2.4s; }
-        .floating-notes .note:nth-child(4) { margin-left: 30px; animation-delay: 0.6s; }
-        .floating-notes .note:nth-child(5) { margin-left: -30px; animation-delay: 1.8s; }
-        .floating-notes .note:nth-child(6) { margin-left: 10px; animation-delay: 3.0s; }
-
-        @keyframes float-note {
-            0% {
-                opacity: 0;
-                transform: translateY(10px) scale(0.6) rotate(-10deg);
-            }
-            20% {
-                opacity: 1;
-                transform: translateY(-10px) scale(1) rotate(5deg);
-            }
-            80% {
-                opacity: 1;
-                transform: translateY(-50px) scale(1.1) rotate(-5deg);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-80px) scale(0.8) rotate(10deg);
-            }
-        }
-
-        .floating-notes.active .note {
-            animation: float-note 3.6s ease-in-out infinite;
-        }
-
         /* 音樂符號區域 */
         .music-icon-wrapper {
             display: flex;
@@ -166,7 +112,7 @@
             align-items: center;
             gap: 12px;
         }
-        /* 音樂符號 - 七彩旋轉 */
+        /* 音樂符號 - 播放時七彩旋轉 */
         .music-icon-display {
             font-size: 42px;
             font-family: "Times New Roman", serif;
@@ -238,55 +184,55 @@
             background: rgba(0,0,0,0.35);
         }
 
-        /* --- 等化器跳動條 --- */
+        /* --- 等化器跳動條 - 七彩版本 --- */
         .equalizer {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 4px;
-            height: 30px;
+            height: 32px;
             padding: 4px 0;
         }
         .equalizer .bar {
-            width: 4px;
-            border-radius: 2px;
-            background: linear-gradient(180deg, #4A90E2, #6ab0ff);
-            transition: height 0.08s ease;
+            width: 5px;
+            border-radius: 3px;
             height: 6px;
             transform-origin: bottom;
+            transition: height 0.08s ease;
         }
-        .equalizer .bar:nth-child(1) { transition-delay: 0.00s; }
-        .equalizer .bar:nth-child(2) { transition-delay: 0.04s; }
-        .equalizer .bar:nth-child(3) { transition-delay: 0.08s; }
-        .equalizer .bar:nth-child(4) { transition-delay: 0.02s; }
-        .equalizer .bar:nth-child(5) { transition-delay: 0.06s; }
-        .equalizer .bar:nth-child(6) { transition-delay: 0.10s; }
-        .equalizer .bar:nth-child(7) { transition-delay: 0.03s; }
-        .equalizer .bar:nth-child(8) { transition-delay: 0.07s; }
-        .equalizer .bar:nth-child(9) { transition-delay: 0.05s; }
-        .equalizer .bar:nth-child(10) { transition-delay: 0.09s; }
-        .equalizer .bar:nth-child(11) { transition-delay: 0.01s; }
-        .equalizer .bar:nth-child(12) { transition-delay: 0.11s; }
+        /* 每條棒不同顏色，播放時跳動 */
+        .equalizer .bar:nth-child(1) { background: #ff0000; }
+        .equalizer .bar:nth-child(2) { background: #ff8800; }
+        .equalizer .bar:nth-child(3) { background: #ffff00; }
+        .equalizer .bar:nth-child(4) { background: #00ff00; }
+        .equalizer .bar:nth-child(5) { background: #0088ff; }
+        .equalizer .bar:nth-child(6) { background: #4400ff; }
+        .equalizer .bar:nth-child(7) { background: #ff00ff; }
+        .equalizer .bar:nth-child(8) { background: #ff0066; }
+        .equalizer .bar:nth-child(9) { background: #00ffcc; }
+        .equalizer .bar:nth-child(10) { background: #ffcc00; }
+        .equalizer .bar:nth-child(11) { background: #ff4400; }
+        .equalizer .bar:nth-child(12) { background: #00ccff; }
 
         .equalizer.active .bar {
-            animation: eq-bounce 0.4s ease-in-out infinite alternate;
+            animation: eq-bounce 0.35s ease-in-out infinite alternate;
         }
-        .equalizer.active .bar:nth-child(1) { animation-delay: 0.00s; height: 12px; }
-        .equalizer.active .bar:nth-child(2) { animation-delay: 0.06s; height: 24px; }
-        .equalizer.active .bar:nth-child(3) { animation-delay: 0.12s; height: 18px; }
-        .equalizer.active .bar:nth-child(4) { animation-delay: 0.03s; height: 28px; }
-        .equalizer.active .bar:nth-child(5) { animation-delay: 0.09s; height: 14px; }
-        .equalizer.active .bar:nth-child(6) { animation-delay: 0.15s; height: 22px; }
-        .equalizer.active .bar:nth-child(7) { animation-delay: 0.05s; height: 26px; }
-        .equalizer.active .bar:nth-child(8) { animation-delay: 0.11s; height: 10px; }
-        .equalizer.active .bar:nth-child(9) { animation-delay: 0.07s; height: 20px; }
-        .equalizer.active .bar:nth-child(10) { animation-delay: 0.13s; height: 16px; }
-        .equalizer.active .bar:nth-child(11) { animation-delay: 0.02s; height: 30px; }
-        .equalizer.active .bar:nth-child(12) { animation-delay: 0.08s; height: 8px; }
+        .equalizer.active .bar:nth-child(1) { animation-delay: 0.00s; }
+        .equalizer.active .bar:nth-child(2) { animation-delay: 0.06s; }
+        .equalizer.active .bar:nth-child(3) { animation-delay: 0.12s; }
+        .equalizer.active .bar:nth-child(4) { animation-delay: 0.03s; }
+        .equalizer.active .bar:nth-child(5) { animation-delay: 0.09s; }
+        .equalizer.active .bar:nth-child(6) { animation-delay: 0.15s; }
+        .equalizer.active .bar:nth-child(7) { animation-delay: 0.05s; }
+        .equalizer.active .bar:nth-child(8) { animation-delay: 0.11s; }
+        .equalizer.active .bar:nth-child(9) { animation-delay: 0.07s; }
+        .equalizer.active .bar:nth-child(10) { animation-delay: 0.13s; }
+        .equalizer.active .bar:nth-child(11) { animation-delay: 0.02s; }
+        .equalizer.active .bar:nth-child(12) { animation-delay: 0.08s; }
 
         @keyframes eq-bounce {
-            0% { transform: scaleY(0.3); }
-            100% { transform: scaleY(1); }
+            0% { transform: scaleY(0.2); opacity: 0.6; }
+            100% { transform: scaleY(1); opacity: 1; }
         }
 
         /* 控制按鈕區 */
@@ -572,23 +518,14 @@
     <div class="avatar-wrapper">
         <div class="avatar-row">
             <img src="avatar.jpg" alt="版主頭像" class="profile-pic">
-            <!-- 音樂符號區域 -->
+            <!-- 音樂符號 + 音量（同排） + 控制按鈕（在音符下方） -->
             <div class="music-icon-wrapper">
-                <!-- 飄浮音符動畫容器 -->
-                <div id="floating-notes" class="floating-notes">
-                    <span class="note">🎵</span>
-                    <span class="note">🎶</span>
-                    <span class="note">🎵</span>
-                    <span class="note">🎶</span>
-                    <span class="note">🎵</span>
-                    <span class="note">🎶</span>
-                </div>
                 <div class="music-top-row">
                     <span id="music-icon-display" class="music-icon-display">♪</span>
                     <span id="volume-icon" class="volume-icon">🔊</span>
                     <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
                 </div>
-                <!-- 等化器跳動條 -->
+                <!-- 等化器跳動條 - 七彩版本 -->
                 <div id="equalizer" class="equalizer">
                     <span class="bar"></span>
                     <span class="bar"></span>
@@ -790,14 +727,13 @@
     const volumeSlider = document.getElementById('volume-slider');
     const volumeIcon = document.getElementById('volume-icon');
     const equalizer = document.getElementById('equalizer');
-    const floatingNotes = document.getElementById('floating-notes');
 
     // 設定初始音量
     audio.volume = 0.5;
     volumeSlider.value = 0.5;
     updateVolumeIcon(0.5);
 
-    // 更新音量圖示
+    // 更新音量圖示 - 純喇叭圖示
     function updateVolumeIcon(value) {
         const val = parseFloat(value);
         if (val === 0) {
@@ -847,21 +783,11 @@
         }
     }
 
-    // 更新飄浮音符狀態
-    function updateFloatingNotes() {
-        if (isPlaying) {
-            floatingNotes.classList.add('active');
-        } else {
-            floatingNotes.classList.remove('active');
-        }
-    }
-
     // 更新所有UI
     function updateUI() {
         updatePlayButton();
         updateMusicIcon();
         updateEqualizer();
-        updateFloatingNotes();
     }
 
     // 初始化剩餘清單（隨機洗牌）
@@ -899,7 +825,7 @@
         }
     }
 
-    // 播放下一首
+    // 播放下一首（隨機不重複，循環）
     function playNext() {
         const newIndex = getNextSongIndex();
         lastPlayedIndex = currentSongIndex;
@@ -1003,7 +929,7 @@
         playPrev();
     });
 
-    // 鍵盤快捷鍵
+    // 鍵盤快捷鍵（空白鍵播放/暫停）
     document.addEventListener('keydown', function(e) {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         if (e.code === 'Space') {
