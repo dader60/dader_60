@@ -279,82 +279,92 @@
             background: rgba(0,0,0,0.35);
         }
 
-        /* --- 音頻頻譜可視化 (均衡器風格) --- */
-        .spectrum-visualizer {
+        /* --- PotPlayer 風格頻譜可視化 --- */
+        .pot-spectrum {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 3px;
-            height: 40px;
+            gap: 2px;
+            height: 32px;
             padding: 4px 0;
         }
-        .spectrum-visualizer .spec-bar {
-            width: 5px;
-            border-radius: 2px;
-            transition: height 0.10s ease;
-            height: 4px;
+        .pot-spectrum .pot-bar {
+            width: 4px;
+            border-radius: 1px;
+            transition: height 0.08s ease;
+            height: 3px;
             transform-origin: bottom;
-            opacity: 0.5;
+            opacity: 0.7;
             flex-shrink: 0;
+            background: #4A90E2;
         }
-        /* 七彩頻譜條 - 從低頻到高頻漸變 */
-        .spectrum-visualizer .spec-bar:nth-child(1) { background: #ff0044; }
-        .spectrum-visualizer .spec-bar:nth-child(2) { background: #ff0088; }
-        .spectrum-visualizer .spec-bar:nth-child(3) { background: #ff00cc; }
-        .spectrum-visualizer .spec-bar:nth-child(4) { background: #cc00ff; }
-        .spectrum-visualizer .spec-bar:nth-child(5) { background: #8800ff; }
-        .spectrum-visualizer .spec-bar:nth-child(6) { background: #4400ff; }
-        .spectrum-visualizer .spec-bar:nth-child(7) { background: #0044ff; }
-        .spectrum-visualizer .spec-bar:nth-child(8) { background: #0088ff; }
-        .spectrum-visualizer .spec-bar:nth-child(9) { background: #00ccff; }
-        .spectrum-visualizer .spec-bar:nth-child(10) { background: #00ffcc; }
-        .spectrum-visualizer .spec-bar:nth-child(11) { background: #00ff88; }
-        .spectrum-visualizer .spec-bar:nth-child(12) { background: #44ff00; }
-        .spectrum-visualizer .spec-bar:nth-child(13) { background: #88ff00; }
-        .spectrum-visualizer .spec-bar:nth-child(14) { background: #ccff00; }
-        .spectrum-visualizer .spec-bar:nth-child(15) { background: #ffcc00; }
-        .spectrum-visualizer .spec-bar:nth-child(16) { background: #ff8800; }
-        .spectrum-visualizer .spec-bar:nth-child(17) { background: #ff4400; }
-        .spectrum-visualizer .spec-bar:nth-child(18) { background: #ff0000; }
-        .spectrum-visualizer .spec-bar:nth-child(19) { background: #ff0044; }
-        .spectrum-visualizer .spec-bar:nth-child(20) { background: #ff0088; }
+        /* 從左到右漸變顏色 - 低頻到高頻 */
+        .pot-spectrum .pot-bar:nth-child(1) { background: #0044ff; }
+        .pot-spectrum .pot-bar:nth-child(2) { background: #0066ff; }
+        .pot-spectrum .pot-bar:nth-child(3) { background: #0088ff; }
+        .pot-spectrum .pot-bar:nth-child(4) { background: #00aaff; }
+        .pot-spectrum .pot-bar:nth-child(5) { background: #00ccff; }
+        .pot-spectrum .pot-bar:nth-child(6) { background: #00ffcc; }
+        .pot-spectrum .pot-bar:nth-child(7) { background: #00ffaa; }
+        .pot-spectrum .pot-bar:nth-child(8) { background: #00ff88; }
+        .pot-spectrum .pot-bar:nth-child(9) { background: #44ff44; }
+        .pot-spectrum .pot-bar:nth-child(10) { background: #88ff00; }
+        .pot-spectrum .pot-bar:nth-child(11) { background: #aaff00; }
+        .pot-spectrum .pot-bar:nth-child(12) { background: #ccff00; }
+        .pot-spectrum .pot-bar:nth-child(13) { background: #ffdd00; }
+        .pot-spectrum .pot-bar:nth-child(14) { background: #ffbb00; }
+        .pot-spectrum .pot-bar:nth-child(15) { background: #ff9900; }
+        .pot-spectrum .pot-bar:nth-child(16) { background: #ff7700; }
+        .pot-spectrum .pot-bar:nth-child(17) { background: #ff5500; }
+        .pot-spectrum .pot-bar:nth-child(18) { background: #ff3300; }
+        .pot-spectrum .pot-bar:nth-child(19) { background: #ff1100; }
+        .pot-spectrum .pot-bar:nth-child(20) { background: #ff0000; }
+        .pot-spectrum .pot-bar:nth-child(21) { background: #ff0044; }
+        .pot-spectrum .pot-bar:nth-child(22) { background: #ff0088; }
+        .pot-spectrum .pot-bar:nth-child(23) { background: #ff00cc; }
+        .pot-spectrum .pot-bar:nth-child(24) { background: #cc00ff; }
 
-        /* 播放時跳動 - 模擬頻譜 */
-        .spectrum-visualizer.active .spec-bar {
-            animation: spec-bounce 0.45s ease-in-out infinite alternate;
+        /* PotPlayer 風格跳動 - 更自然的隨機感 */
+        .pot-spectrum.active .pot-bar {
+            animation: pot-bounce 0.5s ease-in-out infinite alternate;
         }
-        .spectrum-visualizer.active .spec-bar:nth-child(1) { animation-delay: 0.00s; height: 8px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(2) { animation-delay: 0.03s; height: 14px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(3) { animation-delay: 0.06s; height: 22px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(4) { animation-delay: 0.09s; height: 30px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(5) { animation-delay: 0.12s; height: 18px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(6) { animation-delay: 0.15s; height: 34px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(7) { animation-delay: 0.18s; height: 12px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(8) { animation-delay: 0.21s; height: 26px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(9) { animation-delay: 0.24s; height: 20px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(10) { animation-delay: 0.27s; height: 32px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(11) { animation-delay: 0.30s; height: 16px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(12) { animation-delay: 0.33s; height: 28px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(13) { animation-delay: 0.36s; height: 10px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(14) { animation-delay: 0.39s; height: 24px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(15) { animation-delay: 0.42s; height: 18px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(16) { animation-delay: 0.45s; height: 30px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(17) { animation-delay: 0.48s; height: 14px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(18) { animation-delay: 0.51s; height: 22px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(19) { animation-delay: 0.54s; height: 8px; }
-        .spectrum-visualizer.active .spec-bar:nth-child(20) { animation-delay: 0.57s; height: 12px; }
+        .pot-spectrum.active .pot-bar:nth-child(1) { animation-delay: 0.00s; height: 6px; }
+        .pot-spectrum.active .pot-bar:nth-child(2) { animation-delay: 0.02s; height: 14px; }
+        .pot-spectrum.active .pot-bar:nth-child(3) { animation-delay: 0.04s; height: 22px; }
+        .pot-spectrum.active .pot-bar:nth-child(4) { animation-delay: 0.06s; height: 30px; }
+        .pot-spectrum.active .pot-bar:nth-child(5) { animation-delay: 0.08s; height: 18px; }
+        .pot-spectrum.active .pot-bar:nth-child(6) { animation-delay: 0.10s; height: 34px; }
+        .pot-spectrum.active .pot-bar:nth-child(7) { animation-delay: 0.12s; height: 10px; }
+        .pot-spectrum.active .pot-bar:nth-child(8) { animation-delay: 0.14s; height: 26px; }
+        .pot-spectrum.active .pot-bar:nth-child(9) { animation-delay: 0.16s; height: 20px; }
+        .pot-spectrum.active .pot-bar:nth-child(10) { animation-delay: 0.18s; height: 32px; }
+        .pot-spectrum.active .pot-bar:nth-child(11) { animation-delay: 0.20s; height: 14px; }
+        .pot-spectrum.active .pot-bar:nth-child(12) { animation-delay: 0.22s; height: 28px; }
+        .pot-spectrum.active .pot-bar:nth-child(13) { animation-delay: 0.24s; height: 8px; }
+        .pot-spectrum.active .pot-bar:nth-child(14) { animation-delay: 0.26s; height: 24px; }
+        .pot-spectrum.active .pot-bar:nth-child(15) { animation-delay: 0.28s; height: 16px; }
+        .pot-spectrum.active .pot-bar:nth-child(16) { animation-delay: 0.30s; height: 30px; }
+        .pot-spectrum.active .pot-bar:nth-child(17) { animation-delay: 0.32s; height: 12px; }
+        .pot-spectrum.active .pot-bar:nth-child(18) { animation-delay: 0.34s; height: 22px; }
+        .pot-spectrum.active .pot-bar:nth-child(19) { animation-delay: 0.36s; height: 18px; }
+        .pot-spectrum.active .pot-bar:nth-child(20) { animation-delay: 0.38s; height: 26px; }
+        .pot-spectrum.active .pot-bar:nth-child(21) { animation-delay: 0.40s; height: 10px; }
+        .pot-spectrum.active .pot-bar:nth-child(22) { animation-delay: 0.42s; height: 20px; }
+        .pot-spectrum.active .pot-bar:nth-child(23) { animation-delay: 0.44s; height: 14px; }
+        .pot-spectrum.active .pot-bar:nth-child(24) { animation-delay: 0.46s; height: 8px; }
 
-        @keyframes spec-bounce {
-            0% { transform: scaleY(0.15); opacity: 0.2; }
-            50% { transform: scaleY(0.6); opacity: 0.6; }
+        @keyframes pot-bounce {
+            0% { transform: scaleY(0.15); opacity: 0.3; }
+            40% { transform: scaleY(0.6); opacity: 0.7; }
+            80% { transform: scaleY(0.9); opacity: 0.9; }
             100% { transform: scaleY(1); opacity: 1; }
         }
 
         /* 暫停時靜止 */
-        .spectrum-visualizer .spec-bar.stopped {
+        .pot-spectrum .pot-bar.stopped {
             animation: none !important;
-            height: 4px !important;
-            opacity: 0.15 !important;
+            height: 3px !important;
+            opacity: 0.12 !important;
             transform: scaleY(1);
         }
 
@@ -653,28 +663,32 @@
                     <span id="volume-icon" class="volume-icon">🔊</span>
                     <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
                 </div>
-                <!-- 音頻頻譜可視化 -->
-                <div class="spectrum-visualizer" id="spectrum-visualizer">
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
-                    <span class="spec-bar"></span>
+                <!-- PotPlayer 風格頻譜可視化 -->
+                <div class="pot-spectrum" id="pot-spectrum">
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
                 </div>
                 <div class="music-controls">
                     <button class="ctrl-btn" id="prev-btn" title="上一首">⏮</button>
@@ -861,7 +875,7 @@
     const nextBtn = document.getElementById('next-btn');
     const volumeSlider = document.getElementById('volume-slider');
     const volumeIcon = document.getElementById('volume-icon');
-    const spectrumViz = document.getElementById('spectrum-visualizer');
+    const potSpectrum = document.getElementById('pot-spectrum');
 
     // 設定初始音量
     audio.volume = 0.5;
@@ -911,13 +925,13 @@
 
     function updateSpectrum() {
         if (isPlaying && !isSongChanging) {
-            spectrumViz.classList.add('active');
-            spectrumViz.querySelectorAll('.spec-bar').forEach(bar => {
+            potSpectrum.classList.add('active');
+            potSpectrum.querySelectorAll('.pot-bar').forEach(bar => {
                 bar.classList.remove('stopped');
             });
         } else {
-            spectrumViz.classList.remove('active');
-            spectrumViz.querySelectorAll('.spec-bar').forEach(bar => {
+            potSpectrum.classList.remove('active');
+            potSpectrum.querySelectorAll('.pot-bar').forEach(bar => {
                 bar.classList.add('stopped');
             });
         }
@@ -932,15 +946,15 @@
     // 換歌時暫停頻譜動畫
     function pauseSpectrumForSongChange() {
         isSongChanging = true;
-        spectrumViz.classList.remove('active');
-        spectrumViz.querySelectorAll('.spec-bar').forEach(bar => {
+        potSpectrum.classList.remove('active');
+        potSpectrum.querySelectorAll('.pot-bar').forEach(bar => {
             bar.classList.add('stopped');
         });
         setTimeout(() => {
             isSongChanging = false;
             if (isPlaying) {
-                spectrumViz.classList.add('active');
-                spectrumViz.querySelectorAll('.spec-bar').forEach(bar => {
+                potSpectrum.classList.add('active');
+                potSpectrum.querySelectorAll('.pot-bar').forEach(bar => {
                     bar.classList.remove('stopped');
                 });
             }
