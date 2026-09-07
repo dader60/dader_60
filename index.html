@@ -128,7 +128,6 @@
             position: relative;
             transition: transform 0.3s ease;
         }
-        /* 唱片紋路 */
         .vinyl-disc::before {
             content: '';
             position: absolute;
@@ -148,7 +147,6 @@
                 );
             pointer-events: none;
         }
-        /* 唱片標籤 - 中心音符會七彩變色 */
         .vinyl-disc .label-icon {
             position: absolute;
             top: 50%;
@@ -175,8 +173,6 @@
             85% { color: #ff00ff; text-shadow: 0 0 20px rgba(255,0,255,0.5); }
             100% { color: #ff0044; text-shadow: 0 0 20px rgba(255,0,68,0.5); }
         }
-
-        /* 播放時 - 唱片旋轉 */
         .vinyl-disc.playing {
             animation: vinyl-spin 2.5s linear infinite;
         }
@@ -185,7 +181,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* 指針 */
         .tonearm {
             position: absolute;
             top: -8px;
@@ -239,7 +234,6 @@
             transform: rotate(10deg);
         }
 
-        /* 音量圖示 */
         .volume-icon {
             font-size: 22px;
             user-select: none;
@@ -249,7 +243,6 @@
             text-align: center;
         }
 
-        /* 音量滑桿 */
         .volume-slider {
             -webkit-appearance: none;
             appearance: none;
@@ -286,68 +279,93 @@
             background: rgba(0,0,0,0.35);
         }
 
-        /* --- 等化器跳動條 - 七彩顏色 --- */
-        .equalizer {
+        /* --- 生動的聲波圖形等化器 --- */
+        .wave-equalizer {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
-            height: 30px;
+            gap: 3px;
+            height: 36px;
             padding: 4px 0;
+            position: relative;
+            width: 100%;
+            max-width: 200px;
         }
-        .equalizer .bar {
-            width: 5px;
-            border-radius: 3px;
-            transition: height 0.08s ease;
-            height: 6px;
+        .wave-equalizer .wave-bar {
+            width: 4px;
+            border-radius: 2px;
+            transition: height 0.1s ease;
+            height: 4px;
             transform-origin: bottom;
-            opacity: 0.6;
+            opacity: 0.7;
         }
-        .equalizer .bar:nth-child(1) { background: #ff0000; }
-        .equalizer .bar:nth-child(2) { background: #ff7700; }
-        .equalizer .bar:nth-child(3) { background: #ffdd00; }
-        .equalizer .bar:nth-child(4) { background: #00cc44; }
-        .equalizer .bar:nth-child(5) { background: #00aaff; }
-        .equalizer .bar:nth-child(6) { background: #4444ff; }
-        .equalizer .bar:nth-child(7) { background: #aa00ff; }
-        .equalizer .bar:nth-child(8) { background: #ff00aa; }
-        .equalizer .bar:nth-child(9) { background: #ff4400; }
-        .equalizer .bar:nth-child(10) { background: #88ff00; }
-        .equalizer .bar:nth-child(11) { background: #00ffcc; }
-        .equalizer .bar:nth-child(12) { background: #cc44ff; }
+        /* 七彩漸層 - 每個柱不同顏色 */
+        .wave-equalizer .wave-bar:nth-child(1) { background: #ff0000; }
+        .wave-equalizer .wave-bar:nth-child(2) { background: #ff4400; }
+        .wave-equalizer .wave-bar:nth-child(3) { background: #ff8800; }
+        .wave-equalizer .wave-bar:nth-child(4) { background: #ffcc00; }
+        .wave-equalizer .wave-bar:nth-child(5) { background: #44ff00; }
+        .wave-equalizer .wave-bar:nth-child(6) { background: #00ff44; }
+        .wave-equalizer .wave-bar:nth-child(7) { background: #00ff88; }
+        .wave-equalizer .wave-bar:nth-child(8) { background: #00ffcc; }
+        .wave-equalizer .wave-bar:nth-child(9) { background: #00ccff; }
+        .wave-equalizer .wave-bar:nth-child(10) { background: #0088ff; }
+        .wave-equalizer .wave-bar:nth-child(11) { background: #4444ff; }
+        .wave-equalizer .wave-bar:nth-child(12) { background: #8800ff; }
+        .wave-equalizer .wave-bar:nth-child(13) { background: #cc00ff; }
+        .wave-equalizer .wave-bar:nth-child(14) { background: #ff00cc; }
+        .wave-equalizer .wave-bar:nth-child(15) { background: #ff0088; }
+        .wave-equalizer .wave-bar:nth-child(16) { background: #ff0044; }
 
-        .equalizer .bar:nth-child(1) { transition-delay: 0.00s; }
-        .equalizer .bar:nth-child(2) { transition-delay: 0.04s; }
-        .equalizer .bar:nth-child(3) { transition-delay: 0.08s; }
-        .equalizer .bar:nth-child(4) { transition-delay: 0.02s; }
-        .equalizer .bar:nth-child(5) { transition-delay: 0.06s; }
-        .equalizer .bar:nth-child(6) { transition-delay: 0.10s; }
-        .equalizer .bar:nth-child(7) { transition-delay: 0.03s; }
-        .equalizer .bar:nth-child(8) { transition-delay: 0.07s; }
-        .equalizer .bar:nth-child(9) { transition-delay: 0.05s; }
-        .equalizer .bar:nth-child(10) { transition-delay: 0.09s; }
-        .equalizer .bar:nth-child(11) { transition-delay: 0.01s; }
-        .equalizer .bar:nth-child(12) { transition-delay: 0.11s; }
-
-        .equalizer.active .bar {
-            animation: eq-bounce 0.4s ease-in-out infinite alternate;
+        /* 播放時的動畫 - 不同延遲和高度變化，製造聲波浪效果 */
+        .wave-equalizer.active .wave-bar {
+            animation: wave-bounce 0.5s ease-in-out infinite alternate;
         }
-        .equalizer.active .bar:nth-child(1) { animation-delay: 0.00s; height: 12px; }
-        .equalizer.active .bar:nth-child(2) { animation-delay: 0.06s; height: 24px; }
-        .equalizer.active .bar:nth-child(3) { animation-delay: 0.12s; height: 18px; }
-        .equalizer.active .bar:nth-child(4) { animation-delay: 0.03s; height: 28px; }
-        .equalizer.active .bar:nth-child(5) { animation-delay: 0.09s; height: 14px; }
-        .equalizer.active .bar:nth-child(6) { animation-delay: 0.15s; height: 22px; }
-        .equalizer.active .bar:nth-child(7) { animation-delay: 0.05s; height: 26px; }
-        .equalizer.active .bar:nth-child(8) { animation-delay: 0.11s; height: 10px; }
-        .equalizer.active .bar:nth-child(9) { animation-delay: 0.07s; height: 20px; }
-        .equalizer.active .bar:nth-child(10) { animation-delay: 0.13s; height: 16px; }
-        .equalizer.active .bar:nth-child(11) { animation-delay: 0.02s; height: 30px; }
-        .equalizer.active .bar:nth-child(12) { animation-delay: 0.08s; height: 8px; }
+        .wave-equalizer.active .wave-bar:nth-child(1) { animation-delay: 0.00s; height: 12px; }
+        .wave-equalizer.active .wave-bar:nth-child(2) { animation-delay: 0.03s; height: 8px; }
+        .wave-equalizer.active .wave-bar:nth-child(3) { animation-delay: 0.06s; height: 20px; }
+        .wave-equalizer.active .wave-bar:nth-child(4) { animation-delay: 0.09s; height: 28px; }
+        .wave-equalizer.active .wave-bar:nth-child(5) { animation-delay: 0.12s; height: 16px; }
+        .wave-equalizer.active .wave-bar:nth-child(6) { animation-delay: 0.15s; height: 32px; }
+        .wave-equalizer.active .wave-bar:nth-child(7) { animation-delay: 0.18s; height: 10px; }
+        .wave-equalizer.active .wave-bar:nth-child(8) { animation-delay: 0.21s; height: 24px; }
+        .wave-equalizer.active .wave-bar:nth-child(9) { animation-delay: 0.24s; height: 18px; }
+        .wave-equalizer.active .wave-bar:nth-child(10) { animation-delay: 0.27s; height: 30px; }
+        .wave-equalizer.active .wave-bar:nth-child(11) { animation-delay: 0.30s; height: 14px; }
+        .wave-equalizer.active .wave-bar:nth-child(12) { animation-delay: 0.33s; height: 22px; }
+        .wave-equalizer.active .wave-bar:nth-child(13) { animation-delay: 0.36s; height: 26px; }
+        .wave-equalizer.active .wave-bar:nth-child(14) { animation-delay: 0.39s; height: 6px; }
+        .wave-equalizer.active .wave-bar:nth-child(15) { animation-delay: 0.42s; height: 18px; }
+        .wave-equalizer.active .wave-bar:nth-child(16) { animation-delay: 0.45s; height: 12px; }
 
-        @keyframes eq-bounce {
-            0% { transform: scaleY(0.3); opacity: 0.5; }
+        @keyframes wave-bounce {
+            0% { transform: scaleY(0.2); opacity: 0.4; }
+            50% { transform: scaleY(0.8); opacity: 0.8; }
             100% { transform: scaleY(1); opacity: 1; }
+        }
+
+        /* 底部聲波曲線 - 額外的視覺效果 */
+        .wave-equalizer .wave-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0.15;
+        }
+        .wave-equalizer .wave-line svg {
+            width: 100%;
+            height: 100%;
+        }
+        .wave-equalizer.active .wave-line svg path {
+            animation: wave-flow 1.5s ease-in-out infinite;
+        }
+        @keyframes wave-flow {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
         }
 
         /* 控制按鈕區 */
@@ -539,7 +557,6 @@
             background: #4A90E2;
         }
 
-        /* 達德日常討論群區塊樣式 */
         .daily-chat-section {
             background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
             color: white;
@@ -629,13 +646,11 @@
 </div>
 
 <div class="container">
-    <!-- 頭像 + 黑膠唱片 + 控制按鈕 -->
     <div class="avatar-wrapper">
         <div class="avatar-row">
             <img src="avatar.jpg" alt="版主頭像" class="profile-pic">
             <div class="music-icon-wrapper">
                 <div class="music-top-row">
-                    <!-- 黑膠唱片 + 指針 -->
                     <div class="vinyl-wrapper">
                         <div class="tonearm" id="tonearm">
                             <div class="arm"></div>
@@ -648,22 +663,33 @@
                     <span id="volume-icon" class="volume-icon">🔊</span>
                     <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
                 </div>
-                <!-- 等化器跳動條 -->
-                <div id="equalizer" class="equalizer">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
+                <!-- 生動聲波圖形等化器 -->
+                <div id="wave-equalizer" class="wave-equalizer">
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <div class="wave-line">
+                        <svg viewBox="0 0 200 36" preserveAspectRatio="none">
+                            <path d="M0,18 Q10,8 20,18 T40,18 T60,18 T80,18 T100,18 T120,18 T140,18 T160,18 T180,18 T200,18" 
+                                  stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none"/>
+                            <path d="M0,18 Q10,28 20,18 T40,18 T60,18 T80,18 T100,18 T120,18 T140,18 T160,18 T180,18 T200,18" 
+                                  stroke="rgba(255,255,255,0.15)" stroke-width="1" fill="none"/>
+                        </svg>
+                    </div>
                 </div>
-                <!-- 控制按鈕 -->
                 <div class="music-controls">
                     <button class="ctrl-btn" id="prev-btn" title="上一首">⏮</button>
                     <button class="ctrl-btn play-btn" id="play-btn" title="播放/暫停">▶</button>
@@ -689,7 +715,6 @@
     
     <a href="https://dader60.github.io/dader/" target="_blank" class="card">🚨 投訴系統</a>
     
-    <!-- 達德日常討論群 -->
     <div class="daily-chat-section">
         <div class="section-title">💬 達德日常討論群</div>
         <div class="section-content">
@@ -700,7 +725,6 @@
         <a href="https://ig.me/j/l3p1iGOTZDJVhtjJ/" target="_blank" class="join-btn">🚀 點擊我加入群聊</a>
     </div>
     
-    <!-- 💖 聘職靠達小編表單 -->
     <div class="card" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; box-shadow: 0 4px 12px rgba(56, 239, 125, 0.25); padding: 18px; margin-bottom: 15px; text-align: center; box-sizing: border-box;">
         <div style="font-size: 18px; font-weight: bold; margin-bottom: 12px; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px;">
             📝 聘職靠達小編表單
@@ -714,7 +738,6 @@
         </a>
     </div>
     
-    <!-- weplay語音房 -->
     <div class="card" style="background: linear-gradient(135deg, #25f4ee, #fe0979); color: white; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.15); padding: 15px; text-align: center; margin-bottom: 15px;">
         <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">🎙️ 版主weplay語音房</div>
         <div style="font-size: 15px; margin-bottom: 12px; background: rgba(0,0,0,0.2); display: inline-block; padding: 3px 12px; border-radius: 10px; letter-spacing: 1px;">房號: C820553</div>
@@ -851,14 +874,13 @@
     const nextBtn = document.getElementById('next-btn');
     const volumeSlider = document.getElementById('volume-slider');
     const volumeIcon = document.getElementById('volume-icon');
-    const equalizer = document.getElementById('equalizer');
+    const waveEq = document.getElementById('wave-equalizer');
 
     // 設定初始音量
     audio.volume = 0.5;
     volumeSlider.value = 0.5;
     updateVolumeIcon(0.5);
 
-    // 更新音量圖示
     function updateVolumeIcon(value) {
         const val = parseFloat(value);
         if (val === 0) {
@@ -872,14 +894,12 @@
         }
     }
 
-    // 音量控制
     volumeSlider.addEventListener('input', function() {
         const val = parseFloat(this.value);
         audio.volume = val;
         updateVolumeIcon(val);
     });
 
-    // 更新播放按鈕圖示
     function updatePlayButton() {
         if (isPlaying) {
             playBtn.textContent = '⏸';
@@ -890,7 +910,6 @@
         }
     }
 
-    // 更新黑膠唱片狀態
     function updateVinyl() {
         if (isPlaying) {
             vinylDisc.classList.add('playing');
@@ -903,23 +922,20 @@
         }
     }
 
-    // 更新等化器狀態
     function updateEqualizer() {
         if (isPlaying) {
-            equalizer.classList.add('active');
+            waveEq.classList.add('active');
         } else {
-            equalizer.classList.remove('active');
+            waveEq.classList.remove('active');
         }
     }
 
-    // 更新所有UI
     function updateUI() {
         updatePlayButton();
         updateVinyl();
         updateEqualizer();
     }
 
-    // 初始化剩餘清單（隨機洗牌）
     function initRemainingList() {
         remainingIndices = songs.map((_, i) => i);
         for (let i = remainingIndices.length - 1; i > 0; i--) {
@@ -931,7 +947,6 @@
         }
     }
 
-    // 取得下一首隨機不重複
     function getNextSongIndex() {
         if (!remainingIndices || remainingIndices.length === 0) {
             initRemainingList();
@@ -939,7 +954,6 @@
         return remainingIndices.shift();
     }
 
-    // 播放指定索引的歌曲
     function playSong(index) {
         if (index >= 0 && index < songs.length) {
             currentSongIndex = index;
@@ -954,14 +968,12 @@
         }
     }
 
-    // 播放下一首
     function playNext() {
         const newIndex = getNextSongIndex();
         lastPlayedIndex = currentSongIndex;
         playSong(newIndex);
     }
 
-    // 播放上一首
     function playPrev() {
         if (lastPlayedIndex >= 0 && lastPlayedIndex !== currentSongIndex) {
             remainingIndices.push(currentSongIndex);
@@ -975,7 +987,6 @@
         }
     }
 
-    // 切換播放/暫停
     function togglePlay() {
         if (isPlaying) {
             audio.pause();
@@ -993,12 +1004,10 @@
         }
     }
 
-    // 歌曲結束自動下一首
     audio.onended = function() {
         playNext();
     };
 
-    // 初始化播放
     function initAudio() {
         currentSongIndex = Math.floor(Math.random() * songs.length);
         lastPlayedIndex = currentSongIndex;
@@ -1030,7 +1039,6 @@
         });
     }
 
-    // 頁面離開時暫停音樂
     function stopAudioOnUnload() {
         if (audio) {
             audio.pause();
@@ -1047,7 +1055,6 @@
         }
     });
 
-    // 綁定按鈕事件
     playBtn.addEventListener('click', togglePlay);
     nextBtn.addEventListener('click', function() {
         audio.pause();
@@ -1058,7 +1065,6 @@
         playPrev();
     });
 
-    // 鍵盤快捷鍵（空白鍵播放/暫停）
     document.addEventListener('keydown', function(e) {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         if (e.code === 'Space') {
@@ -1067,7 +1073,6 @@
         }
     });
 
-    // 其餘原始功能函數
     const API_KEY = "CWA-E16D81B4-7836-43CA-95E5-51D9A434B120";
 
     function showPauseNotice(e) {
