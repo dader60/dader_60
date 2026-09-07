@@ -112,7 +112,7 @@
             align-items: center;
             gap: 12px;
         }
-        /* 音樂符號 - 播放時七彩旋轉 */
+        /* 音樂符號 - 播放時上下晃動 + 七彩顏色 */
         .music-icon-display {
             font-size: 42px;
             font-family: "Times New Roman", serif;
@@ -120,20 +120,20 @@
             transition: color 0.3s ease;
             text-align: center;
             line-height: 1.2;
+            display: inline-block;
         }
         .music-icon-display.playing {
-            color: #ff4500;
-            animation: spin-rainbow 2s linear infinite;
+            animation: bounce-rainbow 0.6s ease-in-out infinite alternate;
         }
-        @keyframes spin-rainbow {
-            0% { transform: rotate(0deg); color: #ff0000; }
+        @keyframes bounce-rainbow {
+            0% { transform: translateY(0px); color: #ff0000; }
             14% { color: #ff8800; }
             28% { color: #ffff00; }
             42% { color: #00ff00; }
             57% { color: #0088ff; }
             71% { color: #4400ff; }
             85% { color: #ff00ff; }
-            100% { transform: rotate(360deg); color: #ff0000; }
+            100% { transform: translateY(-15px); color: #ff0000; }
         }
 
         /* 音量圖示 */
@@ -184,58 +184,72 @@
             background: rgba(0,0,0,0.35);
         }
 
-        /* --- 等化器跳動條 - 七彩版本 --- */
+        /* --- 等化器跳動條 - 七彩顏色 --- */
         .equalizer {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 4px;
-            height: 32px;
+            height: 30px;
             padding: 4px 0;
         }
         .equalizer .bar {
             width: 5px;
             border-radius: 3px;
+            transition: height 0.08s ease;
             height: 6px;
             transform-origin: bottom;
-            transition: height 0.08s ease;
+            opacity: 0.6;
         }
-        /* 每條棒不同顏色，播放時跳動 */
+        /* 每條不同顏色 - 彩虹漸變 */
         .equalizer .bar:nth-child(1) { background: #ff0000; }
-        .equalizer .bar:nth-child(2) { background: #ff8800; }
-        .equalizer .bar:nth-child(3) { background: #ffff00; }
-        .equalizer .bar:nth-child(4) { background: #00ff00; }
-        .equalizer .bar:nth-child(5) { background: #0088ff; }
-        .equalizer .bar:nth-child(6) { background: #4400ff; }
-        .equalizer .bar:nth-child(7) { background: #ff00ff; }
-        .equalizer .bar:nth-child(8) { background: #ff0066; }
-        .equalizer .bar:nth-child(9) { background: #00ffcc; }
-        .equalizer .bar:nth-child(10) { background: #ffcc00; }
-        .equalizer .bar:nth-child(11) { background: #ff4400; }
-        .equalizer .bar:nth-child(12) { background: #00ccff; }
+        .equalizer .bar:nth-child(2) { background: #ff7700; }
+        .equalizer .bar:nth-child(3) { background: #ffdd00; }
+        .equalizer .bar:nth-child(4) { background: #00cc44; }
+        .equalizer .bar:nth-child(5) { background: #00aaff; }
+        .equalizer .bar:nth-child(6) { background: #4444ff; }
+        .equalizer .bar:nth-child(7) { background: #aa00ff; }
+        .equalizer .bar:nth-child(8) { background: #ff00aa; }
+        .equalizer .bar:nth-child(9) { background: #ff4400; }
+        .equalizer .bar:nth-child(10) { background: #88ff00; }
+        .equalizer .bar:nth-child(11) { background: #00ffcc; }
+        .equalizer .bar:nth-child(12) { background: #cc44ff; }
+
+        .equalizer .bar:nth-child(1) { transition-delay: 0.00s; }
+        .equalizer .bar:nth-child(2) { transition-delay: 0.04s; }
+        .equalizer .bar:nth-child(3) { transition-delay: 0.08s; }
+        .equalizer .bar:nth-child(4) { transition-delay: 0.02s; }
+        .equalizer .bar:nth-child(5) { transition-delay: 0.06s; }
+        .equalizer .bar:nth-child(6) { transition-delay: 0.10s; }
+        .equalizer .bar:nth-child(7) { transition-delay: 0.03s; }
+        .equalizer .bar:nth-child(8) { transition-delay: 0.07s; }
+        .equalizer .bar:nth-child(9) { transition-delay: 0.05s; }
+        .equalizer .bar:nth-child(10) { transition-delay: 0.09s; }
+        .equalizer .bar:nth-child(11) { transition-delay: 0.01s; }
+        .equalizer .bar:nth-child(12) { transition-delay: 0.11s; }
 
         .equalizer.active .bar {
-            animation: eq-bounce 0.35s ease-in-out infinite alternate;
+            animation: eq-bounce 0.4s ease-in-out infinite alternate;
         }
-        .equalizer.active .bar:nth-child(1) { animation-delay: 0.00s; }
-        .equalizer.active .bar:nth-child(2) { animation-delay: 0.06s; }
-        .equalizer.active .bar:nth-child(3) { animation-delay: 0.12s; }
-        .equalizer.active .bar:nth-child(4) { animation-delay: 0.03s; }
-        .equalizer.active .bar:nth-child(5) { animation-delay: 0.09s; }
-        .equalizer.active .bar:nth-child(6) { animation-delay: 0.15s; }
-        .equalizer.active .bar:nth-child(7) { animation-delay: 0.05s; }
-        .equalizer.active .bar:nth-child(8) { animation-delay: 0.11s; }
-        .equalizer.active .bar:nth-child(9) { animation-delay: 0.07s; }
-        .equalizer.active .bar:nth-child(10) { animation-delay: 0.13s; }
-        .equalizer.active .bar:nth-child(11) { animation-delay: 0.02s; }
-        .equalizer.active .bar:nth-child(12) { animation-delay: 0.08s; }
+        .equalizer.active .bar:nth-child(1) { animation-delay: 0.00s; height: 12px; }
+        .equalizer.active .bar:nth-child(2) { animation-delay: 0.06s; height: 24px; }
+        .equalizer.active .bar:nth-child(3) { animation-delay: 0.12s; height: 18px; }
+        .equalizer.active .bar:nth-child(4) { animation-delay: 0.03s; height: 28px; }
+        .equalizer.active .bar:nth-child(5) { animation-delay: 0.09s; height: 14px; }
+        .equalizer.active .bar:nth-child(6) { animation-delay: 0.15s; height: 22px; }
+        .equalizer.active .bar:nth-child(7) { animation-delay: 0.05s; height: 26px; }
+        .equalizer.active .bar:nth-child(8) { animation-delay: 0.11s; height: 10px; }
+        .equalizer.active .bar:nth-child(9) { animation-delay: 0.07s; height: 20px; }
+        .equalizer.active .bar:nth-child(10) { animation-delay: 0.13s; height: 16px; }
+        .equalizer.active .bar:nth-child(11) { animation-delay: 0.02s; height: 30px; }
+        .equalizer.active .bar:nth-child(12) { animation-delay: 0.08s; height: 8px; }
 
         @keyframes eq-bounce {
-            0% { transform: scaleY(0.2); opacity: 0.6; }
+            0% { transform: scaleY(0.3); opacity: 0.5; }
             100% { transform: scaleY(1); opacity: 1; }
         }
 
-        /* 控制按鈕區 */
+        /* 控制按鈕區 - 在音符正下方 */
         .music-controls {
             display: flex;
             align-items: center;
@@ -525,7 +539,7 @@
                     <span id="volume-icon" class="volume-icon">🔊</span>
                     <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
                 </div>
-                <!-- 等化器跳動條 - 七彩版本 -->
+                <!-- 等化器跳動條 - 七彩顏色 -->
                 <div id="equalizer" class="equalizer">
                     <span class="bar"></span>
                     <span class="bar"></span>
@@ -540,7 +554,7 @@
                     <span class="bar"></span>
                     <span class="bar"></span>
                 </div>
-                <!-- 控制按鈕區 -->
+                <!-- 控制按鈕區 - 在等化器下方 -->
                 <div class="music-controls">
                     <button class="ctrl-btn" id="prev-btn" title="上一首">⏮</button>
                     <button class="ctrl-btn play-btn" id="play-btn" title="播放/暫停">▶</button>
@@ -765,7 +779,7 @@
         }
     }
 
-    // 更新音樂符號（播放時七彩旋轉，暫停時灰色靜止）
+    // 更新音樂符號（播放時七彩上下晃動，暫停時灰色靜止）
     function updateMusicIcon() {
         if (isPlaying) {
             musicIcon.classList.add('playing');
