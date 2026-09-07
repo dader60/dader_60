@@ -294,10 +294,11 @@
         .wave-equalizer .wave-bar {
             width: 4px;
             border-radius: 2px;
-            transition: height 0.1s ease;
+            transition: height 0.12s ease;
             height: 4px;
             transform-origin: bottom;
             opacity: 0.7;
+            flex-shrink: 0;
         }
         /* 七彩漸層 - 每個柱不同顏色 */
         .wave-equalizer .wave-bar:nth-child(1) { background: #ff0000; }
@@ -317,7 +318,7 @@
         .wave-equalizer .wave-bar:nth-child(15) { background: #ff0088; }
         .wave-equalizer .wave-bar:nth-child(16) { background: #ff0044; }
 
-        /* 播放時的動畫 - 不同延遲和高度變化，製造聲波浪效果 */
+        /* 播放時的動態聲波跳動 */
         .wave-equalizer.active .wave-bar {
             animation: wave-bounce 0.5s ease-in-out infinite alternate;
         }
@@ -339,12 +340,20 @@
         .wave-equalizer.active .wave-bar:nth-child(16) { animation-delay: 0.45s; height: 12px; }
 
         @keyframes wave-bounce {
-            0% { transform: scaleY(0.2); opacity: 0.4; }
-            50% { transform: scaleY(0.8); opacity: 0.8; }
+            0% { transform: scaleY(0.25); opacity: 0.4; }
+            50% { transform: scaleY(0.7); opacity: 0.7; }
             100% { transform: scaleY(1); opacity: 1; }
         }
 
-        /* 底部聲波曲線 - 額外的視覺效果 */
+        /* 暫停時 - 靜止狀態 */
+        .wave-equalizer .wave-bar.stopped {
+            animation: none !important;
+            height: 4px !important;
+            opacity: 0.3;
+            transform: scaleY(1);
+        }
+
+        /* 底部聲波曲線 */
         .wave-equalizer .wave-line {
             position: absolute;
             bottom: 0;
@@ -353,18 +362,18 @@
             height: 100%;
             pointer-events: none;
             overflow: hidden;
-            opacity: 0.15;
+            opacity: 0.12;
         }
         .wave-equalizer .wave-line svg {
             width: 100%;
             height: 100%;
         }
         .wave-equalizer.active .wave-line svg path {
-            animation: wave-flow 1.5s ease-in-out infinite;
+            animation: wave-flow 2s ease-in-out infinite;
         }
         @keyframes wave-flow {
             0% { transform: translateX(0); }
-            50% { transform: translateX(-10px); }
+            50% { transform: translateX(-8px); }
             100% { transform: translateX(0); }
         }
 
@@ -862,6 +871,7 @@
     let currentSongIndex = 0;
     let lastPlayedIndex = -1;
     let remainingIndices = [];
+    let isSongChanging = false;
     
     const audio = new Audio();
     let isPlaying = false;
@@ -923,10 +933,18 @@
     }
 
     function updateEqualizer() {
-        if (isPlaying) {
+        if (isPlaying && !isSongChanging) {
             waveEq.classList.add('active');
+            // 移除 stopped class
+            waveEq.querySelectorAll('.wave-bar').forEach(bar => {
+                bar.classList.remove('stopped');
+            });
         } else {
             waveEq.classList.remove('active');
+            // 加上 stopped class 讓所有柱子歸零
+            waveEq.querySelectorAll('.wave-bar').forEach(bar => {
+                bar.classList.add('stopped');
+            });
         }
     }
 
@@ -934,6 +952,25 @@
         updatePlayButton();
         updateVinyl();
         updateEqualizer();
+    }
+
+    // 換歌時暫停等化器跳動
+    function pauseEqualizerForSongChange() {
+        isSongChanging = true;
+        waveEq.classList.remove('active');
+        waveEq.querySelectorAll('.wave-bar').forEach(bar => {
+            bar.classList.add('stopped');
+        });
+        // 300ms 後恢復
+        setTimeout(() => {
+            isSongChanging = false;
+            if (isPlaying) {
+                waveEq.classList.add('active');
+                waveEq.querySelectorAll('.wave-bar').forEach(bar => {
+                    bar.classList.remove('stopped');
+                });
+            }
+        }, 400);
     }
 
     function initRemainingList() {
@@ -958,6 +995,10 @@
         if (index >= 0 && index < songs.length) {
             currentSongIndex = index;
             audio.src = songs[currentSongIndex];
+            
+            // 換歌時暫停等化器
+            pauseEqualizerForSongChange();
+            
             audio.play().then(() => {
                 isPlaying = true;
                 updateUI();
