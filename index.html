@@ -136,131 +136,107 @@
             100% { transform: rotate(360deg); color: #ff0000; }
         }
 
-        /* 音量圖示 - 會動態縮放 */
-        .volume-icon {
-            font-size: 22px;
-            user-select: none;
-            flex-shrink: 0;
-            transition: transform 0.15s ease;
-            display: inline-block;
-        }
-        .volume-icon.small {
-            transform: scale(0.7);
-        }
-        .volume-icon.medium {
-            transform: scale(0.85);
-        }
-        .volume-icon.large {
-            transform: scale(1.0);
-        }
-        .volume-icon.muted {
-            transform: scale(0.8);
-            opacity: 0.6;
-        }
-
-        /* --- 自定義音量滑桿（手機與電腦一致） --- */
-        .volume-slider-wrapper {
-            position: relative;
+        /* --- 音量圖示 + 聲波動畫 --- */
+        .volume-icon-wrapper {
             display: flex;
             align-items: center;
-            width: 60px;
-            height: 24px;
+            gap: 2px;
+            user-select: none;
             flex-shrink: 0;
+            height: 30px;
         }
-        /* 聲波線條背景 */
-        .volume-slider-wrapper .wave-bg {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 6px;
-            transform: translateY(-50%);
-            background: rgba(0,0,0,0.10);
-            border-radius: 3px;
-            overflow: hidden;
-            pointer-events: none;
+        .volume-icon-wrapper .speaker {
+            font-size: 20px;
+            line-height: 1;
+            transition: transform 0.15s ease;
         }
-        .volume-slider-wrapper .wave-bg .wave-fill {
-            height: 100%;
-            width: 50%;
-            background: linear-gradient(90deg, #4A90E2, #6ab0ff);
-            border-radius: 3px;
-            transition: width 0.1s ease;
-            position: relative;
+        /* 聲波線條 - 從喇叭右側發出 */
+        .volume-icon-wrapper .wave-bars {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            height: 20px;
+            transition: all 0.15s ease;
         }
-        /* 聲波線條 - 在填滿區域上畫出波形 */
-        .volume-slider-wrapper .wave-bg .wave-fill::after {
-            content: '';
-            position: absolute;
-            top: -4px;
-            left: 0;
-            right: 0;
-            height: 14px;
-            background: 
-                radial-gradient(ellipse at 10% 50%, rgba(74,144,226,0.3) 0%, transparent 50%),
-                radial-gradient(ellipse at 30% 50%, rgba(74,144,226,0.25) 0%, transparent 40%),
-                radial-gradient(ellipse at 50% 50%, rgba(74,144,226,0.3) 0%, transparent 45%),
-                radial-gradient(ellipse at 70% 50%, rgba(74,144,226,0.25) 0%, transparent 40%),
-                radial-gradient(ellipse at 90% 50%, rgba(74,144,226,0.3) 0%, transparent 50%);
-            pointer-events: none;
-            border-radius: 3px;
+        .volume-icon-wrapper .wave-bars .bar {
+            width: 3px;
+            background: #4A90E2;
+            border-radius: 2px;
+            transition: all 0.15s ease;
+            transform-origin: bottom;
+        }
+        .volume-icon-wrapper .wave-bars .bar:nth-child(1) { height: 6px; }
+        .volume-icon-wrapper .wave-bars .bar:nth-child(2) { height: 10px; }
+        .volume-icon-wrapper .wave-bars .bar:nth-child(3) { height: 14px; }
+        .volume-icon-wrapper .wave-bars .bar:nth-child(4) { height: 10px; }
+        .volume-icon-wrapper .wave-bars .bar:nth-child(5) { height: 6px; }
+
+        /* 音量等級 - 控制聲波顯示 */
+        .volume-icon-wrapper.muted .speaker { opacity: 0.5; }
+        .volume-icon-wrapper.muted .wave-bars { opacity: 0.2; transform: scale(0.6); }
+        .volume-icon-wrapper.level-0 .wave-bars .bar { opacity: 0.1; }
+        .volume-icon-wrapper.level-1 .wave-bars .bar:nth-child(1),
+        .volume-icon-wrapper.level-1 .wave-bars .bar:nth-child(5) { opacity: 1; }
+        .volume-icon-wrapper.level-1 .wave-bars .bar:nth-child(2),
+        .volume-icon-wrapper.level-1 .wave-bars .bar:nth-child(3),
+        .volume-icon-wrapper.level-1 .wave-bars .bar:nth-child(4) { opacity: 0.2; }
+        .volume-icon-wrapper.level-2 .wave-bars .bar:nth-child(1),
+        .volume-icon-wrapper.level-2 .wave-bars .bar:nth-child(2),
+        .volume-icon-wrapper.level-2 .wave-bars .bar:nth-child(4),
+        .volume-icon-wrapper.level-2 .wave-bars .bar:nth-child(5) { opacity: 1; }
+        .volume-icon-wrapper.level-2 .wave-bars .bar:nth-child(3) { opacity: 0.3; }
+        .volume-icon-wrapper.level-3 .wave-bars .bar { opacity: 1; }
+
+        /* 聲波動畫 - 播放時 */
+        .volume-icon-wrapper.animate .wave-bars .bar {
+            animation: wave-pulse 0.6s ease-in-out infinite alternate;
+        }
+        .volume-icon-wrapper.animate .wave-bars .bar:nth-child(1) { animation-delay: 0s; }
+        .volume-icon-wrapper.animate .wave-bars .bar:nth-child(2) { animation-delay: 0.1s; }
+        .volume-icon-wrapper.animate .wave-bars .bar:nth-child(3) { animation-delay: 0.2s; }
+        .volume-icon-wrapper.animate .wave-bars .bar:nth-child(4) { animation-delay: 0.1s; }
+        .volume-icon-wrapper.animate .wave-bars .bar:nth-child(5) { animation-delay: 0s; }
+
+        @keyframes wave-pulse {
+            0% { transform: scaleY(0.4); }
+            100% { transform: scaleY(1); }
         }
 
-        /* 隱藏原始滑桿，用自定義取代 */
+        /* 音量滑桿 */
         .volume-slider {
             -webkit-appearance: none;
             appearance: none;
-            position: relative;
-            width: 100%;
-            height: 24px;
-            background: transparent;
+            width: 50px;
+            height: 4px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 2px;
             outline: none;
             cursor: pointer;
-            z-index: 2;
-            margin: 0;
-            padding: 0;
+            transition: all 0.2s;
             flex-shrink: 0;
-        }
-        .volume-slider::-webkit-slider-track {
-            -webkit-appearance: none;
-            appearance: none;
-            height: 6px;
-            background: transparent;
-            border-radius: 3px;
         }
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background: #4A90E2;
             border: 2px solid white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             cursor: pointer;
-            margin-top: -5px;
-            transition: transform 0.2s ease;
-        }
-        .volume-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.15);
-        }
-        .volume-slider::-moz-range-track {
-            height: 6px;
-            background: transparent;
-            border-radius: 3px;
-            border: none;
         }
         .volume-slider::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background: #4A90E2;
             border: 2px solid white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             cursor: pointer;
         }
-        .volume-slider::-moz-range-thumb:hover {
-            transform: scale(1.15);
+        .volume-slider:hover {
+            background: rgba(0,0,0,0.35);
         }
 
         /* 控制按鈕區 - 在音符正下方 */
@@ -550,14 +526,18 @@
             <div class="music-icon-wrapper">
                 <div class="music-top-row">
                     <span id="music-icon-display" class="music-icon-display">♪</span>
-                    <span id="volume-icon" class="volume-icon large">🔉</span>
-                    <!-- 自定義音量滑桿 + 聲波線條 -->
-                    <div class="volume-slider-wrapper">
-                        <div class="wave-bg">
-                            <div class="wave-fill" id="wave-fill" style="width:50%"></div>
+                    <!-- 音量圖示 + 聲波線條 -->
+                    <div id="volume-icon-wrapper" class="volume-icon-wrapper level-3">
+                        <span class="speaker">🔊</span>
+                        <div class="wave-bars">
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                            <span class="bar"></span>
                         </div>
-                        <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
                     </div>
+                    <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
                 </div>
                 <!-- 控制按鈕區 - 在音符正下方 -->
                 <div class="music-controls">
@@ -744,38 +724,34 @@
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const volumeSlider = document.getElementById('volume-slider');
-    const volumeIcon = document.getElementById('volume-icon');
-    const waveFill = document.getElementById('wave-fill');
+    const volumeWrapper = document.getElementById('volume-icon-wrapper');
 
     // 設定初始音量
     audio.volume = 0.5;
     volumeSlider.value = 0.5;
     updateVolumeUI(0.5);
 
-    // 更新音量UI（圖示 + 聲波線條）
+    // 更新音量UI（聲波線條等級 + 喇叭圖示）
     function updateVolumeUI(value) {
         const val = parseFloat(value);
-        const percent = val * 100;
         
-        // 更新聲波線條
-        if (waveFill) {
-            waveFill.style.width = percent + '%';
-        }
+        // 移除所有等級class
+        volumeWrapper.classList.remove('level-0', 'level-1', 'level-2', 'level-3', 'muted');
         
-        // 更新圖示
-        volumeIcon.classList.remove('small', 'medium', 'large', 'muted');
+        // 更新喇叭圖示和聲波等級
+        const speaker = volumeWrapper.querySelector('.speaker');
         if (val === 0) {
-            volumeIcon.textContent = '🔇';
-            volumeIcon.classList.add('muted');
-        } else if (val > 0 && val <= 0.3) {
-            volumeIcon.textContent = '🔉';
-            volumeIcon.classList.add('small');
-        } else if (val > 0.3 && val <= 0.7) {
-            volumeIcon.textContent = '🔉';
-            volumeIcon.classList.add('medium');
+            speaker.textContent = '🔇';
+            volumeWrapper.classList.add('muted');
+        } else if (val > 0 && val <= 0.2) {
+            speaker.textContent = '🔈';
+            volumeWrapper.classList.add('level-1');
+        } else if (val > 0.2 && val <= 0.5) {
+            speaker.textContent = '🔉';
+            volumeWrapper.classList.add('level-2');
         } else {
-            volumeIcon.textContent = '🔉';
-            volumeIcon.classList.add('large');
+            speaker.textContent = '🔊';
+            volumeWrapper.classList.add('level-3');
         }
     }
 
@@ -801,8 +777,11 @@
     function updateMusicIcon() {
         if (isPlaying) {
             musicIcon.classList.add('playing');
+            // 聲波動畫
+            volumeWrapper.classList.add('animate');
         } else {
             musicIcon.classList.remove('playing');
+            volumeWrapper.classList.remove('animate');
         }
     }
 
