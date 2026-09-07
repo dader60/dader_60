@@ -279,59 +279,83 @@
             background: rgba(0,0,0,0.35);
         }
 
-        /* --- 環形音頻可視化 --- */
-        .ring-visualizer {
+        /* --- 音頻頻譜可視化 (均衡器風格) --- */
+        .spectrum-visualizer {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 44px;
+            gap: 3px;
+            height: 40px;
             padding: 4px 0;
         }
-        .ring-visualizer svg {
-            width: 44px;
-            height: 44px;
-            transform: rotate(-90deg);
+        .spectrum-visualizer .spec-bar {
+            width: 5px;
+            border-radius: 2px;
+            transition: height 0.10s ease;
+            height: 4px;
+            transform-origin: bottom;
+            opacity: 0.5;
+            flex-shrink: 0;
         }
-        .ring-visualizer .ring {
-            fill: none;
-            stroke-width: 3.5;
-            stroke-linecap: round;
-            transition: stroke-dashoffset 0.12s ease, stroke 0.3s ease, opacity 0.3s ease;
-            opacity: 0.6;
-        }
-        /* 七彩環 */
-        .ring-visualizer .ring:nth-child(1) { stroke: #ff0000; }
-        .ring-visualizer .ring:nth-child(2) { stroke: #ff8800; }
-        .ring-visualizer .ring:nth-child(3) { stroke: #ffdd00; }
-        .ring-visualizer .ring:nth-child(4) { stroke: #00ff44; }
-        .ring-visualizer .ring:nth-child(5) { stroke: #00aaff; }
-        .ring-visualizer .ring:nth-child(6) { stroke: #4400ff; }
-        .ring-visualizer .ring:nth-child(7) { stroke: #cc00ff; }
-        .ring-visualizer .ring:nth-child(8) { stroke: #ff00aa; }
+        /* 七彩頻譜條 - 從低頻到高頻漸變 */
+        .spectrum-visualizer .spec-bar:nth-child(1) { background: #ff0044; }
+        .spectrum-visualizer .spec-bar:nth-child(2) { background: #ff0088; }
+        .spectrum-visualizer .spec-bar:nth-child(3) { background: #ff00cc; }
+        .spectrum-visualizer .spec-bar:nth-child(4) { background: #cc00ff; }
+        .spectrum-visualizer .spec-bar:nth-child(5) { background: #8800ff; }
+        .spectrum-visualizer .spec-bar:nth-child(6) { background: #4400ff; }
+        .spectrum-visualizer .spec-bar:nth-child(7) { background: #0044ff; }
+        .spectrum-visualizer .spec-bar:nth-child(8) { background: #0088ff; }
+        .spectrum-visualizer .spec-bar:nth-child(9) { background: #00ccff; }
+        .spectrum-visualizer .spec-bar:nth-child(10) { background: #00ffcc; }
+        .spectrum-visualizer .spec-bar:nth-child(11) { background: #00ff88; }
+        .spectrum-visualizer .spec-bar:nth-child(12) { background: #44ff00; }
+        .spectrum-visualizer .spec-bar:nth-child(13) { background: #88ff00; }
+        .spectrum-visualizer .spec-bar:nth-child(14) { background: #ccff00; }
+        .spectrum-visualizer .spec-bar:nth-child(15) { background: #ffcc00; }
+        .spectrum-visualizer .spec-bar:nth-child(16) { background: #ff8800; }
+        .spectrum-visualizer .spec-bar:nth-child(17) { background: #ff4400; }
+        .spectrum-visualizer .spec-bar:nth-child(18) { background: #ff0000; }
+        .spectrum-visualizer .spec-bar:nth-child(19) { background: #ff0044; }
+        .spectrum-visualizer .spec-bar:nth-child(20) { background: #ff0088; }
 
-        /* 播放時動態跳動 */
-        .ring-visualizer.active .ring {
-            animation: ring-pulse 0.5s ease-in-out infinite alternate;
+        /* 播放時跳動 - 模擬頻譜 */
+        .spectrum-visualizer.active .spec-bar {
+            animation: spec-bounce 0.45s ease-in-out infinite alternate;
         }
-        .ring-visualizer.active .ring:nth-child(1) { animation-delay: 0.00s; stroke-dasharray: 95; stroke-dashoffset: 95; }
-        .ring-visualizer.active .ring:nth-child(2) { animation-delay: 0.04s; stroke-dasharray: 80; stroke-dashoffset: 80; }
-        .ring-visualizer.active .ring:nth-child(3) { animation-delay: 0.08s; stroke-dasharray: 65; stroke-dashoffset: 65; }
-        .ring-visualizer.active .ring:nth-child(4) { animation-delay: 0.12s; stroke-dasharray: 50; stroke-dashoffset: 50; }
-        .ring-visualizer.active .ring:nth-child(5) { animation-delay: 0.16s; stroke-dasharray: 35; stroke-dashoffset: 35; }
-        .ring-visualizer.active .ring:nth-child(6) { animation-delay: 0.20s; stroke-dasharray: 25; stroke-dashoffset: 25; }
-        .ring-visualizer.active .ring:nth-child(7) { animation-delay: 0.24s; stroke-dasharray: 15; stroke-dashoffset: 15; }
-        .ring-visualizer.active .ring:nth-child(8) { animation-delay: 0.28s; stroke-dasharray: 8; stroke-dashoffset: 8; }
+        .spectrum-visualizer.active .spec-bar:nth-child(1) { animation-delay: 0.00s; height: 8px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(2) { animation-delay: 0.03s; height: 14px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(3) { animation-delay: 0.06s; height: 22px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(4) { animation-delay: 0.09s; height: 30px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(5) { animation-delay: 0.12s; height: 18px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(6) { animation-delay: 0.15s; height: 34px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(7) { animation-delay: 0.18s; height: 12px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(8) { animation-delay: 0.21s; height: 26px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(9) { animation-delay: 0.24s; height: 20px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(10) { animation-delay: 0.27s; height: 32px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(11) { animation-delay: 0.30s; height: 16px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(12) { animation-delay: 0.33s; height: 28px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(13) { animation-delay: 0.36s; height: 10px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(14) { animation-delay: 0.39s; height: 24px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(15) { animation-delay: 0.42s; height: 18px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(16) { animation-delay: 0.45s; height: 30px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(17) { animation-delay: 0.48s; height: 14px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(18) { animation-delay: 0.51s; height: 22px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(19) { animation-delay: 0.54s; height: 8px; }
+        .spectrum-visualizer.active .spec-bar:nth-child(20) { animation-delay: 0.57s; height: 12px; }
 
-        @keyframes ring-pulse {
-            0% { stroke-dashoffset: 5; opacity: 0.3; }
-            100% { stroke-dashoffset: 90; opacity: 1; }
+        @keyframes spec-bounce {
+            0% { transform: scaleY(0.15); opacity: 0.2; }
+            50% { transform: scaleY(0.6); opacity: 0.6; }
+            100% { transform: scaleY(1); opacity: 1; }
         }
 
         /* 暫停時靜止 */
-        .ring-visualizer .ring.stopped {
+        .spectrum-visualizer .spec-bar.stopped {
             animation: none !important;
-            stroke-dashoffset: 95 !important;
-            opacity: 0.12 !important;
+            height: 4px !important;
+            opacity: 0.15 !important;
+            transform: scaleY(1);
         }
 
         /* 控制按鈕區 */
@@ -629,18 +653,28 @@
                     <span id="volume-icon" class="volume-icon">🔊</span>
                     <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
                 </div>
-                <!-- 環形音頻可視化 -->
-                <div class="ring-visualizer" id="ring-visualizer">
-                    <svg viewBox="0 0 48 48">
-                        <circle class="ring" cx="24" cy="24" r="20" stroke-dasharray="95" stroke-dashoffset="95" />
-                        <circle class="ring" cx="24" cy="24" r="17" stroke-dasharray="80" stroke-dashoffset="80" />
-                        <circle class="ring" cx="24" cy="24" r="14" stroke-dasharray="65" stroke-dashoffset="65" />
-                        <circle class="ring" cx="24" cy="24" r="11" stroke-dasharray="50" stroke-dashoffset="50" />
-                        <circle class="ring" cx="24" cy="24" r="8" stroke-dasharray="35" stroke-dashoffset="35" />
-                        <circle class="ring" cx="24" cy="24" r="6" stroke-dasharray="25" stroke-dashoffset="25" />
-                        <circle class="ring" cx="24" cy="24" r="4" stroke-dasharray="15" stroke-dashoffset="15" />
-                        <circle class="ring" cx="24" cy="24" r="2.5" stroke-dasharray="8" stroke-dashoffset="8" />
-                    </svg>
+                <!-- 音頻頻譜可視化 -->
+                <div class="spectrum-visualizer" id="spectrum-visualizer">
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
+                    <span class="spec-bar"></span>
                 </div>
                 <div class="music-controls">
                     <button class="ctrl-btn" id="prev-btn" title="上一首">⏮</button>
@@ -827,7 +861,7 @@
     const nextBtn = document.getElementById('next-btn');
     const volumeSlider = document.getElementById('volume-slider');
     const volumeIcon = document.getElementById('volume-icon');
-    const ringViz = document.getElementById('ring-visualizer');
+    const spectrumViz = document.getElementById('spectrum-visualizer');
 
     // 設定初始音量
     audio.volume = 0.5;
@@ -875,16 +909,16 @@
         }
     }
 
-    function updateRingVisualizer() {
+    function updateSpectrum() {
         if (isPlaying && !isSongChanging) {
-            ringViz.classList.add('active');
-            ringViz.querySelectorAll('.ring').forEach(ring => {
-                ring.classList.remove('stopped');
+            spectrumViz.classList.add('active');
+            spectrumViz.querySelectorAll('.spec-bar').forEach(bar => {
+                bar.classList.remove('stopped');
             });
         } else {
-            ringViz.classList.remove('active');
-            ringViz.querySelectorAll('.ring').forEach(ring => {
-                ring.classList.add('stopped');
+            spectrumViz.classList.remove('active');
+            spectrumViz.querySelectorAll('.spec-bar').forEach(bar => {
+                bar.classList.add('stopped');
             });
         }
     }
@@ -892,22 +926,22 @@
     function updateUI() {
         updatePlayButton();
         updateVinyl();
-        updateRingVisualizer();
+        updateSpectrum();
     }
 
-    // 換歌時暫停環形動畫
-    function pauseRingForSongChange() {
+    // 換歌時暫停頻譜動畫
+    function pauseSpectrumForSongChange() {
         isSongChanging = true;
-        ringViz.classList.remove('active');
-        ringViz.querySelectorAll('.ring').forEach(ring => {
-            ring.classList.add('stopped');
+        spectrumViz.classList.remove('active');
+        spectrumViz.querySelectorAll('.spec-bar').forEach(bar => {
+            bar.classList.add('stopped');
         });
         setTimeout(() => {
             isSongChanging = false;
             if (isPlaying) {
-                ringViz.classList.add('active');
-                ringViz.querySelectorAll('.ring').forEach(ring => {
-                    ring.classList.remove('stopped');
+                spectrumViz.classList.add('active');
+                spectrumViz.querySelectorAll('.spec-bar').forEach(bar => {
+                    bar.classList.remove('stopped');
                 });
             }
         }, 400);
@@ -935,7 +969,7 @@
         if (index >= 0 && index < songs.length) {
             currentSongIndex = index;
             audio.src = songs[currentSongIndex];
-            pauseRingForSongChange();
+            pauseSpectrumForSongChange();
             audio.play().then(() => {
                 isPlaying = true;
                 updateUI();
