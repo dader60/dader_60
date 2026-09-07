@@ -99,41 +99,127 @@
             justify-content: center;
             gap: 16px;
         }
-        /* 音樂符號區域 */
+        /* 音樂控制區域 */
         .music-icon-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 6px;
         }
-        /* 音樂符號 + 音量（同一行） */
         .music-top-row {
             display: flex;
             align-items: center;
             gap: 12px;
         }
-        /* 音樂符號 - 播放時上下晃動 + 七彩顏色 */
-        .music-icon-display {
-            font-size: 42px;
-            font-family: "Times New Roman", serif;
-            color: #888;
-            transition: color 0.3s ease;
-            text-align: center;
-            line-height: 1.2;
+
+        /* --- 黑膠唱片 + 指針 --- */
+        .vinyl-wrapper {
+            position: relative;
             display: inline-block;
+            width: 60px;
+            height: 60px;
+            flex-shrink: 0;
         }
-        .music-icon-display.playing {
-            animation: bounce-rainbow 0.6s ease-in-out infinite alternate;
+        .vinyl-disc {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #444, #111 60%, #000 100%);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 0 20px rgba(255,255,255,0.05);
+            position: relative;
+            transition: background 0.3s ease;
         }
-        @keyframes bounce-rainbow {
-            0% { transform: translateY(0px); color: #ff0000; }
-            14% { color: #ff8800; }
-            28% { color: #ffff00; }
-            42% { color: #00ff00; }
-            57% { color: #0088ff; }
-            71% { color: #4400ff; }
-            85% { color: #ff00ff; }
-            100% { transform: translateY(-15px); color: #ff0000; }
+        /* 唱片紋路 */
+        .vinyl-disc::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            background: repeating-conic-gradient(
+                rgba(255,255,255,0.03) 0deg 2deg,
+                transparent 2deg 4deg
+            );
+            pointer-events: none;
+        }
+        /* 唱片標籤 */
+        .vinyl-disc::after {
+            content: '♪';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: rgba(255,255,255,0.3);
+            font-family: "Times New Roman", serif;
+        }
+        /* 播放時 - 七彩旋轉 */
+        .vinyl-disc.playing {
+            animation: vinyl-spin-rainbow 3s linear infinite;
+            background: radial-gradient(circle at 30% 30%, #ff0000, #ff8800 20%, #ffff00 35%, #00ff00 50%, #0088ff 65%, #4400ff 80%, #ff00ff 100%);
+        }
+        .vinyl-disc.playing::after {
+            color: rgba(255,255,255,0.7);
+        }
+        @keyframes vinyl-spin-rainbow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 指針 */
+        .tonearm {
+            position: absolute;
+            top: -8px;
+            right: -20px;
+            width: 35px;
+            height: 35px;
+            transform-origin: top right;
+            transform: rotate(25deg);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 5;
+            pointer-events: none;
+        }
+        .tonearm .arm {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 28px;
+            height: 3px;
+            background: linear-gradient(to left, #888, #ccc);
+            border-radius: 2px;
+            transform-origin: top right;
+            transform: rotate(-10deg);
+        }
+        .tonearm .arm::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #ddd, #999);
+            border-radius: 50%;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+        .tonearm .base {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle at 40% 35%, #bbb, #666);
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        /* 指針放下（播放狀態） */
+        .tonearm.down {
+            transform: rotate(-35deg);
+        }
+        .tonearm.down .arm {
+            transform: rotate(10deg);
         }
 
         /* 音量圖示 */
@@ -141,7 +227,6 @@
             font-size: 22px;
             user-select: none;
             flex-shrink: 0;
-            transition: transform 0.15s ease;
             display: inline-block;
             min-width: 28px;
             text-align: center;
@@ -201,7 +286,6 @@
             transform-origin: bottom;
             opacity: 0.6;
         }
-        /* 每條不同顏色 - 彩虹漸變 */
         .equalizer .bar:nth-child(1) { background: #ff0000; }
         .equalizer .bar:nth-child(2) { background: #ff7700; }
         .equalizer .bar:nth-child(3) { background: #ffdd00; }
@@ -249,7 +333,7 @@
             100% { transform: scaleY(1); opacity: 1; }
         }
 
-        /* 控制按鈕區 - 在音符正下方 */
+        /* 控制按鈕區 */
         .music-controls {
             display: flex;
             align-items: center;
@@ -528,18 +612,24 @@
 </div>
 
 <div class="container">
-    <!-- 頭像 + 音樂符號(上方) + 控制按鈕(在音符下方) -->
+    <!-- 頭像 + 黑膠唱片 + 控制按鈕 -->
     <div class="avatar-wrapper">
         <div class="avatar-row">
             <img src="avatar.jpg" alt="版主頭像" class="profile-pic">
-            <!-- 音樂符號 + 音量（同排） + 控制按鈕（在音符下方） -->
             <div class="music-icon-wrapper">
                 <div class="music-top-row">
-                    <span id="music-icon-display" class="music-icon-display">♪</span>
+                    <!-- 黑膠唱片 + 指針 -->
+                    <div class="vinyl-wrapper">
+                        <div class="tonearm" id="tonearm">
+                            <div class="arm"></div>
+                            <div class="base"></div>
+                        </div>
+                        <div class="vinyl-disc" id="vinyl-disc"></div>
+                    </div>
                     <span id="volume-icon" class="volume-icon">🔊</span>
                     <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
                 </div>
-                <!-- 等化器跳動條 - 七彩顏色 -->
+                <!-- 等化器跳動條 -->
                 <div id="equalizer" class="equalizer">
                     <span class="bar"></span>
                     <span class="bar"></span>
@@ -554,7 +644,7 @@
                     <span class="bar"></span>
                     <span class="bar"></span>
                 </div>
-                <!-- 控制按鈕區 - 在等化器下方 -->
+                <!-- 控制按鈕 -->
                 <div class="music-controls">
                     <button class="ctrl-btn" id="prev-btn" title="上一首">⏮</button>
                     <button class="ctrl-btn play-btn" id="play-btn" title="播放/暫停">▶</button>
@@ -580,7 +670,7 @@
     
     <a href="https://dader60.github.io/dader/" target="_blank" class="card">🚨 投訴系統</a>
     
-    <!-- 達德日常討論群 - 獨立區塊 -->
+    <!-- 達德日常討論群 -->
     <div class="daily-chat-section">
         <div class="section-title">💬 達德日常討論群</div>
         <div class="section-content">
@@ -591,7 +681,7 @@
         <a href="https://ig.me/j/l3p1iGOTZDJVhtjJ/" target="_blank" class="join-btn">🚀 點擊我加入群聊</a>
     </div>
     
-    <!-- 💖 聘職靠達小編表單美化區塊 -->
+    <!-- 💖 聘職靠達小編表單 -->
     <div class="card" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; box-shadow: 0 4px 12px rgba(56, 239, 125, 0.25); padding: 18px; margin-bottom: 15px; text-align: center; box-sizing: border-box;">
         <div style="font-size: 18px; font-weight: bold; margin-bottom: 12px; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px;">
             📝 聘職靠達小編表單
@@ -605,7 +695,7 @@
         </a>
     </div>
     
-    <!-- weplay語音房專區 -->
+    <!-- weplay語音房 -->
     <div class="card" style="background: linear-gradient(135deg, #25f4ee, #fe0979); color: white; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.15); padding: 15px; text-align: center; margin-bottom: 15px;">
         <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">🎙️ 版主weplay語音房</div>
         <div style="font-size: 15px; margin-bottom: 12px; background: rgba(0,0,0,0.2); display: inline-block; padding: 3px 12px; border-radius: 10px; letter-spacing: 1px;">房號: C820553</div>
@@ -734,7 +824,8 @@
     const audio = new Audio();
     let isPlaying = false;
 
-    const musicIcon = document.getElementById('music-icon-display');
+    const vinylDisc = document.getElementById('vinyl-disc');
+    const tonearm = document.getElementById('tonearm');
     const playBtn = document.getElementById('play-btn');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
@@ -747,7 +838,7 @@
     volumeSlider.value = 0.5;
     updateVolumeIcon(0.5);
 
-    // 更新音量圖示 - 純喇叭圖示
+    // 更新音量圖示
     function updateVolumeIcon(value) {
         const val = parseFloat(value);
         if (val === 0) {
@@ -779,12 +870,14 @@
         }
     }
 
-    // 更新音樂符號（播放時七彩上下晃動，暫停時灰色靜止）
-    function updateMusicIcon() {
+    // 更新黑膠唱片狀態
+    function updateVinyl() {
         if (isPlaying) {
-            musicIcon.classList.add('playing');
+            vinylDisc.classList.add('playing');
+            tonearm.classList.add('down');
         } else {
-            musicIcon.classList.remove('playing');
+            vinylDisc.classList.remove('playing');
+            tonearm.classList.remove('down');
         }
     }
 
@@ -800,7 +893,7 @@
     // 更新所有UI
     function updateUI() {
         updatePlayButton();
-        updateMusicIcon();
+        updateVinyl();
         updateEqualizer();
     }
 
@@ -839,7 +932,7 @@
         }
     }
 
-    // 播放下一首（隨機不重複，循環）
+    // 播放下一首
     function playNext() {
         const newIndex = getNextSongIndex();
         lastPlayedIndex = currentSongIndex;
