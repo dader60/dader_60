@@ -279,64 +279,59 @@
             background: rgba(0,0,0,0.35);
         }
 
-        /* --- 均衡器動態圖標 --- */
-        .equalizer-icon {
+        /* --- 環形音頻可視化 --- */
+        .ring-visualizer {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 3px;
-            height: 36px;
+            height: 44px;
             padding: 4px 0;
-            position: relative;
         }
-        .equalizer-icon .eq-bar {
-            width: 5px;
-            border-radius: 2px;
-            transition: height 0.12s ease;
-            height: 4px;
-            transform-origin: bottom;
+        .ring-visualizer svg {
+            width: 44px;
+            height: 44px;
+            transform: rotate(-90deg);
+        }
+        .ring-visualizer .ring {
+            fill: none;
+            stroke-width: 3.5;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.12s ease, stroke 0.3s ease, opacity 0.3s ease;
             opacity: 0.6;
-            flex-shrink: 0;
         }
-        /* 七彩條柱 */
-        .equalizer-icon .eq-bar:nth-child(1) { background: #ff0000; }
-        .equalizer-icon .eq-bar:nth-child(2) { background: #ff6600; }
-        .equalizer-icon .eq-bar:nth-child(3) { background: #ffcc00; }
-        .equalizer-icon .eq-bar:nth-child(4) { background: #33ff00; }
-        .equalizer-icon .eq-bar:nth-child(5) { background: #00ff88; }
-        .equalizer-icon .eq-bar:nth-child(6) { background: #00ccff; }
-        .equalizer-icon .eq-bar:nth-child(7) { background: #4444ff; }
-        .equalizer-icon .eq-bar:nth-child(8) { background: #aa00ff; }
-        .equalizer-icon .eq-bar:nth-child(9) { background: #ff00cc; }
-        .equalizer-icon .eq-bar:nth-child(10) { background: #ff0044; }
+        /* 七彩環 */
+        .ring-visualizer .ring:nth-child(1) { stroke: #ff0000; }
+        .ring-visualizer .ring:nth-child(2) { stroke: #ff8800; }
+        .ring-visualizer .ring:nth-child(3) { stroke: #ffdd00; }
+        .ring-visualizer .ring:nth-child(4) { stroke: #00ff44; }
+        .ring-visualizer .ring:nth-child(5) { stroke: #00aaff; }
+        .ring-visualizer .ring:nth-child(6) { stroke: #4400ff; }
+        .ring-visualizer .ring:nth-child(7) { stroke: #cc00ff; }
+        .ring-visualizer .ring:nth-child(8) { stroke: #ff00aa; }
 
-        /* 播放時跳動 */
-        .equalizer-icon.active .eq-bar {
-            animation: eq-bounce 0.45s ease-in-out infinite alternate;
+        /* 播放時動態跳動 */
+        .ring-visualizer.active .ring {
+            animation: ring-pulse 0.5s ease-in-out infinite alternate;
         }
-        .equalizer-icon.active .eq-bar:nth-child(1) { animation-delay: 0.00s; height: 10px; }
-        .equalizer-icon.active .eq-bar:nth-child(2) { animation-delay: 0.04s; height: 20px; }
-        .equalizer-icon.active .eq-bar:nth-child(3) { animation-delay: 0.08s; height: 28px; }
-        .equalizer-icon.active .eq-bar:nth-child(4) { animation-delay: 0.12s; height: 16px; }
-        .equalizer-icon.active .eq-bar:nth-child(5) { animation-delay: 0.16s; height: 32px; }
-        .equalizer-icon.active .eq-bar:nth-child(6) { animation-delay: 0.20s; height: 12px; }
-        .equalizer-icon.active .eq-bar:nth-child(7) { animation-delay: 0.24s; height: 24px; }
-        .equalizer-icon.active .eq-bar:nth-child(8) { animation-delay: 0.28s; height: 18px; }
-        .equalizer-icon.active .eq-bar:nth-child(9) { animation-delay: 0.32s; height: 30px; }
-        .equalizer-icon.active .eq-bar:nth-child(10) { animation-delay: 0.36s; height: 8px; }
+        .ring-visualizer.active .ring:nth-child(1) { animation-delay: 0.00s; stroke-dasharray: 95; stroke-dashoffset: 95; }
+        .ring-visualizer.active .ring:nth-child(2) { animation-delay: 0.04s; stroke-dasharray: 80; stroke-dashoffset: 80; }
+        .ring-visualizer.active .ring:nth-child(3) { animation-delay: 0.08s; stroke-dasharray: 65; stroke-dashoffset: 65; }
+        .ring-visualizer.active .ring:nth-child(4) { animation-delay: 0.12s; stroke-dasharray: 50; stroke-dashoffset: 50; }
+        .ring-visualizer.active .ring:nth-child(5) { animation-delay: 0.16s; stroke-dasharray: 35; stroke-dashoffset: 35; }
+        .ring-visualizer.active .ring:nth-child(6) { animation-delay: 0.20s; stroke-dasharray: 25; stroke-dashoffset: 25; }
+        .ring-visualizer.active .ring:nth-child(7) { animation-delay: 0.24s; stroke-dasharray: 15; stroke-dashoffset: 15; }
+        .ring-visualizer.active .ring:nth-child(8) { animation-delay: 0.28s; stroke-dasharray: 8; stroke-dashoffset: 8; }
 
-        @keyframes eq-bounce {
-            0% { transform: scaleY(0.2); opacity: 0.3; }
-            50% { transform: scaleY(0.7); opacity: 0.7; }
-            100% { transform: scaleY(1); opacity: 1; }
+        @keyframes ring-pulse {
+            0% { stroke-dashoffset: 5; opacity: 0.3; }
+            100% { stroke-dashoffset: 90; opacity: 1; }
         }
 
         /* 暫停時靜止 */
-        .equalizer-icon .eq-bar.stopped {
+        .ring-visualizer .ring.stopped {
             animation: none !important;
-            height: 4px !important;
-            opacity: 0.2;
-            transform: scaleY(1);
+            stroke-dashoffset: 95 !important;
+            opacity: 0.12 !important;
         }
 
         /* 控制按鈕區 */
@@ -634,18 +629,18 @@
                     <span id="volume-icon" class="volume-icon">🔊</span>
                     <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
                 </div>
-                <!-- 均衡器動態圖標 -->
-                <div class="equalizer-icon" id="equalizer-icon">
-                    <span class="eq-bar"></span>
-                    <span class="eq-bar"></span>
-                    <span class="eq-bar"></span>
-                    <span class="eq-bar"></span>
-                    <span class="eq-bar"></span>
-                    <span class="eq-bar"></span>
-                    <span class="eq-bar"></span>
-                    <span class="eq-bar"></span>
-                    <span class="eq-bar"></span>
-                    <span class="eq-bar"></span>
+                <!-- 環形音頻可視化 -->
+                <div class="ring-visualizer" id="ring-visualizer">
+                    <svg viewBox="0 0 48 48">
+                        <circle class="ring" cx="24" cy="24" r="20" stroke-dasharray="95" stroke-dashoffset="95" />
+                        <circle class="ring" cx="24" cy="24" r="17" stroke-dasharray="80" stroke-dashoffset="80" />
+                        <circle class="ring" cx="24" cy="24" r="14" stroke-dasharray="65" stroke-dashoffset="65" />
+                        <circle class="ring" cx="24" cy="24" r="11" stroke-dasharray="50" stroke-dashoffset="50" />
+                        <circle class="ring" cx="24" cy="24" r="8" stroke-dasharray="35" stroke-dashoffset="35" />
+                        <circle class="ring" cx="24" cy="24" r="6" stroke-dasharray="25" stroke-dashoffset="25" />
+                        <circle class="ring" cx="24" cy="24" r="4" stroke-dasharray="15" stroke-dashoffset="15" />
+                        <circle class="ring" cx="24" cy="24" r="2.5" stroke-dasharray="8" stroke-dashoffset="8" />
+                    </svg>
                 </div>
                 <div class="music-controls">
                     <button class="ctrl-btn" id="prev-btn" title="上一首">⏮</button>
@@ -832,7 +827,7 @@
     const nextBtn = document.getElementById('next-btn');
     const volumeSlider = document.getElementById('volume-slider');
     const volumeIcon = document.getElementById('volume-icon');
-    const eqIcon = document.getElementById('equalizer-icon');
+    const ringViz = document.getElementById('ring-visualizer');
 
     // 設定初始音量
     audio.volume = 0.5;
@@ -880,16 +875,16 @@
         }
     }
 
-    function updateEqualizer() {
+    function updateRingVisualizer() {
         if (isPlaying && !isSongChanging) {
-            eqIcon.classList.add('active');
-            eqIcon.querySelectorAll('.eq-bar').forEach(bar => {
-                bar.classList.remove('stopped');
+            ringViz.classList.add('active');
+            ringViz.querySelectorAll('.ring').forEach(ring => {
+                ring.classList.remove('stopped');
             });
         } else {
-            eqIcon.classList.remove('active');
-            eqIcon.querySelectorAll('.eq-bar').forEach(bar => {
-                bar.classList.add('stopped');
+            ringViz.classList.remove('active');
+            ringViz.querySelectorAll('.ring').forEach(ring => {
+                ring.classList.add('stopped');
             });
         }
     }
@@ -897,22 +892,22 @@
     function updateUI() {
         updatePlayButton();
         updateVinyl();
-        updateEqualizer();
+        updateRingVisualizer();
     }
 
-    // 換歌時暫停等化器
-    function pauseEqForSongChange() {
+    // 換歌時暫停環形動畫
+    function pauseRingForSongChange() {
         isSongChanging = true;
-        eqIcon.classList.remove('active');
-        eqIcon.querySelectorAll('.eq-bar').forEach(bar => {
-            bar.classList.add('stopped');
+        ringViz.classList.remove('active');
+        ringViz.querySelectorAll('.ring').forEach(ring => {
+            ring.classList.add('stopped');
         });
         setTimeout(() => {
             isSongChanging = false;
             if (isPlaying) {
-                eqIcon.classList.add('active');
-                eqIcon.querySelectorAll('.eq-bar').forEach(bar => {
-                    bar.classList.remove('stopped');
+                ringViz.classList.add('active');
+                ringViz.querySelectorAll('.ring').forEach(ring => {
+                    ring.classList.remove('stopped');
                 });
             }
         }, 400);
@@ -940,7 +935,7 @@
         if (index >= 0 && index < songs.length) {
             currentSongIndex = index;
             audio.src = songs[currentSongIndex];
-            pauseEqForSongChange();
+            pauseRingForSongChange();
             audio.play().then(() => {
                 isPlaying = true;
                 updateUI();
