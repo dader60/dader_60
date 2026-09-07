@@ -279,70 +279,64 @@
             background: rgba(0,0,0,0.35);
         }
 
-        /* --- 圓形聲波可視化 --- */
-        .wave-circle-container {
+        /* --- 均衡器動態圖標 --- */
+        .equalizer-icon {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 44px;
+            gap: 3px;
+            height: 36px;
             padding: 4px 0;
-            width: 100%;
-            max-width: 180px;
             position: relative;
         }
-        .wave-circle {
-            position: relative;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .equalizer-icon .eq-bar {
+            width: 5px;
+            border-radius: 2px;
+            transition: height 0.12s ease;
+            height: 4px;
+            transform-origin: bottom;
+            opacity: 0.6;
+            flex-shrink: 0;
         }
-        .wave-circle svg {
-            width: 100%;
-            height: 100%;
-            transform: rotate(-90deg);
-        }
-        .wave-circle .ring {
-            fill: none;
-            stroke-width: 3;
-            stroke-linecap: round;
-            transition: stroke-dashoffset 0.15s ease, stroke 0.3s ease;
-            opacity: 0.8;
-        }
-        /* 七彩環 - 每個環不同顏色 */
-        .wave-circle .ring:nth-child(1) { stroke: #ff0000; }
-        .wave-circle .ring:nth-child(2) { stroke: #ff8800; }
-        .wave-circle .ring:nth-child(3) { stroke: #ffff00; }
-        .wave-circle .ring:nth-child(4) { stroke: #00ff44; }
-        .wave-circle .ring:nth-child(5) { stroke: #0088ff; }
-        .wave-circle .ring:nth-child(6) { stroke: #4400ff; }
-        .wave-circle .ring:nth-child(7) { stroke: #ff00ff; }
-        .wave-circle .ring:nth-child(8) { stroke: #ff0044; }
+        /* 七彩條柱 */
+        .equalizer-icon .eq-bar:nth-child(1) { background: #ff0000; }
+        .equalizer-icon .eq-bar:nth-child(2) { background: #ff6600; }
+        .equalizer-icon .eq-bar:nth-child(3) { background: #ffcc00; }
+        .equalizer-icon .eq-bar:nth-child(4) { background: #33ff00; }
+        .equalizer-icon .eq-bar:nth-child(5) { background: #00ff88; }
+        .equalizer-icon .eq-bar:nth-child(6) { background: #00ccff; }
+        .equalizer-icon .eq-bar:nth-child(7) { background: #4444ff; }
+        .equalizer-icon .eq-bar:nth-child(8) { background: #aa00ff; }
+        .equalizer-icon .eq-bar:nth-child(9) { background: #ff00cc; }
+        .equalizer-icon .eq-bar:nth-child(10) { background: #ff0044; }
 
-        /* 播放時的動畫 - 每個環不同延遲 */
-        .wave-circle.active .ring {
-            animation: ring-pulse 0.6s ease-in-out infinite alternate;
+        /* 播放時跳動 */
+        .equalizer-icon.active .eq-bar {
+            animation: eq-bounce 0.45s ease-in-out infinite alternate;
         }
-        .wave-circle.active .ring:nth-child(1) { animation-delay: 0.00s; }
-        .wave-circle.active .ring:nth-child(2) { animation-delay: 0.05s; }
-        .wave-circle.active .ring:nth-child(3) { animation-delay: 0.10s; }
-        .wave-circle.active .ring:nth-child(4) { animation-delay: 0.15s; }
-        .wave-circle.active .ring:nth-child(5) { animation-delay: 0.20s; }
-        .wave-circle.active .ring:nth-child(6) { animation-delay: 0.25s; }
-        .wave-circle.active .ring:nth-child(7) { animation-delay: 0.30s; }
-        .wave-circle.active .ring:nth-child(8) { animation-delay: 0.35s; }
+        .equalizer-icon.active .eq-bar:nth-child(1) { animation-delay: 0.00s; height: 10px; }
+        .equalizer-icon.active .eq-bar:nth-child(2) { animation-delay: 0.04s; height: 20px; }
+        .equalizer-icon.active .eq-bar:nth-child(3) { animation-delay: 0.08s; height: 28px; }
+        .equalizer-icon.active .eq-bar:nth-child(4) { animation-delay: 0.12s; height: 16px; }
+        .equalizer-icon.active .eq-bar:nth-child(5) { animation-delay: 0.16s; height: 32px; }
+        .equalizer-icon.active .eq-bar:nth-child(6) { animation-delay: 0.20s; height: 12px; }
+        .equalizer-icon.active .eq-bar:nth-child(7) { animation-delay: 0.24s; height: 24px; }
+        .equalizer-icon.active .eq-bar:nth-child(8) { animation-delay: 0.28s; height: 18px; }
+        .equalizer-icon.active .eq-bar:nth-child(9) { animation-delay: 0.32s; height: 30px; }
+        .equalizer-icon.active .eq-bar:nth-child(10) { animation-delay: 0.36s; height: 8px; }
 
-        @keyframes ring-pulse {
-            0% { stroke-dashoffset: 120; opacity: 0.3; }
-            100% { stroke-dashoffset: 40; opacity: 1; }
+        @keyframes eq-bounce {
+            0% { transform: scaleY(0.2); opacity: 0.3; }
+            50% { transform: scaleY(0.7); opacity: 0.7; }
+            100% { transform: scaleY(1); opacity: 1; }
         }
 
         /* 暫停時靜止 */
-        .wave-circle .ring.stopped {
+        .equalizer-icon .eq-bar.stopped {
             animation: none !important;
-            stroke-dashoffset: 120 !important;
-            opacity: 0.15 !important;
+            height: 4px !important;
+            opacity: 0.2;
+            transform: scaleY(1);
         }
 
         /* 控制按鈕區 */
@@ -640,20 +634,18 @@
                     <span id="volume-icon" class="volume-icon">🔊</span>
                     <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
                 </div>
-                <!-- 圓形聲波可視化 -->
-                <div class="wave-circle-container">
-                    <div class="wave-circle" id="wave-circle">
-                        <svg viewBox="0 0 50 50">
-                            <circle class="ring" cx="25" cy="25" r="18" stroke-dasharray="120" stroke-dashoffset="120" />
-                            <circle class="ring" cx="25" cy="25" r="15" stroke-dasharray="100" stroke-dashoffset="100" />
-                            <circle class="ring" cx="25" cy="25" r="12" stroke-dasharray="80" stroke-dashoffset="80" />
-                            <circle class="ring" cx="25" cy="25" r="9" stroke-dasharray="60" stroke-dashoffset="60" />
-                            <circle class="ring" cx="25" cy="25" r="6" stroke-dasharray="40" stroke-dashoffset="40" />
-                            <circle class="ring" cx="25" cy="25" r="3" stroke-dasharray="20" stroke-dashoffset="20" />
-                            <circle class="ring" cx="25" cy="25" r="1.5" stroke-dasharray="12" stroke-dashoffset="12" />
-                            <circle class="ring" cx="25" cy="25" r="0.5" stroke-dasharray="6" stroke-dashoffset="6" />
-                        </svg>
-                    </div>
+                <!-- 均衡器動態圖標 -->
+                <div class="equalizer-icon" id="equalizer-icon">
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
                 </div>
                 <div class="music-controls">
                     <button class="ctrl-btn" id="prev-btn" title="上一首">⏮</button>
@@ -840,7 +832,7 @@
     const nextBtn = document.getElementById('next-btn');
     const volumeSlider = document.getElementById('volume-slider');
     const volumeIcon = document.getElementById('volume-icon');
-    const waveCircle = document.getElementById('wave-circle');
+    const eqIcon = document.getElementById('equalizer-icon');
 
     // 設定初始音量
     audio.volume = 0.5;
@@ -888,16 +880,16 @@
         }
     }
 
-    function updateWaveCircle() {
+    function updateEqualizer() {
         if (isPlaying && !isSongChanging) {
-            waveCircle.classList.add('active');
-            waveCircle.querySelectorAll('.ring').forEach(ring => {
-                ring.classList.remove('stopped');
+            eqIcon.classList.add('active');
+            eqIcon.querySelectorAll('.eq-bar').forEach(bar => {
+                bar.classList.remove('stopped');
             });
         } else {
-            waveCircle.classList.remove('active');
-            waveCircle.querySelectorAll('.ring').forEach(ring => {
-                ring.classList.add('stopped');
+            eqIcon.classList.remove('active');
+            eqIcon.querySelectorAll('.eq-bar').forEach(bar => {
+                bar.classList.add('stopped');
             });
         }
     }
@@ -905,23 +897,22 @@
     function updateUI() {
         updatePlayButton();
         updateVinyl();
-        updateWaveCircle();
+        updateEqualizer();
     }
 
-    // 換歌時暫停聲波動畫
-    function pauseWaveForSongChange() {
+    // 換歌時暫停等化器
+    function pauseEqForSongChange() {
         isSongChanging = true;
-        waveCircle.classList.remove('active');
-        waveCircle.querySelectorAll('.ring').forEach(ring => {
-            ring.classList.add('stopped');
+        eqIcon.classList.remove('active');
+        eqIcon.querySelectorAll('.eq-bar').forEach(bar => {
+            bar.classList.add('stopped');
         });
-        // 400ms 後恢復
         setTimeout(() => {
             isSongChanging = false;
             if (isPlaying) {
-                waveCircle.classList.add('active');
-                waveCircle.querySelectorAll('.ring').forEach(ring => {
-                    ring.classList.remove('stopped');
+                eqIcon.classList.add('active');
+                eqIcon.querySelectorAll('.eq-bar').forEach(bar => {
+                    bar.classList.remove('stopped');
                 });
             }
         }, 400);
@@ -949,10 +940,7 @@
         if (index >= 0 && index < songs.length) {
             currentSongIndex = index;
             audio.src = songs[currentSongIndex];
-            
-            // 換歌時暫停聲波動畫
-            pauseWaveForSongChange();
-            
+            pauseEqForSongChange();
             audio.play().then(() => {
                 isPlaying = true;
                 updateUI();
