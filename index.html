@@ -99,7 +99,6 @@
             justify-content: center;
             gap: 16px;
         }
-        /* 音樂控制區域 */
         .music-icon-wrapper {
             display: flex;
             flex-direction: column;
@@ -124,46 +123,64 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #444, #111 60%, #000 100%);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 0 20px rgba(255,255,255,0.05);
+            background: radial-gradient(circle at 30% 30%, #444, #222 40%, #0a0a0a 70%, #000 100%);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4), inset 0 0 30px rgba(255,255,255,0.03);
             position: relative;
-            transition: background 0.3s ease;
+            transition: transform 0.3s ease;
         }
         /* 唱片紋路 */
         .vinyl-disc::before {
             content: '';
             position: absolute;
-            top: 10%;
-            left: 10%;
-            width: 80%;
-            height: 80%;
+            top: 8%;
+            left: 8%;
+            width: 84%;
+            height: 84%;
             border-radius: 50%;
-            background: repeating-conic-gradient(
-                rgba(255,255,255,0.03) 0deg 2deg,
-                transparent 2deg 4deg
-            );
+            background: 
+                repeating-conic-gradient(
+                    rgba(255,255,255,0.04) 0deg 1.5deg,
+                    transparent 1.5deg 3deg
+                ),
+                repeating-conic-gradient(
+                    rgba(255,255,255,0.02) 0deg 0.8deg,
+                    transparent 0.8deg 1.6deg
+                );
             pointer-events: none;
         }
-        /* 唱片標籤 */
-        .vinyl-disc::after {
-            content: '♪';
+        /* 唱片標籤 - 中心音符會七彩變色 */
+        .vinyl-disc .label-icon {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 18px;
-            color: rgba(255,255,255,0.3);
+            font-size: 20px;
             font-family: "Times New Roman", serif;
+            color: rgba(200,200,200,0.5);
+            transition: color 0.3s ease;
+            text-shadow: 0 0 10px rgba(255,255,255,0.05);
+            pointer-events: none;
+            line-height: 1;
         }
-        /* 播放時 - 七彩旋轉 */
+        .vinyl-disc .label-icon.playing {
+            animation: icon-rainbow 1.2s ease-in-out infinite alternate;
+        }
+        @keyframes icon-rainbow {
+            0% { color: #ff0000; text-shadow: 0 0 15px rgba(255,0,0,0.4); }
+            14% { color: #ff8800; text-shadow: 0 0 15px rgba(255,136,0,0.4); }
+            28% { color: #ffff00; text-shadow: 0 0 15px rgba(255,255,0,0.4); }
+            42% { color: #00ff44; text-shadow: 0 0 15px rgba(0,255,68,0.4); }
+            57% { color: #0088ff; text-shadow: 0 0 15px rgba(0,136,255,0.4); }
+            71% { color: #4400ff; text-shadow: 0 0 15px rgba(68,0,255,0.4); }
+            85% { color: #ff00ff; text-shadow: 0 0 15px rgba(255,0,255,0.4); }
+            100% { color: #ff0044; text-shadow: 0 0 15px rgba(255,0,68,0.4); }
+        }
+
+        /* 播放時 - 唱片旋轉 */
         .vinyl-disc.playing {
-            animation: vinyl-spin-rainbow 3s linear infinite;
-            background: radial-gradient(circle at 30% 30%, #ff0000, #ff8800 20%, #ffff00 35%, #00ff00 50%, #0088ff 65%, #4400ff 80%, #ff00ff 100%);
+            animation: vinyl-spin 2.5s linear infinite;
         }
-        .vinyl-disc.playing::after {
-            color: rgba(255,255,255,0.7);
-        }
-        @keyframes vinyl-spin-rainbow {
+        @keyframes vinyl-spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
@@ -187,10 +204,11 @@
             right: 0;
             width: 28px;
             height: 3px;
-            background: linear-gradient(to left, #888, #ccc);
+            background: linear-gradient(to left, #999, #ddd);
             border-radius: 2px;
             transform-origin: top right;
             transform: rotate(-10deg);
+            box-shadow: 0 0 4px rgba(0,0,0,0.2);
         }
         .tonearm .arm::after {
             content: '';
@@ -199,7 +217,7 @@
             right: -2px;
             width: 8px;
             height: 8px;
-            background: radial-gradient(circle, #ddd, #999);
+            background: radial-gradient(circle, #eee, #aaa);
             border-radius: 50%;
             box-shadow: 0 1px 4px rgba(0,0,0,0.3);
         }
@@ -209,12 +227,11 @@
             right: -4px;
             width: 12px;
             height: 12px;
-            background: radial-gradient(circle at 40% 35%, #bbb, #666);
+            background: radial-gradient(circle at 40% 35%, #ccc, #777);
             border-radius: 50%;
             box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.15);
         }
-        /* 指針放下（播放狀態） */
         .tonearm.down {
             transform: rotate(-35deg);
         }
@@ -624,7 +641,9 @@
                             <div class="arm"></div>
                             <div class="base"></div>
                         </div>
-                        <div class="vinyl-disc" id="vinyl-disc"></div>
+                        <div class="vinyl-disc" id="vinyl-disc">
+                            <span class="label-icon" id="label-icon">♪</span>
+                        </div>
                     </div>
                     <span id="volume-icon" class="volume-icon">🔊</span>
                     <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
@@ -825,6 +844,7 @@
     let isPlaying = false;
 
     const vinylDisc = document.getElementById('vinyl-disc');
+    const labelIcon = document.getElementById('label-icon');
     const tonearm = document.getElementById('tonearm');
     const playBtn = document.getElementById('play-btn');
     const prevBtn = document.getElementById('prev-btn');
@@ -874,9 +894,11 @@
     function updateVinyl() {
         if (isPlaying) {
             vinylDisc.classList.add('playing');
+            labelIcon.classList.add('playing');
             tonearm.classList.add('down');
         } else {
             vinylDisc.classList.remove('playing');
+            labelIcon.classList.remove('playing');
             tonearm.classList.remove('down');
         }
     }
