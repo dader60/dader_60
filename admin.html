@@ -333,7 +333,6 @@
         <div class="modal-box">
             <h2>✏️ 編輯倒數事件</h2>
             <input type="hidden" id="editId">
-            <input type="hidden" id="editSource"> <!-- 'events' 或 'recurring' -->
             <div class="input-group">
                 <label>📌 事件名稱</label>
                 <input type="text" id="editName" maxlength="40">
@@ -415,7 +414,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const eventsRef = ref(db, 'events');           // 一次性 + 每年輪迴事件
+        const eventsRef = ref(db, 'events');
         const authRef = ref(db, 'auth');
         const messagesRef = ref(db, 'messages');
 
@@ -594,27 +593,34 @@
             return [...fixed, ...customRecurring];
         }
 
-        // ========== 倒數事件列表 ==========
+        // ========== 倒數事件列表（相容舊資料） ==========
         function renderAdminList() {
             if (!isLoggedIn) return;
             const container = document.getElementById('adminCountdownList');
             const recurring = getRecurringEventsWithDate();
-            const onceEvents = adminEvents.filter(ev => ev.type === 'once').map(ev => ({
-                id: ev.id,
-                name: ev.name,
-                date: ev.date,
-                recurring: false,
-                fixed: false,
-                emoji: ev.emoji || '',
-                progressDays: ev.progressDays || 365,
-                message: ev.message || '',
-                type: 'once'
-            }));
+
+            // 一次性事件（相容舊資料：沒有 type 欄位視為一次性）
+            const onceEvents = adminEvents
+                .filter(ev => ev.type === 'once' || !ev.type)
+                .map(ev => ({
+                    id: ev.id,
+                    name: ev.name,
+                    date: ev.date,
+                    recurring: false,
+                    fixed: false,
+                    emoji: ev.emoji || '',
+                    progressDays: ev.progressDays || 365,
+                    message: ev.message || '',
+                    type: 'once'
+                }));
 
             const allEvents = [...recurring, ...onceEvents];
 
             const active = allEvents
-                .filter(ev => !getCountdownParts(ev.date).isPast)
+                .filter(ev => {
+                    if (!ev.date) return false;
+                    return !getCountdownParts(ev.date).isPast;
+                })
                 .sort((a, b) => new Date(a.date) - new Date(b.date));
 
             if (!active.length) {
@@ -638,11 +644,10 @@
                     tagHtml = `<span class="once-tag">一次性</span>`;
                 }
 
-                // 編輯按鈕：固定節日不能編輯日期，但可以編輯訊息（透過節日訊息分頁）
+                // 編輯 / 刪除按鈕
                 let editBtn = '';
                 let deleteBtn = '';
                 if (ev.fixed) {
-                    // 固定節日：無編輯/刪除按鈕（訊息在節日訊息分頁改）
                     editBtn = '';
                     deleteBtn = '';
                 } else {
@@ -720,7 +725,6 @@
                 document.getElementById('eventDate').value = '';
                 document.getElementById('eventMessage').value = '';
             } else {
-                // 每年輪迴
                 const month = parseInt(document.getElementById('eventMonth').value, 10);
                 const day = parseInt(document.getElementById('eventDay').value, 10);
                 const progressDays = parseInt(document.getElementById('eventProgress').value, 10) || 365;
@@ -803,7 +807,7 @@
                 updateData.month = month;
                 updateData.day = day;
                 updateData.progressDays = progressDays;
-                updateData.date = null; // 移除一次性日期
+                updateData.date = null;
             } else {
                 const date = document.getElementById('editDate').value;
                 if (!date) { alert('請選擇日期'); return; }
@@ -883,7 +887,6 @@
                     const savedEl = document.querySelector(`.msg-saved[data-saved-id="${id}"]`);
                     const value = input.value.trim();
 
-                    // 若 id 是管理員新增的每年事件，同時更新 events 中的 message
                     const isCustomRecurring = adminEvents.some(e => e.id === id && e.type === 'yearly');
                     if (isCustomRecurring) {
                         await update(ref(db, 'events/' + id), { message: value });
@@ -1011,7 +1014,6 @@
                 }
             });
 
-            // 新增按鈕
             document.getElementById('addBtn').addEventListener('click', addNewEvent);
 
             // 編輯 Modal
@@ -1033,7 +1035,6 @@
                 }
             });
 
-            // 若已登入
             if (sessionStorage.getItem('admin_logged_in') === 'true') {
                 isLoggedIn = true;
                 showAdminPage();
