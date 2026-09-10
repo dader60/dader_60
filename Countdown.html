@@ -6,7 +6,7 @@
     <title>倒數系統</title>
     <style>
         * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; }
-        body { background: #a8d5e5; min-height: 100vh; padding: 2rem 1.5rem; }
+        body { background: #a8d5e5; min-height: 100vh; padding: 2rem 1.5rem 6rem; }
 
         .public-container { max-width: 1300px; margin: 0 auto; }
 
@@ -53,17 +53,6 @@
             color: #ffffff;
             letter-spacing: 0.5px;
             line-height: 1.4;
-        }
-        .recurring-tag {
-            font-size: 0.7rem;
-            background: #3a2e00;
-            color: #ffc107;
-            padding: 0.15rem 0.6rem;
-            border-radius: 20px;
-            font-weight: 600;
-            border: 1px solid #5c4900;
-            margin-left: 0.5rem;
-            vertical-align: middle;
         }
 
         .countdown-grid {
@@ -143,18 +132,27 @@
             grid-column: 1 / -1;
         }
 
+        /* ===== 固定在底部的頁尾 ===== */
         .footer-note {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             text-align: center;
-            margin-top: 3rem;
+            padding: 1rem;
             font-size: 1rem;
             color: #0b2a3b;
             letter-spacing: 0.5px;
             font-weight: 600;
-            opacity: 0.75;
+            background: rgba(168, 213, 229, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(11, 42, 59, 0.1);
+            z-index: 100;
         }
 
         @media (max-width: 600px) {
-            body { padding: 1.2rem 1rem; }
+            body { padding: 1.2rem 1rem 5rem; }
             h1 { font-size: 1.5rem; }
             .countdown-list { grid-template-columns: 1fr; gap: 1rem; }
             .countdown-card { padding: 1.4rem 1.2rem 1.2rem; }
@@ -163,7 +161,7 @@
             .time-label { font-size: 0.7rem; }
             .time-box { padding: 0.55rem 0.2rem 0.4rem; }
             .card-message { font-size: 0.78rem; }
-            .footer-note { font-size: 0.85rem; }
+            .footer-note { font-size: 0.85rem; padding: 0.8rem; }
         }
     </style>
 </head>
@@ -178,9 +176,9 @@
         </div>
 
         <div id="publicCountdownList" class="countdown-list"></div>
-
-        <div class="footer-note">𝓭𝓪𝓭𝓮𝓻 靠北達德速度版 ⚡️｜版主小編團隊製作</div>
     </div>
+
+    <div class="footer-note">𝓭𝓪𝓭𝓮𝓻 靠北達德速度版 ⚡️｜版主小編團隊製作</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -203,19 +201,19 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const eventsRef = ref(db, 'events');
+        const messagesRef = ref(db, 'messages');
 
-        // ========== 固定節日（自動輪迴）==========
-        // type: 'yearly'  每年固定月/日
-        // type: 'oddMonths' 單數月（1,3,5,7,9,11）的固定日
+        // 固定節日（自動輪迴）
         const RECURRING_EVENTS = [
-            { id: 'rec_1', name: '1/1 元旦', type: 'yearly', month: 1, day: 1, emoji: '🎆', message: '新年快樂，全新開始！✨', progressDays: 365 },
-            { id: 'rec_2', name: '2/28 和平紀念日', type: 'yearly', month: 2, day: 28, emoji: '🕊️', message: '和平紀念日，珍惜自由', progressDays: 365 },
-            { id: 'rec_3', name: '10/10 國慶日', type: 'yearly', month: 10, day: 10, emoji: '🎉', message: '國慶連假放鬆去！🎈', progressDays: 365 },
-            { id: 'rec_4', name: '10/10 版主生日', type: 'yearly', month: 10, day: 10, emoji: '🎂', message: '生日快樂！Happy Birthday! 🎊', progressDays: 365 },
-            { id: 'rec_5', name: '載具發票開獎', type: 'oddMonths', day: 25, emoji: '🧾', message: '祝您中大獎！💰', progressDays: 60 }
+            { id: 'rec_1', name: '1/1 元旦', type: 'yearly', month: 1, day: 1, emoji: '🎆', defaultMessage: '新年快樂，全新開始！✨', progressDays: 365 },
+            { id: 'rec_2', name: '2/28 和平紀念日', type: 'yearly', month: 2, day: 28, emoji: '🕊️', defaultMessage: '和平紀念日，珍惜自由', progressDays: 365 },
+            { id: 'rec_3', name: '10/10 國慶日', type: 'yearly', month: 10, day: 10, emoji: '🎉', defaultMessage: '國慶連假放鬆去！🎈', progressDays: 365 },
+            { id: 'rec_4', name: '10/10 版主生日', type: 'yearly', month: 10, day: 10, emoji: '🎂', defaultMessage: '生日快樂！Happy Birthday! 🎊', progressDays: 365 },
+            { id: 'rec_5', name: '載具發票開獎', type: 'oddMonths', day: 25, emoji: '🧾', defaultMessage: '祝您中大獎！💰', progressDays: 60 }
         ];
 
         let adminEvents = [];
+        let customMessages = {};
 
         onValue(eventsRef, (snapshot) => {
             const data = snapshot.val() || {};
@@ -225,6 +223,11 @@
         }, (error) => {
             setSyncStatus(false);
             console.error(error);
+        });
+
+        onValue(messagesRef, (snapshot) => {
+            customMessages = snapshot.val() || {};
+            renderPublicList();
         });
 
         function setSyncStatus(online) {
@@ -239,47 +242,32 @@
             }
         }
 
-        // ========== 日期計算 ==========
         function getNextYearlyDate(month, day) {
             const now = new Date();
             const year = now.getFullYear();
             let target = new Date(year, month - 1, day, 0, 0, 0);
-            if (target <= now) {
-                target = new Date(year + 1, month - 1, day, 0, 0, 0);
-            }
+            if (target <= now) target = new Date(year + 1, month - 1, day, 0, 0, 0);
             return target;
         }
 
-        // 下一個單數月（1,3,5,7,9,11）的指定日
         function getNextOddMonthDate(day) {
             const now = new Date();
             const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth() + 1; // 1-12
-
-            // 從當前月開始往後找（最多找 12 個月）
+            const currentMonth = now.getMonth() + 1;
             for (let offset = 0; offset < 12; offset++) {
                 let m = currentMonth + offset;
                 let y = currentYear;
                 while (m > 12) { m -= 12; y++; }
-
-                // 只考慮單數月
                 if (m % 2 === 0) continue;
-
                 const target = new Date(y, m - 1, day, 0, 0, 0);
-                if (target > now) {
-                    return target;
-                }
+                if (target > now) return target;
             }
-            // 理論上不會到這，保險用
             return new Date(currentYear + 1, 0, day, 0, 0, 0);
         }
 
         function getNextRecurringDate(ev) {
-            if (ev.type === 'yearly') {
-                return getNextYearlyDate(ev.month, ev.day);
-            } else if (ev.type === 'oddMonths') {
-                return getNextOddMonthDate(ev.day);
-            }
+            if (ev.type === 'yearly') return getNextYearlyDate(ev.month, ev.day);
+            if (ev.type === 'oddMonths') return getNextOddMonthDate(ev.day);
             return null;
         }
 
@@ -296,13 +284,12 @@
                     date: `${y}-${m}-${d}`,
                     recurring: true,
                     emoji: ev.emoji,
-                    message: ev.message,
-                    progressDays: ev.progressDays
+                    progressDays: ev.progressDays,
+                    defaultMessage: ev.defaultMessage
                 };
             }).filter(Boolean);
         }
 
-        // ========== 倒數計算 ==========
         function getCountdownParts(dateStr) {
             const now = new Date();
             const target = new Date(dateStr + 'T00:00:00');
@@ -328,12 +315,12 @@
         }
 
         function escapeHtml(s) {
-            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+            if (s === undefined || s === null) return '';
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
         }
 
         function pad2(n) { return String(n).padStart(2, '0'); }
 
-        // ========== 渲染 ==========
         function renderPublicList() {
             const container = document.getElementById('publicCountdownList');
             const recurring = getRecurringEventsWithDate();
@@ -352,14 +339,23 @@
                 const p = getCountdownParts(ev.date);
                 const progressDays = ev.progressDays || 365;
                 const percent = getProgressPercent(p.totalSeconds, progressDays);
-                const recurringTag = ev.recurring ? `<span class="recurring-tag">每年</span>` : '';
                 const emoji = ev.emoji ? ev.emoji + ' ' : '';
-                const message = ev.message || '';
+
+                // 判斷訊息：固定節日優先使用自訂訊息，否則用預設
+                let message = '';
+                if (ev.recurring) {
+                    const custom = customMessages[ev.id];
+                    if (custom !== undefined && custom !== null && custom !== '') {
+                        message = custom;
+                    } else {
+                        message = ev.defaultMessage || '';
+                    }
+                }
 
                 return `
                     <div class="countdown-card">
                         <div class="card-header">
-                            <div class="event-name">${emoji}${escapeHtml(ev.name)}${recurringTag}</div>
+                            <div class="event-name">${emoji}${escapeHtml(ev.name)}</div>
                         </div>
                         <div class="countdown-grid">
                             <div class="time-box">
@@ -395,7 +391,6 @@
             startUpdater();
         }
 
-        // ========== 每秒更新 ==========
         let interval = null;
         function startUpdater() {
             if (interval) clearInterval(interval);
@@ -415,7 +410,6 @@
                     const bar = document.querySelector(`.progress-bar[data-bar-date="${dateStr}"]`);
                     if (bar) {
                         const card = bar.closest('.countdown-card');
-                        // 找對應 progressDays
                         let progressDays = 365;
                         const recurring = RECURRING_EVENTS.find(r => {
                             const target = getNextRecurringDate(r);
