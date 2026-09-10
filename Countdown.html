@@ -6,37 +6,164 @@
     <title>倒數系統</title>
     <style>
         * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; }
-        body { background: #cfe8f7; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1.5rem; }
-        .public-container { max-width: 900px; width: 100%; background: rgba(255,255,255,0.8); backdrop-filter: blur(16px); border-radius: 2.5rem; padding: 2rem 2.5rem; box-shadow: 0 25px 40px -12px rgba(0,20,30,0.3); border: 1px solid rgba(255,255,255,0.6); }
+        body { background: #a8d5e5; min-height: 100vh; padding: 2rem 1.5rem; }
+
+        .public-container { max-width: 1300px; margin: 0 auto; }
+
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 0.8rem; }
-        h1 { font-size: 2rem; font-weight: 600; color: #1e3b4f; display: flex; align-items: center; gap: 0.75rem; }
-        .sync-badge { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: #2d7a4b; background: #e3f5e9; padding: 0.35rem 1rem; border-radius: 30px; font-weight: 600; border: 1px solid #b8e0c4; }
-        .sync-dot { width: 8px; height: 8px; background: #2d7a4b; border-radius: 50%; animation: pulse 1.5s infinite; }
+        h1 { font-size: 2rem; font-weight: 700; color: #0b2a3b; display: flex; align-items: center; gap: 0.75rem; }
+        .sync-badge { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: #1e5a3a; background: #c8ecd6; padding: 0.35rem 1rem; border-radius: 30px; font-weight: 600; border: 1px solid #8fd4a8; }
+        .sync-dot { width: 8px; height: 8px; background: #1e5a3a; border-radius: 50%; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.5;transform:scale(0.85);} }
-        .offline-badge { background: #ffe8e8; color: #b33; border-color: #ffc9c9; }
+        .offline-badge { background: #ffd6d6; color: #b33; border-color: #ffb0b0; }
         .offline-badge .sync-dot { background: #b33; }
-        .countdown-list { display: flex; flex-direction: column; gap: 1.2rem; }
-        .countdown-card { background: white; border-radius: 1.8rem; padding: 1.5rem 2rem; box-shadow: 0 6px 16px rgba(0,30,50,0.07); border: 1px solid #d4e3ee; display: flex; flex-direction: column; gap: 0.8rem; transition: 0.2s; }
-        .countdown-card:hover { transform: translateY(-3px); box-shadow: 0 16px 28px -8px rgba(0,30,50,0.15); }
-        .card-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem; }
-        .event-name { font-weight: 700; font-size: 1.25rem; color: #0b2a3b; }
-        .event-date { font-size: 0.8rem; color: #5b7f97; background: #eef5fb; padding: 0.25rem 1rem; border-radius: 30px; font-weight: 500; }
-        .countdown-display { font-family: 'SF Mono', monospace; background: linear-gradient(135deg, #eaf3fa 0%, #dce9f3 100%); padding: 1rem 1.5rem; border-radius: 1.5rem; font-size: 1.3rem; font-weight: 700; color: #17445e; text-align: center; border: 1px solid #c9ddec; }
-        .progress-wrap { width: 100%; height: 14px; background: #dce9f3; border-radius: 30px; overflow: hidden; border: 1px solid #c9ddec; }
-        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #4a9edb 0%, #1e6fa8 100%); border-radius: 30px; transition: width 0.6s ease; box-shadow: 0 0 8px rgba(30,111,168,0.35); }
-        .progress-info { display: flex; justify-content: space-between; font-size: 0.75rem; color: #5b7f97; font-weight: 500; margin-top: 0.2rem; }
-        .progress-percent { font-weight: 700; color: #1e6fa8; }
-        .empty-state { text-align: center; padding: 3rem 2rem; color: #7b98ab; background: rgba(244,250,255,0.8); border-radius: 2rem; font-size: 1.1rem; border: 1px dashed #c6dae7; }
-        .footer-note { text-align: center; margin-top: 2.5rem; font-size: 1rem; color: #5b7f97; letter-spacing: 0.5px; font-weight: 500; }
-        .recurring-tag { font-size: 0.7rem; background: #fff4e0; color: #a86a1a; padding: 0.15rem 0.6rem; border-radius: 20px; font-weight: 600; border: 1px solid #ffe0b0; margin-left: 0.4rem; }
+
+        .countdown-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .countdown-card {
+            background: #1c1c1c;
+            border-radius: 1.5rem;
+            padding: 1.8rem 1.8rem 1.5rem;
+            box-shadow: 0 12px 30px rgba(0, 20, 30, 0.25);
+            border: 1px solid #2e2e2e;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            transition: 0.25s;
+        }
+        .countdown-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 20, 30, 0.35);
+            border-color: #ffc107;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .event-name {
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            line-height: 1.4;
+        }
+        .recurring-tag {
+            font-size: 0.7rem;
+            background: #3a2e00;
+            color: #ffc107;
+            padding: 0.15rem 0.6rem;
+            border-radius: 20px;
+            font-weight: 600;
+            border: 1px solid #5c4900;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .countdown-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.6rem;
+        }
+        .time-box {
+            background: #141414;
+            border: 2px solid #f5b301;
+            border-radius: 0.9rem;
+            padding: 0.7rem 0.3rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.15rem;
+        }
+        .time-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #f5b301;
+            line-height: 1;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            letter-spacing: -1px;
+        }
+        .time-label {
+            font-size: 0.75rem;
+            color: #bdbdbd;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .progress-section { display: flex; flex-direction: column; gap: 0.4rem; }
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: #bdbdbd;
+            font-weight: 500;
+        }
+        .progress-remaining { color: #e0e0e0; font-weight: 600; }
+        .progress-wrap {
+            width: 100%;
+            height: 10px;
+            background: #2e2e2e;
+            border-radius: 30px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f5b301 0%, #e8a800 100%);
+            border-radius: 30px;
+            transition: width 0.6s ease;
+            box-shadow: 0 0 8px rgba(245, 179, 1, 0.5);
+        }
+
+        .card-message {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #d4b96a;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            line-height: 1.5;
+            margin-top: 0.2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #0b2a3b;
+            background: rgba(255,255,255,0.5);
+            border-radius: 2rem;
+            font-size: 1.1rem;
+            border: 2px dashed rgba(11,42,59,0.2);
+            grid-column: 1 / -1;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 1rem;
+            color: #0b2a3b;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            opacity: 0.75;
+        }
+
         @media (max-width: 600px) {
-            .public-container { padding: 1.5rem 1.2rem; border-radius: 1.8rem; }
+            body { padding: 1.2rem 1rem; }
             h1 { font-size: 1.5rem; }
-            .countdown-card { padding: 1.2rem 1.2rem; }
-            .event-name { font-size: 1.1rem; }
-            .countdown-display { font-size: 1rem; padding: 0.8rem 1rem; }
+            .countdown-list { grid-template-columns: 1fr; gap: 1rem; }
+            .countdown-card { padding: 1.4rem 1.2rem 1.2rem; }
+            .event-name { font-size: 1rem; }
+            .time-value { font-size: 1.6rem; }
+            .time-label { font-size: 0.7rem; }
+            .time-box { padding: 0.55rem 0.2rem 0.4rem; }
+            .card-message { font-size: 0.78rem; }
             .footer-note { font-size: 0.85rem; }
-            .progress-wrap { height: 12px; }
         }
     </style>
 </head>
@@ -77,12 +204,15 @@
         const db = getDatabase(app);
         const eventsRef = ref(db, 'events');
 
-        // 固定節日（自動輪迴）
+        // ========== 固定節日（自動輪迴）==========
+        // type: 'yearly'  每年固定月/日
+        // type: 'oddMonths' 單數月（1,3,5,7,9,11）的固定日
         const RECURRING_EVENTS = [
-            { id: 'rec_1', name: '元旦', month: 1, day: 1 },
-            { id: 'rec_2', name: '和平紀念日', month: 2, day: 28 },
-            { id: 'rec_3', name: '國慶日', month: 10, day: 10 },
-            { id: 'rec_4', name: '版主生日', month: 10, day: 10 }
+            { id: 'rec_1', name: '1/1 元旦', type: 'yearly', month: 1, day: 1, emoji: '🎆', message: '新年快樂，全新開始！✨', progressDays: 365 },
+            { id: 'rec_2', name: '2/28 和平紀念日', type: 'yearly', month: 2, day: 28, emoji: '🕊️', message: '和平紀念日，珍惜自由', progressDays: 365 },
+            { id: 'rec_3', name: '10/10 國慶日', type: 'yearly', month: 10, day: 10, emoji: '🎉', message: '國慶連假放鬆去！🎈', progressDays: 365 },
+            { id: 'rec_4', name: '10/10 版主生日', type: 'yearly', month: 10, day: 10, emoji: '🎂', message: '生日快樂！Happy Birthday! 🎊', progressDays: 365 },
+            { id: 'rec_5', name: '載具發票開獎', type: 'oddMonths', day: 25, emoji: '🧾', message: '祝您中大獎！💰', progressDays: 60 }
         ];
 
         let adminEvents = [];
@@ -109,7 +239,8 @@
             }
         }
 
-        function getNextRecurringDate(month, day) {
+        // ========== 日期計算 ==========
+        function getNextYearlyDate(month, day) {
             const now = new Date();
             const year = now.getFullYear();
             let target = new Date(year, month - 1, day, 0, 0, 0);
@@ -119,9 +250,43 @@
             return target;
         }
 
+        // 下一個單數月（1,3,5,7,9,11）的指定日
+        function getNextOddMonthDate(day) {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1; // 1-12
+
+            // 從當前月開始往後找（最多找 12 個月）
+            for (let offset = 0; offset < 12; offset++) {
+                let m = currentMonth + offset;
+                let y = currentYear;
+                while (m > 12) { m -= 12; y++; }
+
+                // 只考慮單數月
+                if (m % 2 === 0) continue;
+
+                const target = new Date(y, m - 1, day, 0, 0, 0);
+                if (target > now) {
+                    return target;
+                }
+            }
+            // 理論上不會到這，保險用
+            return new Date(currentYear + 1, 0, day, 0, 0, 0);
+        }
+
+        function getNextRecurringDate(ev) {
+            if (ev.type === 'yearly') {
+                return getNextYearlyDate(ev.month, ev.day);
+            } else if (ev.type === 'oddMonths') {
+                return getNextOddMonthDate(ev.day);
+            }
+            return null;
+        }
+
         function getRecurringEventsWithDate() {
             return RECURRING_EVENTS.map(ev => {
-                const target = getNextRecurringDate(ev.month, ev.day);
+                const target = getNextRecurringDate(ev);
+                if (!target) return null;
                 const y = target.getFullYear();
                 const m = String(target.getMonth() + 1).padStart(2, '0');
                 const d = String(target.getDate()).padStart(2, '0');
@@ -129,11 +294,15 @@
                     id: ev.id,
                     name: ev.name,
                     date: `${y}-${m}-${d}`,
-                    recurring: true
+                    recurring: true,
+                    emoji: ev.emoji,
+                    message: ev.message,
+                    progressDays: ev.progressDays
                 };
-            });
+            }).filter(Boolean);
         }
 
+        // ========== 倒數計算 ==========
         function getCountdownParts(dateStr) {
             const now = new Date();
             const target = new Date(dateStr + 'T00:00:00');
@@ -150,12 +319,8 @@
             };
         }
 
-        function formatCountdown(p) {
-            return p.isPast ? null : `剩 ${p.days} 天 ${p.hours} 小時 ${p.minutes} 分 ${p.seconds} 秒`;
-        }
-
-        function getProgressPercent(totalSeconds) {
-            const FULL = 365 * 86400;
+        function getProgressPercent(totalSeconds, progressDays = 365) {
+            const FULL = progressDays * 86400;
             let percent = ((FULL - totalSeconds) / FULL) * 100;
             if (percent < 0) percent = 0;
             if (percent > 100) percent = 100;
@@ -166,6 +331,9 @@
             return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
         }
 
+        function pad2(n) { return String(n).padStart(2, '0'); }
+
+        // ========== 渲染 ==========
         function renderPublicList() {
             const container = document.getElementById('publicCountdownList');
             const recurring = getRecurringEventsWithDate();
@@ -182,51 +350,90 @@
 
             container.innerHTML = active.map(ev => {
                 const p = getCountdownParts(ev.date);
-                const dateObj = new Date(ev.date + 'T00:00:00');
-                const dateDisplay = `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(dateObj.getDate()).padStart(2,'0')}`;
-                const percent = getProgressPercent(p.totalSeconds);
-                const percentText = percent.toFixed(1);
+                const progressDays = ev.progressDays || 365;
+                const percent = getProgressPercent(p.totalSeconds, progressDays);
                 const recurringTag = ev.recurring ? `<span class="recurring-tag">每年</span>` : '';
+                const emoji = ev.emoji ? ev.emoji + ' ' : '';
+                const message = ev.message || '';
 
                 return `
                     <div class="countdown-card">
                         <div class="card-header">
-                            <div class="event-name">📅 ${escapeHtml(ev.name)}${recurringTag}</div>
-                            <div class="event-date">${dateDisplay}</div>
+                            <div class="event-name">${emoji}${escapeHtml(ev.name)}${recurringTag}</div>
                         </div>
-                        <div class="countdown-display" data-date="${ev.date}">${formatCountdown(p)}</div>
-                        <div>
+                        <div class="countdown-grid">
+                            <div class="time-box">
+                                <div class="time-value" data-val="days" data-date="${ev.date}">${p.days}</div>
+                                <div class="time-label">天</div>
+                            </div>
+                            <div class="time-box">
+                                <div class="time-value" data-val="hours" data-date="${ev.date}">${pad2(p.hours)}</div>
+                                <div class="time-label">時</div>
+                            </div>
+                            <div class="time-box">
+                                <div class="time-value" data-val="minutes" data-date="${ev.date}">${pad2(p.minutes)}</div>
+                                <div class="time-label">分</div>
+                            </div>
+                            <div class="time-box">
+                                <div class="time-value" data-val="seconds" data-date="${ev.date}">${pad2(p.seconds)}</div>
+                                <div class="time-label">秒</div>
+                            </div>
+                        </div>
+                        <div class="progress-section">
+                            <div class="progress-header">
+                                <span>進度（${progressDays}天）</span>
+                                <span class="progress-remaining">剩 ${p.days} 天</span>
+                            </div>
                             <div class="progress-wrap">
                                 <div class="progress-bar" data-bar-date="${ev.date}" style="width:${percent}%"></div>
                             </div>
-                            <div class="progress-info">
-                                <span>進度</span>
-                                <span class="progress-percent" data-percent-date="${ev.date}">${percentText}%</span>
-                            </div>
                         </div>
+                        ${message ? `<div class="card-message">${escapeHtml(message)}</div>` : ''}
                     </div>`;
             }).join('');
 
             startUpdater();
         }
 
+        // ========== 每秒更新 ==========
         let interval = null;
         function startUpdater() {
             if (interval) clearInterval(interval);
             interval = setInterval(() => {
                 let needRerender = false;
-                document.querySelectorAll('.countdown-display[data-date]').forEach(el => {
+                document.querySelectorAll('.time-value[data-date]').forEach(el => {
                     const dateStr = el.getAttribute('data-date');
                     const p = getCountdownParts(dateStr);
                     if (p.isPast) { needRerender = true; return; }
-                    el.textContent = formatCountdown(p);
+
+                    const val = el.getAttribute('data-val');
+                    if (val === 'days') el.textContent = p.days;
+                    else if (val === 'hours') el.textContent = pad2(p.hours);
+                    else if (val === 'minutes') el.textContent = pad2(p.minutes);
+                    else if (val === 'seconds') el.textContent = pad2(p.seconds);
 
                     const bar = document.querySelector(`.progress-bar[data-bar-date="${dateStr}"]`);
-                    const percentEl = document.querySelector(`.progress-percent[data-percent-date="${dateStr}"]`);
                     if (bar) {
-                        const percent = getProgressPercent(p.totalSeconds);
+                        const card = bar.closest('.countdown-card');
+                        // 找對應 progressDays
+                        let progressDays = 365;
+                        const recurring = RECURRING_EVENTS.find(r => {
+                            const target = getNextRecurringDate(r);
+                            if (!target) return false;
+                            const y = target.getFullYear();
+                            const m = String(target.getMonth() + 1).padStart(2, '0');
+                            const d = String(target.getDate()).padStart(2, '0');
+                            return `${y}-${m}-${d}` === dateStr;
+                        });
+                        if (recurring && recurring.progressDays) progressDays = recurring.progressDays;
+
+                        const percent = getProgressPercent(p.totalSeconds, progressDays);
                         bar.style.width = percent + '%';
-                        if (percentEl) percentEl.textContent = percent.toFixed(1) + '%';
+
+                        if (card) {
+                            const remainEl = card.querySelector('.progress-remaining');
+                            if (remainEl) remainEl.textContent = `剩 ${p.days} 天`;
+                        }
                     }
                 });
                 if (needRerender) renderPublicList();
