@@ -21,23 +21,37 @@
         .login-error { color: #b33; font-size: 0.85rem; text-align: center; margin-top: 1rem; min-height: 1.2rem; }
 
         /* ===== 管理頁面 ===== */
-        .admin-container { max-width: 1000px; width: 100%; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-radius: 2.5rem; padding: 2rem 2.5rem; box-shadow: 0 25px 40px -12px rgba(0,20,30,0.35); border: 1px solid rgba(255,255,255,0.6); display: none; }
+        .admin-container { max-width: 1100px; width: 100%; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-radius: 2.5rem; padding: 2rem 2.5rem; box-shadow: 0 25px 40px -12px rgba(0,20,30,0.35); border: 1px solid rgba(255,255,255,0.6); display: none; }
         .admin-container.active { display: block; }
         h1 { font-size: 2rem; font-weight: 600; color: #1e3b4f; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
         h1 span { background: #1e3b4f; color: white; font-size: 1rem; padding: 0.25rem 0.9rem; border-radius: 40px; }
         .logout-btn { background: #ffe8e8; border: 1px solid #ffc9c9; color: #b33; font-size: 0.8rem; padding: 0.4rem 1rem; border-radius: 30px; cursor: pointer; font-weight: 600; margin-left: auto; }
         .logout-btn:hover { background: #ffd4d4; }
         .subhead { color: #4a6f88; margin-bottom: 2rem; font-size: 1rem; border-left: 4px solid #7bb3d0; background: rgba(123,179,208,0.1); border-radius: 0 12px 12px 0; padding: 0.8rem 1.2rem; line-height: 1.6; }
+
+        /* ===== 分頁標籤 ===== */
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; border-bottom: 2px solid #e0eef7; padding-bottom: 0.5rem; }
+        .tab { background: transparent; border: none; padding: 0.7rem 1.4rem; border-radius: 30px 30px 0 0; cursor: pointer; font-weight: 600; font-size: 0.95rem; color: #5b7f97; transition: 0.2s; }
+        .tab:hover { background: #eaf3fa; color: #1e3b4f; }
+        .tab.active { background: #1e3b4f; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ===== 表單 ===== */
         .form-card { background: white; border-radius: 1.8rem; padding: 1.8rem 2rem; box-shadow: 0 8px 18px rgba(0,30,50,0.08); margin-bottom: 2.5rem; border: 1px solid #d9e7f0; }
         .form-row { display: flex; flex-wrap: wrap; gap: 1.2rem; align-items: flex-end; }
         .input-group { flex: 1 1 200px; display: flex; flex-direction: column; gap: 0.4rem; }
         .input-group label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #2d5770; }
-        .input-group input { background: #f4faff; border: 1.5px solid #cfe1ee; border-radius: 1rem; padding: 0.8rem 1.2rem; font-size: 1rem; color: #0b2a3b; font-weight: 500; }
-        .input-group input:focus { outline: none; border-color: #5c9ec7; box-shadow: 0 0 0 3px rgba(92,158,199,0.25); background: white; }
+        .input-group input, .input-group textarea { background: #f4faff; border: 1.5px solid #cfe1ee; border-radius: 1rem; padding: 0.8rem 1.2rem; font-size: 1rem; color: #0b2a3b; font-weight: 500; font-family: inherit; }
+        .input-group textarea { resize: vertical; min-height: 44px; }
+        .input-group input:focus, .input-group textarea:focus { outline: none; border-color: #5c9ec7; box-shadow: 0 0 0 3px rgba(92,158,199,0.25); background: white; }
         .btn { background: #1e3b4f; border: none; color: white; font-weight: 600; padding: 0.85rem 2.2rem; border-radius: 3rem; font-size: 1rem; cursor: pointer; transition: 0.2s; box-shadow: 0 6px 12px rgba(20,50,70,0.2); white-space: nowrap; }
         .btn:hover { background: #0f2c3d; transform: translateY(-2px); }
         .btn-secondary { background: #e3eef7; color: #1e3b4f; box-shadow: none; border: 1px solid #bbd3e3; }
         .btn-secondary:hover { background: #d1e2f0; }
+        .btn-small { padding: 0.5rem 1.2rem; font-size: 0.85rem; }
+
+        /* ===== 列表 ===== */
         .section-title { font-size: 1.3rem; font-weight: 600; color: #1e3b4f; margin-bottom: 1.2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #c6dae7; padding-bottom: 0.7rem; flex-wrap: wrap; gap: 0.5rem; }
         .countdown-list { display: flex; flex-direction: column; gap: 1rem; max-height: 420px; overflow-y: auto; padding-right: 0.4rem; }
         .countdown-item { background: white; border-radius: 1.5rem; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,30,50,0.06); border: 1px solid #d4e3ee; flex-wrap: wrap; gap: 0.8rem; }
@@ -54,6 +68,71 @@
         .status-offline { background: #ffe8e8; color: #b33; border: 1px solid #ffc9c9; }
         .recurring-item { background: #fffbf2; border: 1px dashed #ffd98a; }
         .recurring-tag { font-size: 0.7rem; background: #fff4e0; color: #a86a1a; padding: 0.15rem 0.6rem; border-radius: 20px; font-weight: 600; border: 1px solid #ffe0b0; margin-left: 0.4rem; }
+
+        /* ===== 訊息管理卡片 ===== */
+        .msg-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.2rem 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,30,50,0.06);
+            border: 1px solid #d4e3ee;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        .msg-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .msg-card-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #0b2a3b;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .msg-card-date {
+            font-size: 0.75rem;
+            color: #5b7f97;
+            background: #eef5fb;
+            padding: 0.15rem 0.7rem;
+            border-radius: 30px;
+            font-weight: 500;
+        }
+        .msg-row {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .msg-row input {
+            flex: 1 1 200px;
+            background: #f4faff;
+            border: 1.5px solid #cfe1ee;
+            border-radius: 1rem;
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+            color: #0b2a3b;
+            font-weight: 500;
+            font-family: inherit;
+        }
+        .msg-row input:focus {
+            outline: none;
+            border-color: #5c9ec7;
+            box-shadow: 0 0 0 3px rgba(92,158,199,0.25);
+            background: white;
+        }
+        .msg-saved {
+            font-size: 0.8rem;
+            color: #2d7a4b;
+            font-weight: 600;
+            min-height: 1.2rem;
+        }
 
         /* ===== 密碼變更區 ===== */
         .settings-card { background: #f8fbff; border-radius: 1.5rem; padding: 1.5rem 2rem; border: 1px solid #d9e7f0; margin-top: 2rem; }
@@ -97,51 +176,71 @@
         </h1>
         <div class="subhead">
             ➕ 新增倒數事件 · 所有裝置即時同步<br>
-            🔒 固定節日自動輪迴（元旦、和平紀念日、國慶日、版主生日）
+            🔒 固定節日自動輪迴（元旦、和平紀念日、國慶日、版主生日、載具發票開獎）
         </div>
 
-        <div class="form-card">
-            <div class="form-row">
-                <div class="input-group">
-                    <label>📌 事件名稱</label>
-                    <input type="text" id="eventName" placeholder="例如：聖誕節、專案截止" maxlength="40">
+        <!-- 分頁標籤 -->
+        <div class="tabs">
+            <button class="tab active" data-tab="tab-events">📋 倒數事件</button>
+            <button class="tab" data-tab="tab-messages">💬 節日訊息</button>
+            <button class="tab" data-tab="tab-settings">🔑 帳號設定</button>
+        </div>
+
+        <!-- ========== 分頁 1：倒數事件 ========== -->
+        <div class="tab-content active" id="tab-events">
+            <div class="form-card">
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>📌 事件名稱</label>
+                        <input type="text" id="eventName" placeholder="例如：聖誕節、專案截止" maxlength="40">
+                    </div>
+                    <div class="input-group">
+                        <label>📅 日期</label>
+                        <input type="date" id="eventDate">
+                    </div>
+                    <button class="btn" id="addBtn">＋ 新增倒數</button>
                 </div>
-                <div class="input-group">
-                    <label>📅 日期</label>
-                    <input type="date" id="eventDate">
-                </div>
-                <button class="btn" id="addBtn">＋ 新增倒數</button>
+            </div>
+
+            <div class="section-title">
+                <span>📋 目前倒數事件（即時預覽）</span>
+                <span id="statusBadge" class="status-badge status-offline">連線中…</span>
+            </div>
+            <div id="adminCountdownList" class="countdown-list"></div>
+            <div class="admin-note">
+                💡 新增或刪除事件後，公開頁面會即時同步更新。橘色虛線框為固定節日（自動輪迴），無法刪除。
             </div>
         </div>
 
-        <div class="section-title">
-            <span>📋 目前倒數事件（即時預覽）</span>
-            <span id="statusBadge" class="status-badge status-offline">連線中…</span>
-        </div>
-        <div id="adminCountdownList" class="countdown-list"></div>
-        <div class="admin-note">
-            💡 新增或刪除事件後，公開頁面會即時同步更新。橘色虛線框為固定節日（自動輪迴），無法刪除。
+        <!-- ========== 分頁 2：節日訊息 ========== -->
+        <div class="tab-content" id="tab-messages">
+            <div class="admin-note" style="margin-bottom: 1.5rem;">
+                💬 為每個固定節日設定底部顯示的訊息。修改後即時同步到公開頁面，所有裝置都會看到。
+            </div>
+            <div id="messagesList"></div>
         </div>
 
-        <!-- 密碼變更區 -->
-        <div class="settings-card">
-            <h3>🔑 變更管理員密碼</h3>
-            <div class="settings-row">
-                <div class="input-group">
-                    <label>目前密碼</label>
-                    <input type="password" id="oldPass" placeholder="請輸入目前密碼">
+        <!-- ========== 分頁 3：帳號設定 ========== -->
+        <div class="tab-content" id="tab-settings">
+            <div class="settings-card">
+                <h3>🔑 變更管理員密碼</h3>
+                <div class="settings-row">
+                    <div class="input-group">
+                        <label>目前密碼</label>
+                        <input type="password" id="oldPass" placeholder="請輸入目前密碼">
+                    </div>
+                    <div class="input-group">
+                        <label>新密碼</label>
+                        <input type="password" id="newPass" placeholder="請輸入新密碼">
+                    </div>
+                    <div class="input-group">
+                        <label>確認新密碼</label>
+                        <input type="password" id="confirmPass" placeholder="請再次輸入新密碼">
+                    </div>
+                    <button class="btn btn-secondary" id="changePassBtn">變更密碼</button>
                 </div>
-                <div class="input-group">
-                    <label>新密碼</label>
-                    <input type="password" id="newPass" placeholder="請輸入新密碼">
-                </div>
-                <div class="input-group">
-                    <label>確認新密碼</label>
-                    <input type="password" id="confirmPass" placeholder="請再次輸入新密碼">
-                </div>
-                <button class="btn btn-secondary" id="changePassBtn">變更密碼</button>
+                <div class="settings-msg" id="settingsMsg"></div>
             </div>
-            <div class="settings-msg" id="settingsMsg"></div>
         </div>
     </div>
 
@@ -167,23 +266,25 @@
         const db = getDatabase(app);
         const eventsRef = ref(db, 'events');
         const authRef = ref(db, 'auth');
+        const messagesRef = ref(db, 'messages');
 
-        // 固定節日（自動輪迴，無法刪除）
+        // 固定節日（自動輪迴）
         const RECURRING_EVENTS = [
-            { id: 'rec_1', name: '元旦', month: 1, day: 1 },
-            { id: 'rec_2', name: '和平紀念日', month: 2, day: 28 },
-            { id: 'rec_3', name: '國慶日', month: 10, day: 10 },
-            { id: 'rec_4', name: '版主生日', month: 10, day: 10 }
+            { id: 'rec_1', name: '1/1 元旦', type: 'yearly', month: 1, day: 1, emoji: '🎆', defaultMessage: '新年快樂，全新開始！✨', progressDays: 365 },
+            { id: 'rec_2', name: '2/28 和平紀念日', type: 'yearly', month: 2, day: 28, emoji: '🕊️', defaultMessage: '和平紀念日，珍惜自由', progressDays: 365 },
+            { id: 'rec_3', name: '10/10 國慶日', type: 'yearly', month: 10, day: 10, emoji: '🎉', defaultMessage: '國慶連假放鬆去！🎈', progressDays: 365 },
+            { id: 'rec_4', name: '10/10 版主生日', type: 'yearly', month: 10, day: 10, emoji: '🎂', defaultMessage: '生日快樂！Happy Birthday! 🎊', progressDays: 365 },
+            { id: 'rec_5', name: '載具發票開獎', type: 'oddMonths', day: 25, emoji: '🧾', defaultMessage: '祝您中大獎！💰', progressDays: 60 }
         ];
 
         let adminEvents = [];
+        let customMessages = {};
         let isLoggedIn = false;
 
         // ---------- 登入邏輯 ----------
         async function checkAndInitAuth() {
             const snapshot = await get(authRef);
             if (!snapshot.exists()) {
-                // 第一次使用：建立預設帳號 dader60 / 密碼 dader60
                 await set(authRef, { username: 'dader60', password: 'dader60' });
                 console.log('已建立預設管理員帳號 dader60 / dader60');
             }
@@ -201,7 +302,6 @@
             }
 
             await checkAndInitAuth();
-
             const snapshot = await get(authRef);
             const auth = snapshot.val();
             if (!auth) {
@@ -232,6 +332,90 @@
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('adminPage').classList.add('active');
             renderAdminList();
+            renderMessagesList();
+        }
+
+        // ---------- 分頁切換 ----------
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
+            });
+        });
+
+        // ---------- 訊息管理 ----------
+        function renderMessagesList() {
+            const container = document.getElementById('messagesList');
+            if (!container) return;
+
+            container.innerHTML = RECURRING_EVENTS.map(ev => {
+                const customMsg = customMessages[ev.id];
+                const currentMsg = (customMsg !== undefined && customMsg !== null && customMsg !== '')
+                    ? customMsg
+                    : ev.defaultMessage;
+
+                return `
+                    <div class="msg-card" data-id="${ev.id}">
+                        <div class="msg-card-header">
+                            <div class="msg-card-title">${ev.emoji} ${escapeHtml(ev.name)}<span class="recurring-tag">每年</span></div>
+                            <div class="msg-card-date">${getEventDateDisplay(ev)}</div>
+                        </div>
+                        <div class="msg-row">
+                            <input type="text" class="msg-input" data-id="${ev.id}"
+                                value="${escapeHtml(currentMsg)}"
+                                placeholder="輸入要顯示的訊息..."
+                                maxlength="60">
+                            <button class="btn btn-small btn-secondary save-msg-btn" data-id="${ev.id}">儲存</button>
+                            <button class="btn btn-small btn-secondary reset-msg-btn" data-id="${ev.id}">還原預設</button>
+                        </div>
+                        <div class="msg-saved" data-saved-id="${ev.id}"></div>
+                    </div>
+                `;
+            }).join('');
+
+            // 綁定儲存按鈕
+            document.querySelectorAll('.save-msg-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-id');
+                    const input = document.querySelector(`.msg-input[data-id="${id}"]`);
+                    const savedEl = document.querySelector(`.msg-saved[data-saved-id="${id}"]`);
+                    const value = input.value.trim();
+
+                    await set(ref(db, 'messages/' + id), value);
+                    savedEl.style.color = '#2d7a4b';
+                    savedEl.textContent = '✅ 已儲存，公開頁面即時同步！';
+                    setTimeout(() => { savedEl.textContent = ''; }, 2500);
+                });
+            });
+
+            // 綁定還原按鈕
+            document.querySelectorAll('.reset-msg-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-id');
+                    const ev = RECURRING_EVENTS.find(e => e.id === id);
+                    if (!ev) return;
+                    const input = document.querySelector(`.msg-input[data-id="${id}"]`);
+                    const savedEl = document.querySelector(`.msg-saved[data-saved-id="${id}"]`);
+
+                    input.value = ev.defaultMessage;
+                    await remove(ref(db, 'messages/' + id));
+                    savedEl.style.color = '#2d7a4b';
+                    savedEl.textContent = '↩️ 已還原為預設訊息';
+                    setTimeout(() => { savedEl.textContent = ''; }, 2500);
+                });
+            });
+        }
+
+        // 顯示節日日期（用於訊息管理頁）
+        function getEventDateDisplay(ev) {
+            if (ev.type === 'yearly') {
+                return `${ev.month}/${ev.day}`;
+            } else if (ev.type === 'oddMonths') {
+                return `單數月 ${ev.day} 號`;
+            }
+            return '';
         }
 
         // ---------- 密碼變更 ----------
@@ -272,7 +456,7 @@
         }
 
         // ---------- 倒數邏輯 ----------
-        function getNextRecurringDate(month, day) {
+        function getNextYearlyDate(month, day) {
             const now = new Date();
             const year = now.getFullYear();
             let target = new Date(year, month - 1, day, 0, 0, 0);
@@ -282,14 +466,44 @@
             return target;
         }
 
+        function getNextOddMonthDate(day) {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1;
+
+            for (let offset = 0; offset < 12; offset++) {
+                let m = currentMonth + offset;
+                let y = currentYear;
+                while (m > 12) { m -= 12; y++; }
+                if (m % 2 === 0) continue;
+                const target = new Date(y, m - 1, day, 0, 0, 0);
+                if (target > now) return target;
+            }
+            return new Date(currentYear + 1, 0, day, 0, 0, 0);
+        }
+
+        function getNextRecurringDate(ev) {
+            if (ev.type === 'yearly') return getNextYearlyDate(ev.month, ev.day);
+            if (ev.type === 'oddMonths') return getNextOddMonthDate(ev.day);
+            return null;
+        }
+
         function getRecurringEventsWithDate() {
             return RECURRING_EVENTS.map(ev => {
-                const target = getNextRecurringDate(ev.month, ev.day);
+                const target = getNextRecurringDate(ev);
+                if (!target) return null;
                 const y = target.getFullYear();
                 const m = String(target.getMonth() + 1).padStart(2, '0');
                 const d = String(target.getDate()).padStart(2, '0');
-                return { id: ev.id, name: ev.name, date: `${y}-${m}-${d}`, recurring: true };
-            });
+                return {
+                    id: ev.id,
+                    name: ev.name,
+                    date: `${y}-${m}-${d}`,
+                    recurring: true,
+                    emoji: ev.emoji,
+                    progressDays: ev.progressDays
+                };
+            }).filter(Boolean);
         }
 
         function getCountdownParts(dateStr) {
@@ -313,7 +527,8 @@
         }
 
         function escapeHtml(s) {
-            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+            if (s === undefined || s === null) return '';
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
         }
 
         function renderAdminList() {
@@ -353,6 +568,7 @@
             }).join('');
 
             document.querySelectorAll('[data-id]').forEach(btn => {
+                if (!btn.classList.contains('delete-btn')) return;
                 btn.addEventListener('click', () => {
                     const id = btn.getAttribute('data-id');
                     if (confirm('確定要刪除這個倒數事件嗎？')) {
@@ -416,6 +632,11 @@
             console.error(error);
         });
 
+        onValue(messagesRef, (snapshot) => {
+            customMessages = snapshot.val() || {};
+            if (isLoggedIn) renderMessagesList();
+        });
+
         // ---------- 事件綁定 ----------
         window.addEventListener('DOMContentLoaded', async () => {
             await checkAndInitAuth();
@@ -437,7 +658,6 @@
                 if (e.key === 'Enter') { e.preventDefault(); addNewEvent(); }
             });
 
-            // 若之前已登入（session 內），直接進管理頁
             if (sessionStorage.getItem('admin_logged_in') === 'true') {
                 isLoggedIn = true;
                 showAdminPage();
