@@ -200,8 +200,9 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const eventsRef = ref(db, 'events');
-        const messagesRef = ref(db, 'messages');
+        const eventsRef = ref(db, 'events');           // 一次性事件
+        const customRef = ref(db, 'customEvents');     // 自定義節日
+        const messagesRef = ref(db, 'messages');       // 固定節日自訂訊息
 
         // 固定節日（自動輪迴）
         const RECURRING_EVENTS = [
@@ -213,8 +214,10 @@
         ];
 
         let adminEvents = [];
+        let customEvents = [];
         let customMessages = {};
 
+        // ---------- Firebase 監聽 ----------
         onValue(eventsRef, (snapshot) => {
             const data = snapshot.val() || {};
             adminEvents = Object.entries(data).map(([id, val]) => ({ id, ...val }));
@@ -223,6 +226,14 @@
         }, (error) => {
             setSyncStatus(false);
             console.error(error);
+        });
+
+        onValue(customRef, (snapshot) => {
+            const data = snapshot.val() || {};
+            customEvents = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+            renderPublicList();
+        }, (error) => {
+            console.error('customEvents error:', error);
         });
 
         onValue(messagesRef, (snapshot) => {
@@ -242,6 +253,7 @@
             }
         }
 
+        // ---------- 日期計算 ----------
         function getNextYearlyDate(month, day) {
             const now = new Date();
             const year = now.getFullYear();
@@ -268,9 +280,11 @@
         function getNextRecurringDate(ev) {
             if (ev.type === 'yearly') return getNextYearlyDate(ev.month, ev.day);
             if (ev.type === 'oddMonths') return getNextOddMonthDate(ev.day);
+            if (ev.month && ev.day) return getNextYearlyDate(ev.month, ev.day);
             return null;
         }
 
+        // ---------- 建立三種事件資料 ----------
         function getRecurringEventsWithDate() {
             return RECURRING_EVENTS.map(ev => {
                 const target = getNextRecurringDate(ev);
@@ -290,6 +304,25 @@
             }).filter(Boolean);
         }
 
+        function getCustomEventsWithDate() {
+            return customEvents.map(ev => {
+                const target = getNextYearlyDate(ev.month, ev.day);
+                const y = target.getFullYear();
+                const m = String(target.getMonth() + 1).padStart(2, '0');
+                const d = String(target.getDate()).padStart(2, '0');
+                return {
+                    id: ev.id,
+                    name: ev.name,
+                    date: `${y}-${m}-${d}`,
+                    custom: true,
+                    emoji: ev.emoji || '',
+                    message: ev.message || '',
+                    progressDays: ev.progressDays || 365
+                };
+            });
+        }
+
+        // ---------- 倒數計算 ----------
         function getCountdownParts(dateStr) {
             const now = new Date();
             const target = new Date(dateStr + 'T00:00:00');
@@ -321,10 +354,15 @@
 
         function pad2(n) { return String(n).padStart(2, '0'); }
 
+        // ---------- 渲染公開列表 ----------
         function renderPublicList() {
             const container = document.getElementById('publicCountdownList');
+
             const recurring = getRecurringEventsWithDate();
-            const allEvents = [...recurring, ...adminEvents];
+            const custom = getCustomEventsWithDate();
+
+            // 合併所有事件：固定節日 + 自定義節日 + 一次性事件
+            const allEvents = [...recurring, ...custom, ...adminEvents];
 
             const active = allEvents
                 .filter(ev => !getCountdownParts(ev.date).isPast)
@@ -341,15 +379,17 @@
                 const percent = getProgressPercent(p.totalSeconds, progressDays);
                 const emoji = ev.emoji ? ev.emoji + ' ' : '';
 
-                // 判斷訊息：固定節日優先使用自訂訊息，否則用預設
+                // 判斷訊息：固定節日優先使用自訂訊息，自定義節日使用自己的訊息
                 let message = '';
                 if (ev.recurring) {
-                    const custom = customMessages[ev.id];
-                    if (custom !== undefined && custom !== null && custom !== '') {
-                        message = custom;
+                    const customMsg = customMessages[ev.id];
+                    if (customMsg !== undefined && customMsg !== null && customMsg !== '') {
+                        message = customMsg;
                     } else {
                         message = ev.defaultMessage || '';
                     }
+                } else if (ev.custom) {
+                    message = ev.message || '';
                 }
 
                 return `
@@ -391,6 +431,7 @@
             startUpdater();
         }
 
+        // ---------- 每秒更新 ----------
         let interval = null;
         function startUpdater() {
             if (interval) clearInterval(interval);
@@ -410,7 +451,10 @@
                     const bar = document.querySelector(`.progress-bar[data-bar-date="${dateStr}"]`);
                     if (bar) {
                         const card = bar.closest('.countdown-card');
+                        // 判斷進度天數
                         let progressDays = 365;
+
+                        // 檢查是否為固定節日
                         const recurring = RECURRING_EVENTS.find(r => {
                             const target = getNextRecurringDate(r);
                             if (!target) return false;
@@ -419,7 +463,19 @@
                             const d = String(target.getDate()).padStart(2, '0');
                             return `${y}-${m}-${d}` === dateStr;
                         });
-                        if (recurring && recurring.progressDays) progressDays = recurring.progressDays;
+                        if (recurring && recurring.progressDays) {
+                            progressDays = recurring.progressDays;
+                        } else {
+                            // 檢查是否為自定義節日
+                            const custom = customEvents.find(c => {
+                                const target = getNextYearlyDate(c.month, c.day);
+                                const y = target.getFullYear();
+                                const m = String(target.getMonth() + 1).padStart(2, '0');
+                                const d = String(target.getDate()).padStart(2, '0');
+                                return `${y}-${m}-${d}` === dateStr;
+                            });
+                            if (custom && custom.progressDays) progressDays = custom.progressDays;
+                        }
 
                         const percent = getProgressPercent(p.totalSeconds, progressDays);
                         bar.style.width = percent + '%';
