@@ -1,233 +1,237 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>倒數系統</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            background-color: #a5d8e1; /* 淺藍色背景 */
-            font-family: 'Noto Sans TC', sans-serif;
-            padding: 10px;
-            padding-bottom: 70px; /* 為底部固定文字留空間 */
-            margin: 0;
-            min-height: 100vh;
-        }
-        .main-title {
-            color: #1a1a1a;
-            font-size: clamp(1.5rem, 8vw, 2.5rem); /* 自適應標題大小 */
-            font-weight: 800;
-            text-align: center;
-            margin: 1.5rem 0;
-            letter-spacing: 0.2rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* 自動填滿，最窄320px */
-            gap: 1.5rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .card {
-            background-color: #1a1a1a;
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .timer-box {
-            border: 2px solid #eab308;
-            border-radius: 0.75rem;
-            flex: 1; /* 讓方塊等寬 */
-            aspect-ratio: 1 / 1.1; /* 保持比例 */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: rgba(234, 179, 8, 0.05);
-            min-width: 0; /* 防止溢出 */
-        }
-        .timer-value {
-            font-size: clamp(1.1rem, 4vw, 1.5rem);
-            font-weight: 700;
-            color: #eab308;
-        }
-        .timer-label {
-            font-size: 0.7rem;
-            color: #9ca3af;
-            margin-top: 2px;
-        }
-        .progress-container {
-            height: 10px;
-            background-color: #333;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #eab308 0%, #ca8a04 100%);
-            transition: width 1s linear;
-        }
-        /* 底部固定文字 */
-        .footer-text {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            padding: 10px 0;
-            background: rgba(26, 26, 26, 0.85);
-            backdrop-filter: blur(5px);
-            color: #eab308;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 0.1rem;
-            border-top: 1px solid rgba(234, 179, 8, 0.3);
-            z-index: 999;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
-        }
-        /* 手機版微調 */
-        @media (max-width: 480px) {
-            .card {
-                padding: 1.25rem;
-            }
-            .cards-grid {
-                grid-template-columns: 1fr; /* 強制單欄 */
-            }
-            .footer-text {
-                font-size: 0.7rem;
-                padding: 8px 0;
-            }
+        * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; }
+        body { background: #cfe8f7; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1.5rem; }
+        .public-container { max-width: 900px; width: 100%; background: rgba(255,255,255,0.8); backdrop-filter: blur(16px); border-radius: 2.5rem; padding: 2rem 2.5rem; box-shadow: 0 25px 40px -12px rgba(0,20,30,0.3); border: 1px solid rgba(255,255,255,0.6); }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 0.8rem; }
+        h1 { font-size: 2rem; font-weight: 600; color: #1e3b4f; display: flex; align-items: center; gap: 0.75rem; }
+        .sync-badge { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: #2d7a4b; background: #e3f5e9; padding: 0.35rem 1rem; border-radius: 30px; font-weight: 600; border: 1px solid #b8e0c4; }
+        .sync-dot { width: 8px; height: 8px; background: #2d7a4b; border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.5;transform:scale(0.85);} }
+        .offline-badge { background: #ffe8e8; color: #b33; border-color: #ffc9c9; }
+        .offline-badge .sync-dot { background: #b33; }
+        .countdown-list { display: flex; flex-direction: column; gap: 1.2rem; }
+        .countdown-card { background: white; border-radius: 1.8rem; padding: 1.5rem 2rem; box-shadow: 0 6px 16px rgba(0,30,50,0.07); border: 1px solid #d4e3ee; display: flex; flex-direction: column; gap: 0.8rem; transition: 0.2s; }
+        .countdown-card:hover { transform: translateY(-3px); box-shadow: 0 16px 28px -8px rgba(0,30,50,0.15); }
+        .card-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem; }
+        .event-name { font-weight: 700; font-size: 1.25rem; color: #0b2a3b; }
+        .event-date { font-size: 0.8rem; color: #5b7f97; background: #eef5fb; padding: 0.25rem 1rem; border-radius: 30px; font-weight: 500; }
+        .countdown-display { font-family: 'SF Mono', monospace; background: linear-gradient(135deg, #eaf3fa 0%, #dce9f3 100%); padding: 1rem 1.5rem; border-radius: 1.5rem; font-size: 1.3rem; font-weight: 700; color: #17445e; text-align: center; border: 1px solid #c9ddec; }
+        .progress-wrap { width: 100%; height: 14px; background: #dce9f3; border-radius: 30px; overflow: hidden; border: 1px solid #c9ddec; }
+        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #4a9edb 0%, #1e6fa8 100%); border-radius: 30px; transition: width 0.6s ease; box-shadow: 0 0 8px rgba(30,111,168,0.35); }
+        .progress-info { display: flex; justify-content: space-between; font-size: 0.75rem; color: #5b7f97; font-weight: 500; margin-top: 0.2rem; }
+        .progress-percent { font-weight: 700; color: #1e6fa8; }
+        .empty-state { text-align: center; padding: 3rem 2rem; color: #7b98ab; background: rgba(244,250,255,0.8); border-radius: 2rem; font-size: 1.1rem; border: 1px dashed #c6dae7; }
+        .footer-note { text-align: center; margin-top: 2.5rem; font-size: 1rem; color: #5b7f97; letter-spacing: 0.5px; font-weight: 500; }
+        .recurring-tag { font-size: 0.7rem; background: #fff4e0; color: #a86a1a; padding: 0.15rem 0.6rem; border-radius: 20px; font-weight: 600; border: 1px solid #ffe0b0; margin-left: 0.4rem; }
+        @media (max-width: 600px) {
+            .public-container { padding: 1.5rem 1.2rem; border-radius: 1.8rem; }
+            h1 { font-size: 1.5rem; }
+            .countdown-card { padding: 1.2rem 1.2rem; }
+            .event-name { font-size: 1.1rem; }
+            .countdown-display { font-size: 1rem; padding: 0.8rem 1rem; }
+            .footer-note { font-size: 0.85rem; }
+            .progress-wrap { height: 12px; }
         }
     </style>
 </head>
 <body>
+    <div class="public-container">
+        <div class="header">
+            <h1>⏳ 倒數系統</h1>
+            <div id="syncBadge" class="sync-badge">
+                <span class="sync-dot"></span>
+                <span id="syncText">連線中…</span>
+            </div>
+        </div>
 
-    <h1 class="main-title">倒數系統</h1>
+        <div id="publicCountdownList" class="countdown-list"></div>
 
-    <div id="countdown-container" class="cards-grid">
-        <!-- 卡片會由 JS 動態生成 -->
+        <div class="footer-note">𝓭𝓪𝓭𝓮𝓻 靠北達德速度版 ⚡️｜版主小編團隊製作</div>
     </div>
 
-    <script>
-        function getNextInvoiceDate() {
-            const now = new Date();
-            let year = now.getFullYear();
-            let month = now.getMonth() + 1;
-            let targetMonth;
-            if (month % 2 === 0) {
-                targetMonth = month + 1;
-            } else {
-                const drawTime = new Date(year, month - 1, 25, 14, 0, 0);
-                if (now > drawTime) targetMonth = month + 2;
-                else targetMonth = month;
-            }
-            if (targetMonth > 12) { targetMonth -= 12; year += 1; }
-            return new Date(year, targetMonth - 1, 25, 14, 0, 0);
-        }
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, onValue }
+            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        // 活動資料
-        const rawEvents = [
-            { title: "📄 載具發票開獎", targetDate: getNextInvoiceDate(), message: "祝您中大獎！ 💰", totalDays: 60 },
-            { title: "📝 3/30~4/2 第一次段考", targetDate: "2026-03-30T00:00:00", message: "考試順利，加油！ 📖", totalDays: 30 },
-            { title: "🕯️ 4/3~4/6 清明連假", targetDate: "2026-04-03T00:00:00", message: "慎終追遠，假期愉快 🌿", totalDays: 30 },
-            { title: "🛠️ 4/12 在校生丙級檢定學科", targetDate: "2026-04-12T00:00:00", message: "證照拿起來！ 💪", totalDays: 20 },
-            { title: "🎓 4/27~4/30 第二次段考(三年級)", targetDate: "2026-04-27T00:00:00", message: "高三同學最後衝刺！ 🔥", totalDays: 30 },
-            { title: "🎤 5/5 才藝表演", targetDate: "2026-05-05T00:00:00", message: "展現你的才華吧！ ✨", totalDays: 20 },
-            { title: "📚 5/11~5/15 第二次段考(一、二年級)", targetDate: "2026-05-11T00:00:00", message: "保持平常心應考 ✍️", totalDays: 30 },
-            { title: "👩‍🎓 6/1 畢業日", targetDate: "2026-06-01T00:00:00", message: "畢業快樂，前程似錦 🎓", totalDays: 60 },
-            { title: "🛶 6/19~6/21 端午連假", targetDate: "2026-06-19T00:00:00", message: "吃粽子、看龍舟 🛶", totalDays: 30 },
-            { title: "📑 6/25~6/30 期末考", targetDate: "2026-06-25T00:00:00", message: "最後一戰，考完放暑假！ 🏖️", totalDays: 30 },
-            { title: "☀️ 6/30 結業式", targetDate: "2026-06-30T00:00:00", message: "暑假快樂，迎接夏日時光！ 🌊", totalDays: 365 },
-            { title: "📚 8/31 開學日", targetDate: "2026-08-31T00:00:00", message: "新學期新氣象，加油！ 💪", totalDays: 365 },
-            { title: "🌕 9/25~9/28 中秋連假/教師節", targetDate: "2026-09-25T00:00:00", message: "中秋人團圓，假期愉快！ 🥮", totalDays: 365 },
-            { title: "🎂 10/10 版主生日", targetDate: "2026-10-10T00:00:00", message: "生日快樂！Happy Birthday! 🎉", totalDays: 365 },
-            { title: "🇹🇼 10/9~10/11 國慶連假", targetDate: "2026-10-09T00:00:00", message: "國慶連假放鬆去！ 🎈", totalDays: 365 },
-            { title: "🎆 1/1 元旦", targetDate: "2027-01-01T00:00:00", message: "新年快樂，全新開始！ ✨", totalDays: 365 }
+        // ========== 您的 Firebase 設定 ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyBqxkKFETcINEbnuDN7KxGyqsbdntvPd4c",
+            authDomain: "countdown-system-d8ad6.firebaseapp.com",
+            databaseURL: "https://countdown-system-d8ad6-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "countdown-system-d8ad6",
+            storageBucket: "countdown-system-d8ad6.firebasestorage.app",
+            messagingSenderId: "1077561154299",
+            appId: "1:1077561154299:web:52f82e19f178e8203cae5e",
+            measurementId: "G-SJHM41JX6F"
+        };
+        // ========================================
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const eventsRef = ref(db, 'events');
+
+        // 固定節日（自動輪迴）
+        const RECURRING_EVENTS = [
+            { id: 'rec_1', name: '元旦', month: 1, day: 1 },
+            { id: 'rec_2', name: '和平紀念日', month: 2, day: 28 },
+            { id: 'rec_3', name: '國慶日', month: 10, day: 10 },
+            { id: 'rec_4', name: '版主生日', month: 10, day: 10 }
         ];
 
-        function updateCountdowns() {
-            const container = document.getElementById('countdown-container');
-            const now = new Date();
+        let adminEvents = [];
 
-            const activeEvents = rawEvents
-                .map(e => ({ ...e, target: new Date(e.targetDate) }))
-                .filter(e => (e.target - now) > -(1000 * 60 * 60 * 24)) 
-                .sort((a, b) => a.target - b.target);
+        onValue(eventsRef, (snapshot) => {
+            const data = snapshot.val() || {};
+            adminEvents = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+            setSyncStatus(true);
+            renderPublicList();
+        }, (error) => {
+            setSyncStatus(false);
+            console.error(error);
+        });
 
-            // 僅在初始化或長度改變時重新渲染容器，避免每秒閃爍
-            if (container.children.length !== activeEvents.length) {
-                container.innerHTML = activeEvents.map((_, i) => `<div id="event-card-${i}"></div>`).join('');
-            }
-
-            activeEvents.forEach((event, i) => {
-                const diff = event.target - now;
-                const days = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
-                const hours = Math.max(0, Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
-                const minutes = Math.max(0, Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)));
-                const seconds = Math.max(0, Math.floor((diff % (1000 * 60)) / 1000));
-
-                const progressWidth = Math.max(0, Math.min(100, (1 - (days / event.totalDays)) * 100));
-
-                const cardElement = document.getElementById(`event-card-${i}`);
-                if (cardElement) {
-                    cardElement.innerHTML = `
-                        <div class="card text-white h-full">
-                            <div class="text-center text-lg font-bold mb-4 min-h-[3rem] flex items-center justify-center">${event.title}</div>
-                            
-                            <div class="flex justify-between gap-2 mb-4">
-                                <div class="timer-box">
-                                    <span class="timer-value">${days}</span>
-                                    <span class="timer-label">天</span>
-                                </div>
-                                <div class="timer-box">
-                                    <span class="timer-value">${hours}</span>
-                                    <span class="timer-label">時</span>
-                                </div>
-                                <div class="timer-box">
-                                    <span class="timer-value">${minutes}</span>
-                                    <span class="timer-label">分</span>
-                                </div>
-                                <div class="timer-box">
-                                    <span class="timer-value">${seconds}</span>
-                                    <span class="timer-label">秒</span>
-                                </div>
-                            </div>
-
-                            <div class="flex justify-between text-[10px] text-gray-400 mb-1">
-                                <span>進度 (${event.totalDays}天)</span>
-                                <span>剩 ${days} 天</span>
-                            </div>
-                            
-                            <div class="progress-container mb-4">
-                                <div class="progress-bar" style="width: ${progressWidth}%"></div>
-                            </div>
-
-                            <div class="text-center italic text-yellow-400 text-xs">
-                                ${event.message}
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-
-            if (activeEvents.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center text-gray-700 font-bold mt-10 text-xl">目前沒有活動</div>';
+        function setSyncStatus(online) {
+            const badge = document.getElementById('syncBadge');
+            const text = document.getElementById('syncText');
+            if (online) {
+                badge.className = 'sync-badge';
+                text.textContent = '即時同步中';
+            } else {
+                badge.className = 'sync-badge offline-badge';
+                text.textContent = '連線失敗';
             }
         }
 
-        setInterval(updateCountdowns, 1000);
-        updateCountdowns();
+        function getNextRecurringDate(month, day) {
+            const now = new Date();
+            const year = now.getFullYear();
+            let target = new Date(year, month - 1, day, 0, 0, 0);
+            if (target <= now) {
+                target = new Date(year + 1, month - 1, day, 0, 0, 0);
+            }
+            return target;
+        }
+
+        function getRecurringEventsWithDate() {
+            return RECURRING_EVENTS.map(ev => {
+                const target = getNextRecurringDate(ev.month, ev.day);
+                const y = target.getFullYear();
+                const m = String(target.getMonth() + 1).padStart(2, '0');
+                const d = String(target.getDate()).padStart(2, '0');
+                return {
+                    id: ev.id,
+                    name: ev.name,
+                    date: `${y}-${m}-${d}`,
+                    recurring: true
+                };
+            });
+        }
+
+        function getCountdownParts(dateStr) {
+            const now = new Date();
+            const target = new Date(dateStr + 'T00:00:00');
+            const diff = target - now;
+            if (diff <= 0) return { isPast: true };
+            const s = Math.floor(diff / 1000);
+            return {
+                isPast: false,
+                days: Math.floor(s / 86400),
+                hours: Math.floor((s % 86400) / 3600),
+                minutes: Math.floor((s % 3600) / 60),
+                seconds: s % 60,
+                totalSeconds: s
+            };
+        }
+
+        function formatCountdown(p) {
+            return p.isPast ? null : `剩 ${p.days} 天 ${p.hours} 小時 ${p.minutes} 分 ${p.seconds} 秒`;
+        }
+
+        function getProgressPercent(totalSeconds) {
+            const FULL = 365 * 86400;
+            let percent = ((FULL - totalSeconds) / FULL) * 100;
+            if (percent < 0) percent = 0;
+            if (percent > 100) percent = 100;
+            return percent;
+        }
+
+        function escapeHtml(s) {
+            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+        }
+
+        function renderPublicList() {
+            const container = document.getElementById('publicCountdownList');
+            const recurring = getRecurringEventsWithDate();
+            const allEvents = [...recurring, ...adminEvents];
+
+            const active = allEvents
+                .filter(ev => !getCountdownParts(ev.date).isPast)
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            if (!active.length) {
+                container.innerHTML = `<div class="empty-state">✨ 目前沒有進行中的倒數事件</div>`;
+                return;
+            }
+
+            container.innerHTML = active.map(ev => {
+                const p = getCountdownParts(ev.date);
+                const dateObj = new Date(ev.date + 'T00:00:00');
+                const dateDisplay = `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(dateObj.getDate()).padStart(2,'0')}`;
+                const percent = getProgressPercent(p.totalSeconds);
+                const percentText = percent.toFixed(1);
+                const recurringTag = ev.recurring ? `<span class="recurring-tag">每年</span>` : '';
+
+                return `
+                    <div class="countdown-card">
+                        <div class="card-header">
+                            <div class="event-name">📅 ${escapeHtml(ev.name)}${recurringTag}</div>
+                            <div class="event-date">${dateDisplay}</div>
+                        </div>
+                        <div class="countdown-display" data-date="${ev.date}">${formatCountdown(p)}</div>
+                        <div>
+                            <div class="progress-wrap">
+                                <div class="progress-bar" data-bar-date="${ev.date}" style="width:${percent}%"></div>
+                            </div>
+                            <div class="progress-info">
+                                <span>進度</span>
+                                <span class="progress-percent" data-percent-date="${ev.date}">${percentText}%</span>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            startUpdater();
+        }
+
+        let interval = null;
+        function startUpdater() {
+            if (interval) clearInterval(interval);
+            interval = setInterval(() => {
+                let needRerender = false;
+                document.querySelectorAll('.countdown-display[data-date]').forEach(el => {
+                    const dateStr = el.getAttribute('data-date');
+                    const p = getCountdownParts(dateStr);
+                    if (p.isPast) { needRerender = true; return; }
+                    el.textContent = formatCountdown(p);
+
+                    const bar = document.querySelector(`.progress-bar[data-bar-date="${dateStr}"]`);
+                    const percentEl = document.querySelector(`.progress-percent[data-percent-date="${dateStr}"]`);
+                    if (bar) {
+                        const percent = getProgressPercent(p.totalSeconds);
+                        bar.style.width = percent + '%';
+                        if (percentEl) percentEl.textContent = percent.toFixed(1) + '%';
+                    }
+                });
+                if (needRerender) renderPublicList();
+            }, 1000);
+        }
     </script>
-
-    <!-- 底部固定文字 -->
-    <div class="footer-text">𝓭𝓪𝓭𝓮𝓻 靠北達德速度版 ⚡️｜版主小編團隊製作</div>
-
 </body>
 </html>
