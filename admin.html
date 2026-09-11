@@ -337,8 +337,8 @@
         const messagesRef = ref(db, 'messages');
 
         const RECURRING_EVENTS = [
-            { id: 'rec_1', name: '1/1 元旦', type: 'yearly', month: 1, day: 1, emoji: '🎆', defaultMessage: '新年快樂，全新開始！✨', progressDays: 365 },
-            { id: 'rec_2', name: '2/28 和平紀念日', type: 'yearly', month: 2, day: 28, emoji: '🕊️', defaultMessage: '和平紀念日，珍惜自由', progressDays: 365 },
+            { id: 'rec_1', name: '01/01元旦', type: 'yearly', month: 1, day: 1, emoji: '🎆', defaultMessage: '新年快樂，全新開始！✨', progressDays: 365 },
+            { id: 'rec_2', name: '02/28和平紀念日', type: 'yearly', month: 2, day: 28, emoji: '🕊️', defaultMessage: '和平紀念日，珍惜自由', progressDays: 365 },
             { id: 'rec_3', name: '10/10 國慶日', type: 'yearly', month: 10, day: 10, emoji: '🎉', defaultMessage: '國慶連假放鬆去！🎈', progressDays: 365 },
             { id: 'rec_4', name: '10/10 版主生日', type: 'yearly', month: 10, day: 10, emoji: '🎂', defaultMessage: '生日快樂！Happy Birthday! 🎊', progressDays: 365 },
             { id: 'rec_5', name: '載具發票開獎', type: 'oddMonths', day: 25, emoji: '🧾', defaultMessage: '祝您中大獎！💰', progressDays: 60 }
@@ -455,39 +455,21 @@
             return p.isPast ? null : `剩 ${p.days} 天 ${p.hours} 小時 ${p.minutes} 分 ${p.seconds} 秒`;
         }
 
-        // ===== 取得目前有效目標日（多天活動用）=====
-        // 若 endDate 存在：
-        //   - 今天 < startDate：回傳 startDate（倒數到第一天）
-        //   - startDate <= 今天 < endDate 隔日：回傳 endDate 隔日的 00:00（倒數到結束日結束）
-        //   - 今天 >= endDate 隔日：已過期
         function getEffectiveTargetDate(ev) {
             const now = new Date();
             const startTarget = new Date(ev.date + 'T00:00:00');
             if (!ev.endDate) return ev.date;
-
             const endTarget = new Date(ev.endDate + 'T00:00:00');
-            // 結束日的隔天 00:00（代表活動結束）
             const endDayAfter = new Date(endTarget.getTime() + 86400000);
-
-            if (now < startTarget) {
-                // 還沒到第一天
-                return ev.date;
-            } else if (now < endDayAfter) {
-                // 活動期間（含結束日當天），倒數到結束日的隔天 00:00
-                return ev.endDate;
-            } else {
-                // 已過期
-                return ev.endDate;
-            }
+            if (now < startTarget) return ev.date;
+            if (now < endDayAfter) return ev.endDate;
+            return ev.endDate;
         }
 
-        // 取得活動狀態：'before' | 'during' | 'after'
         function getEventPhase(ev) {
             const now = new Date();
             const startTarget = new Date(ev.date + 'T00:00:00');
-            if (!ev.endDate) {
-                return now < startTarget ? 'before' : 'after';
-            }
+            if (!ev.endDate) return now < startTarget ? 'before' : 'after';
             const endTarget = new Date(ev.endDate + 'T00:00:00');
             const endDayAfter = new Date(endTarget.getTime() + 86400000);
             if (now < startTarget) return 'before';
@@ -495,7 +477,6 @@
             return 'after';
         }
 
-        // 固定節日 + 管理員每年輪迴
         function getRecurringEventsWithDate() {
             const fixed = RECURRING_EVENTS.map(ev => {
                 const target = getNextRecurringDate(ev);
@@ -565,7 +546,6 @@
                 .filter(ev => {
                     if (!ev.date) return false;
                     if (ev.endDate) {
-                        // 多天活動：只要還沒過結束日隔天，就顯示
                         const endTarget = new Date(ev.endDate + 'T00:00:00');
                         const endDayAfter = new Date(endTarget.getTime() + 86400000);
                         return new Date() < endDayAfter;
@@ -908,7 +888,6 @@
                     const endDateStr = el.getAttribute('data-end-date') || '';
                     if (!dateStr) return;
 
-                    // 多天活動判斷
                     let targetStr = dateStr;
                     if (endDateStr) {
                         const now = new Date();
