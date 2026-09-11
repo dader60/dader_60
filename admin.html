@@ -8,8 +8,7 @@
         * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; }
         body { background: #cfe8f7; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 1.5rem; }
 
-        /* ===== 登入頁面 ===== */
-        .login-container { max-width: 420px; width: 100%; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); border-radius: 2.5rem; padding: 2.5rem 2.5rem; box-shadow: 0 25px 40px -12px rgba(0,20,30,0.35); border: 1px solid rgba(255,255,255,0.6); margin: auto; }
+        .login-container { max-width: 420px; width: 100%; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); border-radius: 2.5rem; padding: 2.5rem; box-shadow: 0 25px 40px -12px rgba(0,20,30,0.35); border: 1px solid rgba(255,255,255,0.6); margin: auto; }
         .login-container h1 { font-size: 1.8rem; font-weight: 600; color: #1e3b4f; text-align: center; margin-bottom: 0.5rem; }
         .login-container .subhead { text-align: center; color: #4a6f88; margin-bottom: 2rem; font-size: 0.9rem; }
         .login-container .input-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.2rem; }
@@ -20,7 +19,6 @@
         .login-btn:hover { background: #0f2c3d; transform: translateY(-2px); }
         .login-error { color: #b33; font-size: 0.85rem; text-align: center; margin-top: 1rem; min-height: 1.2rem; }
 
-        /* ===== 管理頁面 ===== */
         .admin-container { max-width: 1100px; width: 100%; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-radius: 2.5rem; padding: 2rem 2.5rem; box-shadow: 0 25px 40px -12px rgba(0,20,30,0.35); border: 1px solid rgba(255,255,255,0.6); display: none; }
         .admin-container.active { display: block; }
         h1 { font-size: 2rem; font-weight: 600; color: #1e3b4f; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
@@ -29,7 +27,6 @@
         .logout-btn:hover { background: #ffd4d4; }
         .subhead { color: #4a6f88; margin-bottom: 2rem; font-size: 1rem; border-left: 4px solid #7bb3d0; background: rgba(123,179,208,0.1); border-radius: 0 12px 12px 0; padding: 0.8rem 1.2rem; line-height: 1.6; }
 
-        /* ===== 分頁標籤 ===== */
         .tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; border-bottom: 2px solid #e0eef7; padding-bottom: 0.5rem; }
         .tab { background: transparent; border: none; padding: 0.7rem 1.4rem; border-radius: 30px 30px 0 0; cursor: pointer; font-weight: 600; font-size: 0.95rem; color: #5b7f97; transition: 0.2s; }
         .tab:hover { background: #eaf3fa; color: #1e3b4f; }
@@ -37,7 +34,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* ===== 表單 ===== */
         .form-card { background: white; border-radius: 1.8rem; padding: 1.8rem 2rem; box-shadow: 0 8px 18px rgba(0,30,50,0.08); margin-bottom: 2rem; border: 1px solid #d9e7f0; }
         .form-card h3 { font-size: 1.1rem; color: #1e3b4f; margin-bottom: 1.2rem; }
         .form-row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; margin-bottom: 1rem; }
@@ -60,7 +56,6 @@
         .btn-success { background: #e3f5e9; color: #2d7a4b; border: 1px solid #b8e0c4; }
         .btn-success:hover { background: #d1eedb; }
 
-        /* ===== 列表 ===== */
         .section-title { font-size: 1.3rem; font-weight: 600; color: #1e3b4f; margin-bottom: 1.2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #c6dae7; padding-bottom: 0.7rem; flex-wrap: wrap; gap: 0.5rem; }
         .countdown-list { display: flex; flex-direction: column; gap: 1rem; max-height: 500px; overflow-y: auto; padding-right: 0.4rem; }
         .countdown-item { background: white; border-radius: 1.5rem; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,30,50,0.06); border: 1px solid #d4e3ee; flex-wrap: wrap; gap: 0.8rem; }
@@ -77,104 +72,26 @@
         .recurring-item { background: #fffbf2; border: 1px dashed #ffd98a; }
         .recurring-tag { font-size: 0.7rem; background: #fff4e0; color: #a86a1a; padding: 0.15rem 0.6rem; border-radius: 20px; font-weight: 600; border: 1px solid #ffe0b0; margin-left: 0.4rem; }
         .once-tag { font-size: 0.7rem; background: #e3f5e9; color: #2d7a4b; padding: 0.15rem 0.6rem; border-radius: 20px; font-weight: 600; border: 1px solid #b8e0c4; margin-left: 0.4rem; }
+        .range-tag { font-size: 0.7rem; background: #e0f0ff; color: #1e5a8a; padding: 0.15rem 0.6rem; border-radius: 20px; font-weight: 600; border: 1px solid #b0d4f0; margin-left: 0.4rem; }
 
-        /* ===== 訊息卡片 ===== */
-        .msg-card {
-            background: white;
-            border-radius: 1.5rem;
-            padding: 1.2rem 1.5rem;
-            box-shadow: 0 4px 12px rgba(0,30,50,0.06);
-            border: 1px solid #d4e3ee;
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-            margin-bottom: 1rem;
-        }
-        .msg-card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .msg-card-title {
-            font-weight: 700;
-            font-size: 1rem;
-            color: #0b2a3b;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            flex-wrap: wrap;
-        }
-        .msg-card-date {
-            font-size: 0.75rem;
-            color: #5b7f97;
-            background: #eef5fb;
-            padding: 0.15rem 0.7rem;
-            border-radius: 30px;
-            font-weight: 500;
-        }
-        .msg-row {
-            display: flex;
-            gap: 0.6rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .msg-row input {
-            flex: 1 1 200px;
-            background: #f4faff;
-            border: 1.5px solid #cfe1ee;
-            border-radius: 1rem;
-            padding: 0.7rem 1rem;
-            font-size: 0.9rem;
-            color: #0b2a3b;
-            font-weight: 500;
-            font-family: inherit;
-        }
-        .msg-row input:focus {
-            outline: none;
-            border-color: #5c9ec7;
-            box-shadow: 0 0 0 3px rgba(92,158,199,0.25);
-            background: white;
-        }
-        .msg-saved {
-            font-size: 0.8rem;
-            color: #2d7a4b;
-            font-weight: 600;
-            min-height: 1.2rem;
-        }
+        .msg-card { background: white; border-radius: 1.5rem; padding: 1.2rem 1.5rem; box-shadow: 0 4px 12px rgba(0,30,50,0.06); border: 1px solid #d4e3ee; display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1rem; }
+        .msg-card-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+        .msg-card-title { font-weight: 700; font-size: 1rem; color: #0b2a3b; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+        .msg-card-date { font-size: 0.75rem; color: #5b7f97; background: #eef5fb; padding: 0.15rem 0.7rem; border-radius: 30px; font-weight: 500; }
+        .msg-row { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+        .msg-row input { flex: 1 1 200px; background: #f4faff; border: 1.5px solid #cfe1ee; border-radius: 1rem; padding: 0.7rem 1rem; font-size: 0.9rem; color: #0b2a3b; font-weight: 500; font-family: inherit; }
+        .msg-row input:focus { outline: none; border-color: #5c9ec7; box-shadow: 0 0 0 3px rgba(92,158,199,0.25); background: white; }
+        .msg-saved { font-size: 0.8rem; color: #2d7a4b; font-weight: 600; min-height: 1.2rem; }
 
-        /* ===== 設定區 ===== */
         .settings-card { background: #f8fbff; border-radius: 1.5rem; padding: 1.5rem 2rem; border: 1px solid #d9e7f0; margin-top: 2rem; }
         .settings-card h3 { font-size: 1.1rem; color: #1e3b4f; margin-bottom: 1rem; }
         .settings-row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; }
         .settings-row .input-group { flex: 1 1 180px; }
         .settings-msg { font-size: 0.85rem; margin-top: 0.8rem; min-height: 1.2rem; }
 
-        /* ===== 編輯 Modal ===== */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 20, 30, 0.5);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-            padding: 1.5rem;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 20, 30, 0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 999; padding: 1.5rem; }
         .modal-overlay.active { display: flex; }
-        .modal-box {
-            background: white;
-            border-radius: 2rem;
-            padding: 2rem 2.2rem;
-            max-width: 560px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 30px 60px -15px rgba(0,20,30,0.4);
-            border: 1px solid #d9e7f0;
-        }
+        .modal-box { background: white; border-radius: 2rem; padding: 2rem 2.2rem; max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 30px 60px -15px rgba(0,20,30,0.4); border: 1px solid #d9e7f0; }
         .modal-box h2 { font-size: 1.4rem; color: #1e3b4f; margin-bottom: 1.5rem; }
         .modal-box .input-group { margin-bottom: 1rem; }
         .modal-actions { display: flex; gap: 0.8rem; justify-content: flex-end; margin-top: 1.5rem; flex-wrap: wrap; }
@@ -191,7 +108,6 @@
 </head>
 <body>
 
-    <!-- ===== 登入頁面 ===== -->
     <div class="login-container" id="loginPage">
         <h1>🔐 管理員登入</h1>
         <div class="subhead">請輸入帳號密碼以進入管理系統</div>
@@ -207,7 +123,6 @@
         <div class="login-error" id="loginError"></div>
     </div>
 
-    <!-- ===== 管理頁面 ===== -->
     <div class="admin-container" id="adminPage">
         <h1>
             ⏳ 倒數管理員 <span>ADMIN</span>
@@ -218,25 +133,23 @@
             🔒 固定節日自動輪迴 · 可編輯 · 可刪除
         </div>
 
-        <!-- 分頁標籤 -->
         <div class="tabs">
             <button class="tab active" data-tab="tab-events">📋 倒數事件</button>
             <button class="tab" data-tab="tab-messages">💬 節日訊息</button>
             <button class="tab" data-tab="tab-settings">🔑 帳號設定</button>
         </div>
 
-        <!-- ========== 分頁 1：倒數事件 ========== -->
         <div class="tab-content active" id="tab-events">
             <div class="form-card">
                 <h3>➕ 新增倒數事件</h3>
                 <div class="form-row">
                     <div class="input-group" style="flex: 2 1 200px;">
                         <label>📌 事件名稱</label>
-                        <input type="text" id="eventName" placeholder="例如：聖誕節、專案截止" maxlength="40">
+                        <input type="text" id="eventName" placeholder="例如：中秋連假、國慶連假" maxlength="40">
                     </div>
                     <div class="input-group small">
                         <label>🎭 表情（可留空）</label>
-                        <input type="text" id="eventEmoji" placeholder="🎄" maxlength="4">
+                        <input type="text" id="eventEmoji" placeholder="🎑" maxlength="4">
                     </div>
                     <div class="input-group small">
                         <label>🔁 類型</label>
@@ -245,9 +158,15 @@
                             <option value="yearly">每年輪迴</option>
                         </select>
                     </div>
-                    <div class="input-group" id="dateGroup" style="flex: 1 1 160px;">
-                        <label>📅 日期</label>
+                </div>
+                <div class="form-row" id="onceDateRow">
+                    <div class="input-group">
+                        <label>📅 開始日期</label>
                         <input type="date" id="eventDate">
+                    </div>
+                    <div class="input-group">
+                        <label>📅 結束日期（選填，活動多天用）</label>
+                        <input type="date" id="eventEndDate">
                     </div>
                 </div>
                 <div class="form-row" id="yearlyRow" style="display:none;">
@@ -280,7 +199,7 @@
                 <div class="form-row">
                     <div class="input-group" style="flex: 1 1 100%;">
                         <label>💬 底部訊息（可留空）</label>
-                        <input type="text" id="eventMessage" placeholder="例如：聖誕快樂！🎄" maxlength="80">
+                        <input type="text" id="eventMessage" placeholder="例如：中秋團圓，假期愉快！🥮" maxlength="80">
                     </div>
                     <button class="btn" id="addBtn">＋ 新增倒數</button>
                 </div>
@@ -292,11 +211,10 @@
             </div>
             <div id="adminCountdownList" class="countdown-list"></div>
             <div class="admin-note">
-                💡 所有事件都可以編輯或刪除。橘色虛線框為每年輪迴事件，白色為一次性事件。
+                💡 所有事件都可以編輯或刪除。有「結束日期」的事件會先倒數到開始日，到了當天自動改倒數到結束日。
             </div>
         </div>
 
-        <!-- ========== 分頁 2：節日訊息 ========== -->
         <div class="tab-content" id="tab-messages">
             <div class="admin-note" style="margin-bottom: 1.5rem;">
                 💬 為每個節日設定底部顯示的訊息。修改後即時同步到公開頁面，所有裝置都會看到。
@@ -304,7 +222,6 @@
             <div id="messagesList"></div>
         </div>
 
-        <!-- ========== 分頁 3：帳號設定 ========== -->
         <div class="tab-content" id="tab-settings">
             <div class="settings-card">
                 <h3>🔑 變更管理員密碼</h3>
@@ -328,7 +245,6 @@
         </div>
     </div>
 
-    <!-- ===== 編輯 Modal ===== -->
     <div class="modal-overlay" id="editModal">
         <div class="modal-box">
             <h2>✏️ 編輯倒數事件</h2>
@@ -350,10 +266,14 @@
                     </select>
                 </div>
             </div>
-            <div class="form-row" id="editDateRow">
+            <div class="form-row" id="editOnceDateRow">
                 <div class="input-group">
-                    <label>📅 日期</label>
+                    <label>📅 開始日期</label>
                     <input type="date" id="editDate">
+                </div>
+                <div class="input-group">
+                    <label>📅 結束日期（選填）</label>
+                    <input type="date" id="editEndDate">
                 </div>
             </div>
             <div class="form-row" id="editYearlyRow" style="display:none;">
@@ -399,7 +319,6 @@
         import { getDatabase, ref, onValue, push, remove, get, set, update }
             from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        // ========== 您的 Firebase 設定 ==========
         const firebaseConfig = {
             apiKey: "AIzaSyBqxkKFETcINEbnuDN7KxGyqsbdntvPd4c",
             authDomain: "countdown-system-d8ad6.firebaseapp.com",
@@ -410,7 +329,6 @@
             appId: "1:1077561154299:web:52f82e19f178e8203cae5e",
             measurementId: "G-SJHM41JX6F"
         };
-        // ========================================
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
@@ -418,7 +336,6 @@
         const authRef = ref(db, 'auth');
         const messagesRef = ref(db, 'messages');
 
-        // 固定節日（無法刪除，可改訊息）
         const RECURRING_EVENTS = [
             { id: 'rec_1', name: '1/1 元旦', type: 'yearly', month: 1, day: 1, emoji: '🎆', defaultMessage: '新年快樂，全新開始！✨', progressDays: 365 },
             { id: 'rec_2', name: '2/28 和平紀念日', type: 'yearly', month: 2, day: 28, emoji: '🕊️', defaultMessage: '和平紀念日，珍惜自由', progressDays: 365 },
@@ -431,12 +348,10 @@
         let customMessages = {};
         let isLoggedIn = false;
 
-        // ---------- 登入 ----------
         async function checkAndInitAuth() {
             const snapshot = await get(authRef);
             if (!snapshot.exists()) {
                 await set(authRef, { username: 'dader60', password: 'dader60' });
-                console.log('已建立預設管理員帳號 dader60 / dader60');
             }
         }
 
@@ -445,17 +360,11 @@
             const pass = document.getElementById('loginPass').value;
             const errorEl = document.getElementById('loginError');
             errorEl.textContent = '';
-
-            if (!user || !pass) {
-                errorEl.textContent = '請輸入帳號與密碼';
-                return;
-            }
-
+            if (!user || !pass) { errorEl.textContent = '請輸入帳號與密碼'; return; }
             await checkAndInitAuth();
             const snapshot = await get(authRef);
             const auth = snapshot.val();
             if (!auth) { errorEl.textContent = '系統錯誤，請稍後再試'; return; }
-
             if (user === auth.username && pass === auth.password) {
                 isLoggedIn = true;
                 sessionStorage.setItem('admin_logged_in', 'true');
@@ -482,7 +391,6 @@
             renderMessagesList();
         }
 
-        // ---------- 分頁切換 ----------
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -492,7 +400,6 @@
             });
         });
 
-        // ---------- 輔助函式 ----------
         function escapeHtml(s) {
             if (s === undefined || s === null) return '';
             return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
@@ -548,7 +455,47 @@
             return p.isPast ? null : `剩 ${p.days} 天 ${p.hours} 小時 ${p.minutes} 分 ${p.seconds} 秒`;
         }
 
-        // 固定節日 + 管理員新增的每年輪迴事件
+        // ===== 取得目前有效目標日（多天活動用）=====
+        // 若 endDate 存在：
+        //   - 今天 < startDate：回傳 startDate（倒數到第一天）
+        //   - startDate <= 今天 < endDate 隔日：回傳 endDate 隔日的 00:00（倒數到結束日結束）
+        //   - 今天 >= endDate 隔日：已過期
+        function getEffectiveTargetDate(ev) {
+            const now = new Date();
+            const startTarget = new Date(ev.date + 'T00:00:00');
+            if (!ev.endDate) return ev.date;
+
+            const endTarget = new Date(ev.endDate + 'T00:00:00');
+            // 結束日的隔天 00:00（代表活動結束）
+            const endDayAfter = new Date(endTarget.getTime() + 86400000);
+
+            if (now < startTarget) {
+                // 還沒到第一天
+                return ev.date;
+            } else if (now < endDayAfter) {
+                // 活動期間（含結束日當天），倒數到結束日的隔天 00:00
+                return ev.endDate;
+            } else {
+                // 已過期
+                return ev.endDate;
+            }
+        }
+
+        // 取得活動狀態：'before' | 'during' | 'after'
+        function getEventPhase(ev) {
+            const now = new Date();
+            const startTarget = new Date(ev.date + 'T00:00:00');
+            if (!ev.endDate) {
+                return now < startTarget ? 'before' : 'after';
+            }
+            const endTarget = new Date(ev.endDate + 'T00:00:00');
+            const endDayAfter = new Date(endTarget.getTime() + 86400000);
+            if (now < startTarget) return 'before';
+            if (now < endDayAfter) return 'during';
+            return 'after';
+        }
+
+        // 固定節日 + 管理員每年輪迴
         function getRecurringEventsWithDate() {
             const fixed = RECURRING_EVENTS.map(ev => {
                 const target = getNextRecurringDate(ev);
@@ -567,7 +514,6 @@
                 };
             }).filter(Boolean);
 
-            // 管理員新增的每年輪迴事件
             const customRecurring = adminEvents
                 .filter(ev => ev.type === 'yearly')
                 .map(ev => {
@@ -593,19 +539,18 @@
             return [...fixed, ...customRecurring];
         }
 
-        // ========== 倒數事件列表（相容舊資料） ==========
         function renderAdminList() {
             if (!isLoggedIn) return;
             const container = document.getElementById('adminCountdownList');
             const recurring = getRecurringEventsWithDate();
 
-            // 一次性事件（相容舊資料：沒有 type 欄位視為一次性）
             const onceEvents = adminEvents
                 .filter(ev => ev.type === 'once' || !ev.type)
                 .map(ev => ({
                     id: ev.id,
                     name: ev.name,
                     date: ev.date,
+                    endDate: ev.endDate || '',
                     recurring: false,
                     fixed: false,
                     emoji: ev.emoji || '',
@@ -619,6 +564,12 @@
             const active = allEvents
                 .filter(ev => {
                     if (!ev.date) return false;
+                    if (ev.endDate) {
+                        // 多天活動：只要還沒過結束日隔天，就顯示
+                        const endTarget = new Date(ev.endDate + 'T00:00:00');
+                        const endDayAfter = new Date(endTarget.getTime() + 86400000);
+                        return new Date() < endDayAfter;
+                    }
                     return !getCountdownParts(ev.date).isPast;
                 })
                 .sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -629,22 +580,32 @@
             }
 
             container.innerHTML = active.map(ev => {
-                const p = getCountdownParts(ev.date);
-                const dateObj = new Date(ev.date + 'T00:00:00');
-                const dateDisplay = `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(dateObj.getDate()).padStart(2,'0')}`;
-                const emoji = ev.emoji ? ev.emoji + ' ' : '';
+                const targetStr = getEffectiveTargetDate(ev);
+                const p = getCountdownParts(targetStr);
+                const phase = getEventPhase(ev);
 
-                // 標籤
-                let tagHtml = '';
-                if (ev.fixed) {
-                    tagHtml = `<span class="recurring-tag">固定</span>`;
-                } else if (ev.recurring) {
-                    tagHtml = `<span class="recurring-tag">每年</span>`;
-                } else {
-                    tagHtml = `<span class="once-tag">一次性</span>`;
+                const dateObj = new Date(ev.date + 'T00:00:00');
+                let dateDisplay = `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(dateObj.getDate()).padStart(2,'0')}`;
+                if (ev.endDate) {
+                    const endObj = new Date(ev.endDate + 'T00:00:00');
+                    dateDisplay += ` ~ ${endObj.getFullYear()}-${String(endObj.getMonth()+1).padStart(2,'0')}-${String(endObj.getDate()).padStart(2,'0')}`;
                 }
 
-                // 編輯 / 刪除按鈕
+                const emoji = ev.emoji ? ev.emoji + ' ' : '';
+
+                let tagHtml = '';
+                if (ev.fixed) tagHtml = `<span class="recurring-tag">固定</span>`;
+                else if (ev.recurring) tagHtml = `<span class="recurring-tag">每年</span>`;
+                else tagHtml = `<span class="once-tag">一次性</span>`;
+
+                if (ev.endDate) tagHtml += `<span class="range-tag">多天活動</span>`;
+
+                let phaseLabel = '';
+                if (ev.endDate) {
+                    if (phase === 'before') phaseLabel = `<span style="font-size:0.72rem;color:#1e6fa8;">（倒數到開始日）</span>`;
+                    else if (phase === 'during') phaseLabel = `<span style="font-size:0.72rem;color:#2d7a4b;">（活動中，倒數到結束日）</span>`;
+                }
+
                 let editBtn = '';
                 let deleteBtn = '';
                 if (ev.fixed) {
@@ -658,10 +619,10 @@
                 return `
                     <div class="countdown-item ${ev.recurring && !ev.fixed ? 'recurring-item' : ''}">
                         <div class="event-info">
-                            <div class="event-name">${emoji}${escapeHtml(ev.name)}${tagHtml}</div>
+                            <div class="event-name">${emoji}${escapeHtml(ev.name)}${tagHtml} ${phaseLabel}</div>
                             <div class="event-date">${dateDisplay}</div>
                         </div>
-                        <div class="live-preview" data-countdown-date="${ev.date}">
+                        <div class="live-preview" data-countdown-date="${ev.date}" data-end-date="${ev.endDate || ''}">
                             ${formatCountdown(p)}
                         </div>
                         <div class="item-actions">
@@ -672,15 +633,12 @@
                 `;
             }).join('');
 
-            // 編輯按鈕
             document.querySelectorAll('[data-edit-id]').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const id = btn.getAttribute('data-edit-id');
-                    openEditModal(id);
+                    openEditModal(btn.getAttribute('data-edit-id'));
                 });
             });
 
-            // 刪除按鈕
             document.querySelectorAll('[data-delete-id]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const id = btn.getAttribute('data-delete-id');
@@ -693,7 +651,6 @@
             startPreviewUpdater();
         }
 
-        // ========== 新增事件 ==========
         function addNewEvent() {
             const name = document.getElementById('eventName').value.trim();
             const emoji = document.getElementById('eventEmoji').value.trim();
@@ -704,11 +661,11 @@
 
             if (type === 'once') {
                 const date = document.getElementById('eventDate').value;
+                const endDate = document.getElementById('eventEndDate').value;
                 if (!date) { alert('請選擇日期'); return; }
-
-                const parts = getCountdownParts(date);
-                if (parts.isPast) {
-                    if (!confirm('這個日期已經過去了，新增後不會顯示。確定要新增嗎？')) return;
+                if (endDate && new Date(endDate) < new Date(date)) {
+                    alert('結束日期不能早於開始日期');
+                    return;
                 }
 
                 push(eventsRef, {
@@ -716,6 +673,7 @@
                     emoji: emoji || '',
                     type: 'once',
                     date,
+                    endDate: endDate || '',
                     message: message || '',
                     progressDays: 365
                 });
@@ -723,12 +681,12 @@
                 document.getElementById('eventName').value = '';
                 document.getElementById('eventEmoji').value = '';
                 document.getElementById('eventDate').value = '';
+                document.getElementById('eventEndDate').value = '';
                 document.getElementById('eventMessage').value = '';
             } else {
                 const month = parseInt(document.getElementById('eventMonth').value, 10);
                 const day = parseInt(document.getElementById('eventDay').value, 10);
                 const progressDays = parseInt(document.getElementById('eventProgress').value, 10) || 365;
-
                 if (!day || day < 1 || day > 31) { alert('請輸入有效的日期（1-31）'); return; }
                 if (progressDays < 1) { alert('進度天數必須大於 0'); return; }
 
@@ -750,7 +708,6 @@
             }
         }
 
-        // ========== 編輯事件 ==========
         function openEditModal(id) {
             const ev = adminEvents.find(e => e.id === id);
             if (!ev) return;
@@ -765,11 +722,12 @@
                 document.getElementById('editMonth').value = ev.month || 1;
                 document.getElementById('editDay').value = ev.day || 1;
                 document.getElementById('editProgress').value = ev.progressDays || 365;
-                document.getElementById('editDateRow').style.display = 'none';
+                document.getElementById('editOnceDateRow').style.display = 'none';
                 document.getElementById('editYearlyRow').style.display = 'flex';
             } else {
                 document.getElementById('editDate').value = ev.date || '';
-                document.getElementById('editDateRow').style.display = 'flex';
+                document.getElementById('editEndDate').value = ev.endDate || '';
+                document.getElementById('editOnceDateRow').style.display = 'flex';
                 document.getElementById('editYearlyRow').style.display = 'none';
             }
 
@@ -808,10 +766,17 @@
                 updateData.day = day;
                 updateData.progressDays = progressDays;
                 updateData.date = null;
+                updateData.endDate = null;
             } else {
                 const date = document.getElementById('editDate').value;
+                const endDate = document.getElementById('editEndDate').value;
                 if (!date) { alert('請選擇日期'); return; }
+                if (endDate && new Date(endDate) < new Date(date)) {
+                    alert('結束日期不能早於開始日期');
+                    return;
+                }
                 updateData.date = date;
+                updateData.endDate = endDate || '';
                 updateData.month = null;
                 updateData.day = null;
                 updateData.progressDays = 365;
@@ -821,12 +786,10 @@
             closeEditModal();
         }
 
-        // ========== 節日訊息 ==========
         function renderMessagesList() {
             const container = document.getElementById('messagesList');
             if (!container) return;
 
-            // 固定節日 + 管理員新增的每年輪迴事件
             const allRecurring = [
                 ...RECURRING_EVENTS.map(ev => ({
                     id: ev.id,
@@ -854,9 +817,7 @@
             container.innerHTML = allRecurring.map(ev => {
                 const customMsg = customMessages[ev.id];
                 const currentMsg = (customMsg !== undefined && customMsg !== null && customMsg !== '')
-                    ? customMsg
-                    : (ev.defaultMessage || '');
-
+                    ? customMsg : (ev.defaultMessage || '');
                 const tagHtml = ev.type === 'fixed'
                     ? `<span class="recurring-tag">固定</span>`
                     : `<span class="recurring-tag">每年</span>`;
@@ -868,10 +829,7 @@
                             <div class="msg-card-date">${ev.dateDisplay}</div>
                         </div>
                         <div class="msg-row">
-                            <input type="text" class="msg-input" data-id="${ev.id}"
-                                value="${escapeHtml(currentMsg)}"
-                                placeholder="輸入要顯示的訊息..."
-                                maxlength="80">
+                            <input type="text" class="msg-input" data-id="${ev.id}" value="${escapeHtml(currentMsg)}" placeholder="輸入要顯示的訊息..." maxlength="80">
                             <button class="btn btn-small btn-success save-msg-btn" data-id="${ev.id}">💾 儲存</button>
                             <button class="btn btn-small btn-secondary reset-msg-btn" data-id="${ev.id}" data-default="${escapeHtml(ev.defaultMessage || '')}">↩️ 還原</button>
                         </div>
@@ -886,14 +844,12 @@
                     const input = document.querySelector(`.msg-input[data-id="${id}"]`);
                     const savedEl = document.querySelector(`.msg-saved[data-saved-id="${id}"]`);
                     const value = input.value.trim();
-
                     const isCustomRecurring = adminEvents.some(e => e.id === id && e.type === 'yearly');
                     if (isCustomRecurring) {
                         await update(ref(db, 'events/' + id), { message: value });
                     } else {
                         await set(ref(db, 'messages/' + id), value);
                     }
-
                     savedEl.style.color = '#2d7a4b';
                     savedEl.textContent = '✅ 已儲存，公開頁面即時同步！';
                     setTimeout(() => { savedEl.textContent = ''; }, 2500);
@@ -906,16 +862,13 @@
                     const defaultMsg = btn.getAttribute('data-default') || '';
                     const input = document.querySelector(`.msg-input[data-id="${id}"]`);
                     const savedEl = document.querySelector(`.msg-saved[data-saved-id="${id}"]`);
-
                     input.value = defaultMsg;
-
                     const isCustomRecurring = adminEvents.some(e => e.id === id && e.type === 'yearly');
                     if (isCustomRecurring) {
                         await update(ref(db, 'events/' + id), { message: defaultMsg });
                     } else {
                         await remove(ref(db, 'messages/' + id));
                     }
-
                     savedEl.style.color = '#2d7a4b';
                     savedEl.textContent = '↩️ 已還原為預設訊息';
                     setTimeout(() => { savedEl.textContent = ''; }, 2500);
@@ -923,7 +876,6 @@
             });
         }
 
-        // ========== 密碼變更 ==========
         async function changePassword() {
             const oldPass = document.getElementById('oldPass').value;
             const newPass = document.getElementById('newPass').value;
@@ -931,15 +883,12 @@
             const msg = document.getElementById('settingsMsg');
             msg.textContent = '';
             msg.style.color = '#b33';
-
             if (!oldPass || !newPass || !confirmPass) { msg.textContent = '請填寫所有欄位'; return; }
             if (newPass !== confirmPass) { msg.textContent = '新密碼與確認密碼不一致'; return; }
             if (newPass.length < 4) { msg.textContent = '新密碼長度至少 4 個字元'; return; }
-
             const snapshot = await get(authRef);
             const auth = snapshot.val();
             if (oldPass !== auth.password) { msg.textContent = '目前密碼錯誤'; return; }
-
             await set(authRef, { username: auth.username, password: newPass });
             msg.style.color = '#2d7a4b';
             msg.textContent = '✅ 密碼已成功變更，所有裝置同步生效！';
@@ -948,7 +897,6 @@
             document.getElementById('confirmPass').value = '';
         }
 
-        // ========== 即時更新 ==========
         let previewInterval = null;
         function startPreviewUpdater() {
             if (previewInterval) clearInterval(previewInterval);
@@ -957,8 +905,22 @@
                 let needRerender = false;
                 document.querySelectorAll('.live-preview[data-countdown-date]').forEach(el => {
                     const dateStr = el.getAttribute('data-countdown-date');
+                    const endDateStr = el.getAttribute('data-end-date') || '';
                     if (!dateStr) return;
-                    const parts = getCountdownParts(dateStr);
+
+                    // 多天活動判斷
+                    let targetStr = dateStr;
+                    if (endDateStr) {
+                        const now = new Date();
+                        const startT = new Date(dateStr + 'T00:00:00');
+                        const endT = new Date(endDateStr + 'T00:00:00');
+                        const endAfter = new Date(endT.getTime() + 86400000);
+                        if (now < startT) targetStr = dateStr;
+                        else if (now < endAfter) targetStr = endDateStr;
+                        else { needRerender = true; return; }
+                    }
+
+                    const parts = getCountdownParts(targetStr);
                     if (parts.isPast) { needRerender = true; return; }
                     const text = formatCountdown(parts);
                     if (text) el.textContent = text;
@@ -967,7 +929,6 @@
             }, 1000);
         }
 
-        // ========== Firebase 監聽 ==========
         onValue(eventsRef, (snapshot) => {
             const data = snapshot.val() || {};
             adminEvents = Object.entries(data).map(([id, val]) => ({ id, ...val }));
@@ -988,7 +949,6 @@
             if (isLoggedIn) renderMessagesList();
         });
 
-        // ========== 事件綁定 ==========
         window.addEventListener('DOMContentLoaded', async () => {
             await checkAndInitAuth();
 
@@ -1002,35 +962,31 @@
             document.getElementById('logoutBtn').addEventListener('click', logout);
             document.getElementById('changePassBtn').addEventListener('click', changePassword);
 
-            // 類型切換：顯示/隱藏日期欄位
             document.getElementById('eventType').addEventListener('change', (e) => {
                 const type = e.target.value;
                 if (type === 'yearly') {
-                    document.getElementById('dateGroup').style.display = 'none';
+                    document.getElementById('onceDateRow').style.display = 'none';
                     document.getElementById('yearlyRow').style.display = 'flex';
                 } else {
-                    document.getElementById('dateGroup').style.display = 'flex';
+                    document.getElementById('onceDateRow').style.display = 'flex';
                     document.getElementById('yearlyRow').style.display = 'none';
                 }
             });
 
             document.getElementById('addBtn').addEventListener('click', addNewEvent);
-
-            // 編輯 Modal
             document.getElementById('editCancelBtn').addEventListener('click', closeEditModal);
             document.getElementById('editSaveBtn').addEventListener('click', saveEditModal);
             document.getElementById('editModal').addEventListener('click', (e) => {
                 if (e.target.id === 'editModal') closeEditModal();
             });
 
-            // 編輯類型切換
             document.getElementById('editType').addEventListener('change', (e) => {
                 const type = e.target.value;
                 if (type === 'yearly') {
-                    document.getElementById('editDateRow').style.display = 'none';
+                    document.getElementById('editOnceDateRow').style.display = 'none';
                     document.getElementById('editYearlyRow').style.display = 'flex';
                 } else {
-                    document.getElementById('editDateRow').style.display = 'flex';
+                    document.getElementById('editOnceDateRow').style.display = 'flex';
                     document.getElementById('editYearlyRow').style.display = 'none';
                 }
             });
