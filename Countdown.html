@@ -6,7 +6,7 @@
     <title>倒數系統</title>
     <style>
         * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; }
-        body { background: #a8d5e5; min-height: 100vh; padding: 2rem 1.5rem 6rem; }
+        body { background: #a8d5e5; min-height: 100vh; padding: 2rem 1.5rem 7rem; }
 
         .public-container { max-width: 1300px; margin: 0 auto; }
 
@@ -139,7 +139,7 @@
             left: 0;
             right: 0;
             text-align: center;
-            padding: 1rem;
+            padding: 0.9rem 1rem 0.8rem;
             font-size: 1rem;
             color: #0b2a3b;
             letter-spacing: 0.5px;
@@ -149,10 +149,24 @@
             -webkit-backdrop-filter: blur(10px);
             border-top: 1px solid rgba(11, 42, 59, 0.1);
             z-index: 100;
+            line-height: 1.6;
+        }
+        .view-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.85rem;
+            color: #1e5a3a;
+            background: #c8ecd6;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-weight: 700;
+            border: 1px solid #8fd4a8;
+            margin-top: 0.3rem;
         }
 
         @media (max-width: 600px) {
-            body { padding: 1.2rem 1rem 5rem; }
+            body { padding: 1.2rem 1rem 6rem; }
             h1 { font-size: 1.5rem; }
             .countdown-list { grid-template-columns: 1fr; gap: 1rem; }
             .countdown-card { padding: 1.4rem 1.2rem 1.2rem; }
@@ -161,7 +175,8 @@
             .time-label { font-size: 0.7rem; }
             .time-box { padding: 0.55rem 0.2rem 0.4rem; }
             .card-message { font-size: 0.78rem; }
-            .footer-note { font-size: 0.85rem; padding: 0.8rem; }
+            .footer-note { font-size: 0.85rem; padding: 0.7rem 0.8rem; }
+            .view-count { font-size: 0.75rem; }
         }
     </style>
 </head>
@@ -178,11 +193,15 @@
         <div id="publicCountdownList" class="countdown-list"></div>
     </div>
 
-    <div class="footer-note">𝓭𝓪𝓭𝓮𝓻 靠北達德速度版 ⚡️｜版主小編團隊製作</div>
+    <div class="footer-note">
+        𝓭𝓪𝓭𝓮𝓻 靠北達德速度版 ⚡️｜版主小編團隊製作
+        <br>
+        <span class="view-count">📊 總瀏覽次數：<span id="viewCount">載入中…</span></span>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, onValue }
+        import { getDatabase, ref, onValue, runTransaction }
             from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
         // ========== 您的 Firebase 設定 ==========
@@ -200,8 +219,23 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const eventsRef = ref(db, 'events');           // 管理員新增的事件（一次性 / 每年輪迴）
-        const messagesRef = ref(db, 'messages');       // 固定節日自訂訊息
+        const eventsRef = ref(db, 'events');
+        const messagesRef = ref(db, 'messages');
+        const viewsRef = ref(db, 'total_views');
+
+        // ---------- 瀏覽次數 +1（每次重新整理算一次） ----------
+        runTransaction(viewsRef, (current) => {
+            return (current || 0) + 1;
+        }).catch((err) => {
+            console.error('瀏覽次數更新失敗：', err);
+        });
+
+        // ---------- 即時監聽瀏覽次數 ----------
+        onValue(viewsRef, (snapshot) => {
+            const count = snapshot.val() || 0;
+            const el = document.getElementById('viewCount');
+            if (el) el.textContent = count.toLocaleString('zh-TW');
+        });
 
         // 固定節日（自動輪迴）
         const RECURRING_EVENTS = [
@@ -275,7 +309,6 @@
         }
 
         // ---------- 建立三種事件資料 ----------
-        // 固定節日
         function getFixedRecurringEvents() {
             return RECURRING_EVENTS.map(ev => {
                 const target = getNextRecurringDate(ev);
@@ -295,11 +328,9 @@
             }).filter(Boolean);
         }
 
-        // 管理員新增的事件（一次性 + 每年輪迴）
         function getAdminEventsWithDate() {
             return adminEvents.map(ev => {
                 if (ev.type === 'yearly') {
-                    // 每年輪迴
                     const target = getNextYearlyDate(ev.month, ev.day);
                     const y = target.getFullYear();
                     const m = String(target.getMonth() + 1).padStart(2, '0');
@@ -315,7 +346,6 @@
                         message: ev.message || ''
                     };
                 } else {
-                    // 一次性
                     return {
                         id: ev.id,
                         name: ev.name,
@@ -369,11 +399,13 @@
             const fixed = getFixedRecurringEvents();
             const admin = getAdminEventsWithDate();
 
-            // 合併所有事件：固定節日 + 管理員事件
             const allEvents = [...fixed, ...admin];
 
             const active = allEvents
-                .filter(ev => !getCountdownParts(ev.date).isPast)
+                .filter(ev => {
+                    if (!ev.date) return false;
+                    return !getCountdownParts(ev.date).isPast;
+                })
                 .sort((a, b) => new Date(a.date) - new Date(b.date));
 
             if (!active.length) {
@@ -387,10 +419,8 @@
                 const percent = getProgressPercent(p.totalSeconds, progressDays);
                 const emoji = ev.emoji ? ev.emoji + ' ' : '';
 
-                // 判斷訊息
                 let message = '';
                 if (ev.fixed) {
-                    // 固定節日：優先使用自訂訊息，否則用預設
                     const customMsg = customMessages[ev.id];
                     if (customMsg !== undefined && customMsg !== null && customMsg !== '') {
                         message = customMsg;
@@ -398,7 +428,6 @@
                         message = ev.defaultMessage || '';
                     }
                 } else if (ev.admin) {
-                    // 管理員事件：使用自己的訊息
                     message = ev.message || '';
                 }
 
@@ -462,10 +491,7 @@
                     if (bar) {
                         const card = bar.closest('.countdown-card');
 
-                        // 找對應的 progressDays
                         let progressDays = 365;
-
-                        // 檢查是否為固定節日
                         const fixedEv = RECURRING_EVENTS.find(r => {
                             const target = getNextRecurringDate(r);
                             if (!target) return false;
@@ -477,7 +503,6 @@
                         if (fixedEv && fixedEv.progressDays) {
                             progressDays = fixedEv.progressDays;
                         } else {
-                            // 管理員事件
                             const adminEv = adminEvents.find(e => {
                                 if (e.type === 'yearly') {
                                     const target = getNextYearlyDate(e.month, e.day);
