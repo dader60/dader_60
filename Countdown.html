@@ -18,152 +18,32 @@
         .offline-badge { background: #ffd6d6; color: #b33; border-color: #ffb0b0; }
         .offline-badge .sync-dot { background: #b33; }
 
-        .countdown-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-            gap: 1.5rem;
-        }
+        .countdown-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1.5rem; }
 
-        .countdown-card {
-            background: #1c1c1c;
-            border-radius: 1.5rem;
-            padding: 1.8rem 1.8rem 1.5rem;
-            box-shadow: 0 12px 30px rgba(0, 20, 30, 0.25);
-            border: 1px solid #2e2e2e;
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
-            transition: 0.25s;
-        }
-        .countdown-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0, 20, 30, 0.35);
-            border-color: #ffc107;
-        }
+        .countdown-card { background: #1c1c1c; border-radius: 1.5rem; padding: 1.8rem 1.8rem 1.5rem; box-shadow: 0 12px 30px rgba(0, 20, 30, 0.25); border: 1px solid #2e2e2e; display: flex; flex-direction: column; gap: 1.2rem; transition: 0.25s; }
+        .countdown-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0, 20, 30, 0.35); border-color: #ffc107; }
 
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-        .event-name {
-            font-weight: 700;
-            font-size: 1.15rem;
-            color: #ffffff;
-            letter-spacing: 0.5px;
-            line-height: 1.4;
-        }
+        .card-header { display: flex; align-items: center; justify-content: center; text-align: center; flex-direction: column; gap: 0.3rem; }
+        .event-name { font-weight: 700; font-size: 1.15rem; color: #ffffff; letter-spacing: 0.5px; line-height: 1.4; }
+        .event-phase { font-size: 0.75rem; color: #f5b301; font-weight: 600; letter-spacing: 0.5px; }
 
-        .countdown-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.6rem;
-        }
-        .time-box {
-            background: #141414;
-            border: 2px solid #f5b301;
-            border-radius: 0.9rem;
-            padding: 0.7rem 0.3rem 0.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.15rem;
-        }
-        .time-value {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #f5b301;
-            line-height: 1;
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            letter-spacing: -1px;
-        }
-        .time-label {
-            font-size: 0.75rem;
-            color: #bdbdbd;
-            font-weight: 500;
-            letter-spacing: 1px;
-        }
+        .countdown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; }
+        .time-box { background: #141414; border: 2px solid #f5b301; border-radius: 0.9rem; padding: 0.7rem 0.3rem 0.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.15rem; }
+        .time-value { font-size: 2rem; font-weight: 800; color: #f5b301; line-height: 1; font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: -1px; }
+        .time-label { font-size: 0.75rem; color: #bdbdbd; font-weight: 500; letter-spacing: 1px; }
 
         .progress-section { display: flex; flex-direction: column; gap: 0.4rem; }
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.78rem;
-            color: #bdbdbd;
-            font-weight: 500;
-        }
+        .progress-header { display: flex; justify-content: space-between; font-size: 0.78rem; color: #bdbdbd; font-weight: 500; }
         .progress-remaining { color: #e0e0e0; font-weight: 600; }
-        .progress-wrap {
-            width: 100%;
-            height: 10px;
-            background: #2e2e2e;
-            border-radius: 30px;
-            overflow: hidden;
-        }
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #f5b301 0%, #e8a800 100%);
-            border-radius: 30px;
-            transition: width 0.6s ease;
-            box-shadow: 0 0 8px rgba(245, 179, 1, 0.5);
-        }
+        .progress-wrap { width: 100%; height: 10px; background: #2e2e2e; border-radius: 30px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #f5b301 0%, #e8a800 100%); border-radius: 30px; transition: width 0.6s ease; box-shadow: 0 0 8px rgba(245, 179, 1, 0.5); }
 
-        .card-message {
-            text-align: center;
-            font-size: 0.85rem;
-            color: #d4b96a;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            line-height: 1.5;
-            margin-top: 0.2rem;
-        }
+        .card-message { text-align: center; font-size: 0.85rem; color: #d4b96a; font-weight: 500; letter-spacing: 0.5px; line-height: 1.5; margin-top: 0.2rem; }
 
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: #0b2a3b;
-            background: rgba(255,255,255,0.5);
-            border-radius: 2rem;
-            font-size: 1.1rem;
-            border: 2px dashed rgba(11,42,59,0.2);
-            grid-column: 1 / -1;
-        }
+        .empty-state { text-align: center; padding: 4rem 2rem; color: #0b2a3b; background: rgba(255,255,255,0.5); border-radius: 2rem; font-size: 1.1rem; border: 2px dashed rgba(11,42,59,0.2); grid-column: 1 / -1; }
 
-        /* ===== 固定在底部的頁尾 ===== */
-        .footer-note {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            text-align: center;
-            padding: 0.9rem 1rem 0.8rem;
-            font-size: 1rem;
-            color: #0b2a3b;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-            background: rgba(168, 213, 229, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(11, 42, 59, 0.1);
-            z-index: 100;
-            line-height: 1.6;
-        }
-        .view-count {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            font-size: 0.85rem;
-            color: #1e5a3a;
-            background: #c8ecd6;
-            padding: 0.2rem 0.8rem;
-            border-radius: 30px;
-            font-weight: 700;
-            border: 1px solid #8fd4a8;
-            margin-top: 0.3rem;
-        }
+        .footer-note { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; padding: 0.9rem 1rem 0.8rem; font-size: 1rem; color: #0b2a3b; letter-spacing: 0.5px; font-weight: 600; background: rgba(168, 213, 229, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid rgba(11, 42, 59, 0.1); z-index: 100; line-height: 1.6; }
+        .view-count { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: #1e5a3a; background: #c8ecd6; padding: 0.2rem 0.8rem; border-radius: 30px; font-weight: 700; border: 1px solid #8fd4a8; margin-top: 0.3rem; }
 
         @media (max-width: 600px) {
             body { padding: 1.2rem 1rem 6rem; }
@@ -204,7 +84,6 @@
         import { getDatabase, ref, onValue, runTransaction }
             from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        // ========== 您的 Firebase 設定 ==========
         const firebaseConfig = {
             apiKey: "AIzaSyBqxkKFETcINEbnuDN7KxGyqsbdntvPd4c",
             authDomain: "countdown-system-d8ad6.firebaseapp.com",
@@ -215,7 +94,6 @@
             appId: "1:1077561154299:web:52f82e19f178e8203cae5e",
             measurementId: "G-SJHM41JX6F"
         };
-        // ========================================
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
@@ -223,21 +101,14 @@
         const messagesRef = ref(db, 'messages');
         const viewsRef = ref(db, 'total_views');
 
-        // ---------- 瀏覽次數 +1（每次重新整理算一次） ----------
-        runTransaction(viewsRef, (current) => {
-            return (current || 0) + 1;
-        }).catch((err) => {
-            console.error('瀏覽次數更新失敗：', err);
-        });
+        runTransaction(viewsRef, (current) => (current || 0) + 1).catch(err => console.error(err));
 
-        // ---------- 即時監聽瀏覽次數 ----------
         onValue(viewsRef, (snapshot) => {
             const count = snapshot.val() || 0;
             const el = document.getElementById('viewCount');
             if (el) el.textContent = count.toLocaleString('zh-TW');
         });
 
-        // 固定節日（自動輪迴）
         const RECURRING_EVENTS = [
             { id: 'rec_1', name: '1/1 元旦', type: 'yearly', month: 1, day: 1, emoji: '🎆', defaultMessage: '新年快樂，全新開始！✨', progressDays: 365 },
             { id: 'rec_2', name: '2/28 和平紀念日', type: 'yearly', month: 2, day: 28, emoji: '🕊️', defaultMessage: '和平紀念日，珍惜自由', progressDays: 365 },
@@ -249,7 +120,6 @@
         let adminEvents = [];
         let customMessages = {};
 
-        // ---------- Firebase 監聽 ----------
         onValue(eventsRef, (snapshot) => {
             const data = snapshot.val() || {};
             adminEvents = Object.entries(data).map(([id, val]) => ({ id, ...val }));
@@ -277,7 +147,6 @@
             }
         }
 
-        // ---------- 日期計算 ----------
         function getNextYearlyDate(month, day) {
             const now = new Date();
             const year = now.getFullYear();
@@ -308,7 +177,6 @@
             return null;
         }
 
-        // ---------- 建立三種事件資料 ----------
         function getFixedRecurringEvents() {
             return RECURRING_EVENTS.map(ev => {
                 const target = getNextRecurringDate(ev);
@@ -316,15 +184,7 @@
                 const y = target.getFullYear();
                 const m = String(target.getMonth() + 1).padStart(2, '0');
                 const d = String(target.getDate()).padStart(2, '0');
-                return {
-                    id: ev.id,
-                    name: ev.name,
-                    date: `${y}-${m}-${d}`,
-                    fixed: true,
-                    emoji: ev.emoji,
-                    progressDays: ev.progressDays,
-                    defaultMessage: ev.defaultMessage
-                };
+                return { id: ev.id, name: ev.name, date: `${y}-${m}-${d}`, fixed: true, emoji: ev.emoji, progressDays: ev.progressDays, defaultMessage: ev.defaultMessage };
             }).filter(Boolean);
         }
 
@@ -335,32 +195,49 @@
                     const y = target.getFullYear();
                     const m = String(target.getMonth() + 1).padStart(2, '0');
                     const d = String(target.getDate()).padStart(2, '0');
-                    return {
-                        id: ev.id,
-                        name: ev.name,
-                        date: `${y}-${m}-${d}`,
-                        admin: true,
-                        yearly: true,
-                        emoji: ev.emoji || '',
-                        progressDays: ev.progressDays || 365,
-                        message: ev.message || ''
-                    };
+                    return { id: ev.id, name: ev.name, date: `${y}-${m}-${d}`, admin: true, yearly: true, emoji: ev.emoji || '', progressDays: ev.progressDays || 365, message: ev.message || '' };
                 } else {
-                    return {
-                        id: ev.id,
-                        name: ev.name,
-                        date: ev.date,
-                        admin: true,
-                        yearly: false,
-                        emoji: ev.emoji || '',
-                        progressDays: ev.progressDays || 365,
-                        message: ev.message || ''
-                    };
+                    return { id: ev.id, name: ev.name, date: ev.date, endDate: ev.endDate || '', admin: true, yearly: false, emoji: ev.emoji || '', progressDays: ev.progressDays || 365, message: ev.message || '' };
                 }
             });
         }
 
-        // ---------- 倒數計算 ----------
+        // ===== 關鍵：取得目前有效目標日 =====
+        function getEffectiveTargetDate(ev) {
+            const now = new Date();
+            if (!ev.endDate) return ev.date;
+
+            const startT = new Date(ev.date + 'T00:00:00');
+            const endT = new Date(ev.endDate + 'T00:00:00');
+            const endAfter = new Date(endT.getTime() + 86400000);
+
+            if (now < startT) return ev.date;
+            if (now < endAfter) return ev.endDate;
+            return ev.endDate;
+        }
+
+        function getEventPhase(ev) {
+            const now = new Date();
+            const startT = new Date(ev.date + 'T00:00:00');
+            if (!ev.endDate) return now < startT ? 'before' : 'after';
+            const endT = new Date(ev.endDate + 'T00:00:00');
+            const endAfter = new Date(endT.getTime() + 86400000);
+            if (now < startT) return 'before';
+            if (now < endAfter) return 'during';
+            return 'after';
+        }
+
+        // 判斷事件是否應該顯示（多天活動：只要還沒過結束日隔天就顯示）
+        function isEventActive(ev) {
+            const now = new Date();
+            if (ev.endDate) {
+                const endT = new Date(ev.endDate + 'T00:00:00');
+                const endAfter = new Date(endT.getTime() + 86400000);
+                return now < endAfter;
+            }
+            return !getCountdownParts(ev.date).isPast;
+        }
+
         function getCountdownParts(dateStr) {
             const now = new Date();
             const target = new Date(dateStr + 'T00:00:00');
@@ -392,19 +269,16 @@
 
         function pad2(n) { return String(n).padStart(2, '0'); }
 
-        // ---------- 渲染公開列表 ----------
         function renderPublicList() {
             const container = document.getElementById('publicCountdownList');
-
             const fixed = getFixedRecurringEvents();
             const admin = getAdminEventsWithDate();
-
             const allEvents = [...fixed, ...admin];
 
             const active = allEvents
                 .filter(ev => {
                     if (!ev.date) return false;
-                    return !getCountdownParts(ev.date).isPast;
+                    return isEventActive(ev);
                 })
                 .sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -414,7 +288,9 @@
             }
 
             container.innerHTML = active.map(ev => {
-                const p = getCountdownParts(ev.date);
+                const targetStr = getEffectiveTargetDate(ev);
+                const p = getCountdownParts(targetStr);
+                const phase = getEventPhase(ev);
                 const progressDays = ev.progressDays || 365;
                 const percent = getProgressPercent(p.totalSeconds, progressDays);
                 const emoji = ev.emoji ? ev.emoji + ' ' : '';
@@ -422,37 +298,30 @@
                 let message = '';
                 if (ev.fixed) {
                     const customMsg = customMessages[ev.id];
-                    if (customMsg !== undefined && customMsg !== null && customMsg !== '') {
-                        message = customMsg;
-                    } else {
-                        message = ev.defaultMessage || '';
-                    }
+                    message = (customMsg !== undefined && customMsg !== null && customMsg !== '')
+                        ? customMsg : (ev.defaultMessage || '');
                 } else if (ev.admin) {
                     message = ev.message || '';
+                }
+
+                // 活動階段提示
+                let phaseLabel = '';
+                if (ev.endDate) {
+                    if (phase === 'before') phaseLabel = `<div class="event-phase">🎯 倒數到活動開始日</div>`;
+                    else if (phase === 'during') phaseLabel = `<div class="event-phase">🎊 活動進行中 · 倒數到結束日</div>`;
                 }
 
                 return `
                     <div class="countdown-card">
                         <div class="card-header">
                             <div class="event-name">${emoji}${escapeHtml(ev.name)}</div>
+                            ${phaseLabel}
                         </div>
                         <div class="countdown-grid">
-                            <div class="time-box">
-                                <div class="time-value" data-val="days" data-date="${ev.date}">${p.days}</div>
-                                <div class="time-label">天</div>
-                            </div>
-                            <div class="time-box">
-                                <div class="time-value" data-val="hours" data-date="${ev.date}">${pad2(p.hours)}</div>
-                                <div class="time-label">時</div>
-                            </div>
-                            <div class="time-box">
-                                <div class="time-value" data-val="minutes" data-date="${ev.date}">${pad2(p.minutes)}</div>
-                                <div class="time-label">分</div>
-                            </div>
-                            <div class="time-box">
-                                <div class="time-value" data-val="seconds" data-date="${ev.date}">${pad2(p.seconds)}</div>
-                                <div class="time-label">秒</div>
-                            </div>
+                            <div class="time-box"><div class="time-value" data-val="days" data-date="${ev.date}" data-end-date="${ev.endDate || ''}">${p.days}</div><div class="time-label">天</div></div>
+                            <div class="time-box"><div class="time-value" data-val="hours" data-date="${ev.date}" data-end-date="${ev.endDate || ''}">${pad2(p.hours)}</div><div class="time-label">時</div></div>
+                            <div class="time-box"><div class="time-value" data-val="minutes" data-date="${ev.date}" data-end-date="${ev.endDate || ''}">${pad2(p.minutes)}</div><div class="time-label">分</div></div>
+                            <div class="time-box"><div class="time-value" data-val="seconds" data-date="${ev.date}" data-end-date="${ev.endDate || ''}">${pad2(p.seconds)}</div><div class="time-label">秒</div></div>
                         </div>
                         <div class="progress-section">
                             <div class="progress-header">
@@ -460,7 +329,7 @@
                                 <span class="progress-remaining">剩 ${p.days} 天</span>
                             </div>
                             <div class="progress-wrap">
-                                <div class="progress-bar" data-bar-date="${ev.date}" style="width:${percent}%"></div>
+                                <div class="progress-bar" data-bar-date="${ev.date}" data-end-date="${ev.endDate || ''}" style="width:${percent}%"></div>
                             </div>
                         </div>
                         ${message ? `<div class="card-message">${escapeHtml(message)}</div>` : ''}
@@ -470,15 +339,44 @@
             startUpdater();
         }
 
-        // ---------- 每秒更新 ----------
         let interval = null;
         function startUpdater() {
             if (interval) clearInterval(interval);
             interval = setInterval(() => {
                 let needRerender = false;
+
+                // 檢查是否有事件從 before → during 的轉換，需要重新渲染
                 document.querySelectorAll('.time-value[data-date]').forEach(el => {
                     const dateStr = el.getAttribute('data-date');
-                    const p = getCountdownParts(dateStr);
+                    const endDateStr = el.getAttribute('data-end-date') || '';
+                    if (!dateStr) return;
+
+                    let targetStr = dateStr;
+                    if (endDateStr) {
+                        const now = new Date();
+                        const startT = new Date(dateStr + 'T00:00:00');
+                        const endT = new Date(endDateStr + 'T00:00:00');
+                        const endAfter = new Date(endT.getTime() + 86400000);
+
+                        if (now < startT) {
+                            targetStr = dateStr;
+                        } else if (now < endAfter) {
+                            targetStr = endDateStr;
+                            // 若剛好切換階段（還顯示舊的「倒數到活動開始日」），要重新渲染
+                            const card = el.closest('.countdown-card');
+                            if (card) {
+                                const phaseEl = card.querySelector('.event-phase');
+                                if (phaseEl && phaseEl.textContent.includes('倒數到活動開始日')) {
+                                    needRerender = true;
+                                }
+                            }
+                        } else {
+                            needRerender = true;
+                            return;
+                        }
+                    }
+
+                    const p = getCountdownParts(targetStr);
                     if (p.isPast) { needRerender = true; return; }
 
                     const val = el.getAttribute('data-val');
