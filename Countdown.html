@@ -110,8 +110,8 @@
         });
 
         const RECURRING_EVENTS = [
-            { id: 'rec_1', name: '1/1 元旦', type: 'yearly', month: 1, day: 1, emoji: '🎆', defaultMessage: '新年快樂，全新開始！✨', progressDays: 365 },
-            { id: 'rec_2', name: '2/28 和平紀念日', type: 'yearly', month: 2, day: 28, emoji: '🕊️', defaultMessage: '和平紀念日，珍惜自由', progressDays: 365 },
+            { id: 'rec_1', name: '01/01元旦', type: 'yearly', month: 1, day: 1, emoji: '🎆', defaultMessage: '新年快樂，全新開始！✨', progressDays: 365 },
+            { id: 'rec_2', name: '02/28和平紀念日', type: 'yearly', month: 2, day: 28, emoji: '🕊️', defaultMessage: '和平紀念日，珍惜自由', progressDays: 365 },
             { id: 'rec_3', name: '10/10 國慶日', type: 'yearly', month: 10, day: 10, emoji: '🎉', defaultMessage: '國慶連假放鬆去！🎈', progressDays: 365 },
             { id: 'rec_4', name: '10/10 版主生日', type: 'yearly', month: 10, day: 10, emoji: '🎂', defaultMessage: '生日快樂！Happy Birthday! 🎊', progressDays: 365 },
             { id: 'rec_5', name: '載具發票開獎', type: 'oddMonths', day: 25, emoji: '🧾', defaultMessage: '祝您中大獎！💰', progressDays: 60 }
@@ -202,15 +202,12 @@
             });
         }
 
-        // ===== 關鍵：取得目前有效目標日 =====
         function getEffectiveTargetDate(ev) {
             const now = new Date();
             if (!ev.endDate) return ev.date;
-
             const startT = new Date(ev.date + 'T00:00:00');
             const endT = new Date(ev.endDate + 'T00:00:00');
             const endAfter = new Date(endT.getTime() + 86400000);
-
             if (now < startT) return ev.date;
             if (now < endAfter) return ev.endDate;
             return ev.endDate;
@@ -227,7 +224,6 @@
             return 'after';
         }
 
-        // 判斷事件是否應該顯示（多天活動：只要還沒過結束日隔天就顯示）
         function isEventActive(ev) {
             const now = new Date();
             if (ev.endDate) {
@@ -304,7 +300,6 @@
                     message = ev.message || '';
                 }
 
-                // 活動階段提示
                 let phaseLabel = '';
                 if (ev.endDate) {
                     if (phase === 'before') phaseLabel = `<div class="event-phase">🎯 倒數到活動開始日</div>`;
@@ -344,8 +339,6 @@
             if (interval) clearInterval(interval);
             interval = setInterval(() => {
                 let needRerender = false;
-
-                // 檢查是否有事件從 before → during 的轉換，需要重新渲染
                 document.querySelectorAll('.time-value[data-date]').forEach(el => {
                     const dateStr = el.getAttribute('data-date');
                     const endDateStr = el.getAttribute('data-end-date') || '';
@@ -362,7 +355,6 @@
                             targetStr = dateStr;
                         } else if (now < endAfter) {
                             targetStr = endDateStr;
-                            // 若剛好切換階段（還顯示舊的「倒數到活動開始日」），要重新渲染
                             const card = el.closest('.countdown-card');
                             if (card) {
                                 const phaseEl = card.querySelector('.event-phase');
