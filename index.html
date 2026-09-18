@@ -257,7 +257,6 @@
             touch-action: none;
             border: 2px solid rgba(255,255,255,0.5);
         }
-        /* 旋鈕指針 */
         .volume-knob .knob-pointer {
             position: absolute;
             top: 4px;
@@ -271,7 +270,6 @@
             transition: transform 0.1s ease;
             box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
-        /* 旋鈕刻度線 */
         .volume-knob .knob-tick {
             position: absolute;
             width: 2px;
@@ -285,7 +283,6 @@
         .volume-knob .knob-tick.t75 { top: 8px; right: 6px; transform: rotate(-45deg); }
         .volume-knob .knob-tick.t100 { top: 2px; left: 50%; transform: translateX(-50%); }
 
-        /* 音量數值顯示 */
         .volume-value {
             font-size: 11px;
             font-weight: bold;
@@ -882,12 +879,14 @@
 </div>
 
 <script>
-    /* --- 音樂控制：播放/暫停、上一首、下一首，隨機+循環播放（20首） --- */
+    /* --- 音樂控制：播放/暫停、上一首、下一首，隨機+循環播放（30首） --- */
     const songs = [
         '01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3',
         '06.mp3', '07.mp3', '08.mp3', '09.mp3', '10.mp3',
         '11.mp3', '12.mp3', '13.mp3', '14.mp3', '15.mp3',
-        '16.mp3', '17.mp3', '18.mp3', '19.mp3', '20.mp3'
+        '16.mp3', '17.mp3', '18.mp3', '19.mp3', '20.mp3',
+        '21.mp3', '22.mp3', '23.mp3', '24.mp3', '25.mp3',
+        '26.mp3', '27.mp3', '28.mp3', '29.mp3', '30.mp3'
     ];
     let currentSongIndex = 0;
     let lastPlayedIndex = -1;
@@ -915,7 +914,6 @@
 
     // 更新旋鈕UI（指針旋轉 + 數值顯示）
     function updateKnobUI() {
-        // 指針旋轉角度：-135度（最小）到 +135度（最大），總共270度範圍
         const angle = -135 + (volumePercent / 100) * 270;
         knobPointer.style.transform = `translateX(-50%) rotate(${angle}deg)`;
         volumeValue.textContent = volumePercent;
@@ -942,7 +940,6 @@
         if (!isDragging) return;
         e.preventDefault();
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        // 向上拖曳增加音量，向下減少（每10px改變約5%）
         const deltaY = startY - clientY;
         let newVolume = startVolume + Math.round(deltaY / 10) * 5;
         newVolume = Math.max(0, Math.min(100, newVolume));
