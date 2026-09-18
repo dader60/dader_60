@@ -234,49 +234,70 @@
             transform: rotate(10deg);
         }
 
-        .volume-icon {
-            font-size: 22px;
-            user-select: none;
+        /* --- 旋鈕式音量控制 --- */
+        .volume-knob-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
             flex-shrink: 0;
-            display: inline-block;
+        }
+        .volume-knob {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #f0f0f0, #c0c0c0 50%, #888 100%);
+            box-shadow: 
+                0 3px 8px rgba(0,0,0,0.3),
+                inset 0 1px 2px rgba(255,255,255,0.8),
+                inset 0 -2px 4px rgba(0,0,0,0.15);
+            cursor: pointer;
+            user-select: none;
+            touch-action: none;
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+        /* 旋鈕指針 */
+        .volume-knob .knob-pointer {
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            width: 3px;
+            height: 14px;
+            background: linear-gradient(to bottom, #4A90E2, #2c5fa8);
+            border-radius: 2px;
+            transform-origin: center 18px;
+            transform: translateX(-50%) rotate(0deg);
+            transition: transform 0.1s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        /* 旋鈕刻度線 */
+        .volume-knob .knob-tick {
+            position: absolute;
+            width: 2px;
+            height: 5px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 1px;
+        }
+        .volume-knob .knob-tick.t0 { bottom: 2px; left: 50%; transform: translateX(-50%); }
+        .volume-knob .knob-tick.t25 { bottom: 8px; right: 6px; transform: rotate(45deg); }
+        .volume-knob .knob-tick.t50 { top: 50%; right: 2px; transform: translateY(-50%); }
+        .volume-knob .knob-tick.t75 { top: 8px; right: 6px; transform: rotate(-45deg); }
+        .volume-knob .knob-tick.t100 { top: 2px; left: 50%; transform: translateX(-50%); }
+
+        /* 音量數值顯示 */
+        .volume-value {
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+            background: rgba(255,255,255,0.8);
+            padding: 1px 6px;
+            border-radius: 8px;
             min-width: 28px;
             text-align: center;
-        }
-
-        .volume-slider {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 50px;
-            height: 4px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 2px;
-            outline: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #4A90E2;
-            border: 2px solid white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-            cursor: pointer;
-        }
-        .volume-slider::-moz-range-thumb {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #4A90E2;
-            border: 2px solid white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-            cursor: pointer;
-        }
-        .volume-slider:hover {
-            background: rgba(0,0,0,0.35);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-family: Arial, sans-serif;
+            letter-spacing: 0.5px;
         }
 
         /* --- PotPlayer 風格頻譜可視化 --- */
@@ -298,7 +319,6 @@
             flex-shrink: 0;
             background: #4A90E2;
         }
-        /* 從左到右漸變顏色 - 低頻到高頻 */
         .pot-spectrum .pot-bar:nth-child(1) { background: #0044ff; }
         .pot-spectrum .pot-bar:nth-child(2) { background: #0066ff; }
         .pot-spectrum .pot-bar:nth-child(3) { background: #0088ff; }
@@ -324,7 +344,6 @@
         .pot-spectrum .pot-bar:nth-child(23) { background: #ff00cc; }
         .pot-spectrum .pot-bar:nth-child(24) { background: #cc00ff; }
 
-        /* PotPlayer 風格跳動 - 更自然的隨機感 */
         .pot-spectrum.active .pot-bar {
             animation: pot-bounce 0.5s ease-in-out infinite alternate;
         }
@@ -360,7 +379,6 @@
             100% { transform: scaleY(1); opacity: 1; }
         }
 
-        /* 暫停時靜止 */
         .pot-spectrum .pot-bar.stopped {
             animation: none !important;
             height: 3px !important;
@@ -660,8 +678,18 @@
                             <span class="label-icon" id="label-icon">♫</span>
                         </div>
                     </div>
-                    <span id="volume-icon" class="volume-icon">🔊</span>
-                    <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
+                    <!-- 旋鈕式音量控制 -->
+                    <div class="volume-knob-wrapper">
+                        <div class="volume-knob" id="volume-knob">
+                            <div class="knob-pointer" id="knob-pointer"></div>
+                            <div class="knob-tick t0"></div>
+                            <div class="knob-tick t25"></div>
+                            <div class="knob-tick t50"></div>
+                            <div class="knob-tick t75"></div>
+                            <div class="knob-tick t100"></div>
+                        </div>
+                        <div class="volume-value" id="volume-value">50</div>
+                    </div>
                 </div>
                 <!-- PotPlayer 風格頻譜可視化 -->
                 <div class="pot-spectrum" id="pot-spectrum">
@@ -715,7 +743,6 @@
     
     <a href="https://dader60.github.io/dader/" target="_blank" class="card">🚨 投訴系統</a>
     
-    <!-- 倒數日系統 (已移至投訴系統下方) -->
     <a href="Countdown.html" target="_blank" class="card countdown-card">📅 倒數日系統 ⏳</a>
     
     <div class="daily-chat-section">
@@ -770,7 +797,6 @@
     <a href="https://www.tiktok.com/@hbingzhe10.10" target="_blank" class="card owner-tiktok">🎵 版主抖音 (TikTok)</a>
     <a href="https://www.tiktok.com/@dader_.60?is_from_webapp=1&sender_device=pc" target="_blank" class="card owner-tiktok">🎵 靠北達德抖音</a>
     
-    <!-- 天氣即時查詢 (已移至靠北達德抖音下方) -->
     <a href="weather.html" target="_blank" class="card weather-card">☀️ 天氣即時查詢系統 ☁️</a>
     
     <a href="toolbox.html" target="_blank" class="card toolbox-card">🧰 萬用工具箱 </a>
@@ -877,33 +903,76 @@
     const playBtn = document.getElementById('play-btn');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
-    const volumeSlider = document.getElementById('volume-slider');
-    const volumeIcon = document.getElementById('volume-icon');
     const potSpectrum = document.getElementById('pot-spectrum');
+    const volumeKnob = document.getElementById('volume-knob');
+    const knobPointer = document.getElementById('knob-pointer');
+    const volumeValue = document.getElementById('volume-value');
 
-    // 設定初始音量
-    audio.volume = 0.5;
-    volumeSlider.value = 0.5;
-    updateVolumeIcon(0.5);
+    // 音量設定（0-100）
+    let volumePercent = 50;
+    audio.volume = volumePercent / 100;
+    updateKnobUI();
 
-    function updateVolumeIcon(value) {
-        const val = parseFloat(value);
-        if (val === 0) {
-            volumeIcon.textContent = '🔇';
-        } else if (val > 0 && val <= 0.2) {
-            volumeIcon.textContent = '🔈';
-        } else if (val > 0.2 && val <= 0.5) {
-            volumeIcon.textContent = '🔉';
-        } else {
-            volumeIcon.textContent = '🔊';
-        }
+    // 更新旋鈕UI（指針旋轉 + 數值顯示）
+    function updateKnobUI() {
+        // 指針旋轉角度：-135度（最小）到 +135度（最大），總共270度範圍
+        const angle = -135 + (volumePercent / 100) * 270;
+        knobPointer.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+        volumeValue.textContent = volumePercent;
     }
 
-    volumeSlider.addEventListener('input', function() {
-        const val = parseFloat(this.value);
-        audio.volume = val;
-        updateVolumeIcon(val);
-    });
+    // 旋鈕互動 - 滑鼠/觸控拖曳
+    let isDragging = false;
+    let startY = 0;
+    let startVolume = 0;
+
+    function handleKnobStart(e) {
+        e.preventDefault();
+        isDragging = true;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        startY = clientY;
+        startVolume = volumePercent;
+        document.addEventListener('mousemove', handleKnobMove);
+        document.addEventListener('mouseup', handleKnobEnd);
+        document.addEventListener('touchmove', handleKnobMove, { passive: false });
+        document.addEventListener('touchend', handleKnobEnd);
+    }
+
+    function handleKnobMove(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        // 向上拖曳增加音量，向下減少（每10px改變約5%）
+        const deltaY = startY - clientY;
+        let newVolume = startVolume + Math.round(deltaY / 10) * 5;
+        newVolume = Math.max(0, Math.min(100, newVolume));
+        volumePercent = newVolume;
+        audio.volume = volumePercent / 100;
+        updateKnobUI();
+    }
+
+    function handleKnobEnd() {
+        isDragging = false;
+        document.removeEventListener('mousemove', handleKnobMove);
+        document.removeEventListener('mouseup', handleKnobEnd);
+        document.removeEventListener('touchmove', handleKnobMove);
+        document.removeEventListener('touchend', handleKnobEnd);
+    }
+
+    volumeKnob.addEventListener('mousedown', handleKnobStart);
+    volumeKnob.addEventListener('touchstart', handleKnobStart, { passive: false });
+
+    // 滑鼠滾輪控制音量
+    volumeKnob.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        if (e.deltaY < 0) {
+            volumePercent = Math.min(100, volumePercent + 5);
+        } else {
+            volumePercent = Math.max(0, volumePercent - 5);
+        }
+        audio.volume = volumePercent / 100;
+        updateKnobUI();
+    }, { passive: false });
 
     function updatePlayButton() {
         if (isPlaying) {
@@ -947,7 +1016,6 @@
         updateSpectrum();
     }
 
-    // 換歌時暫停頻譜動畫
     function pauseSpectrumForSongChange() {
         isSongChanging = true;
         potSpectrum.classList.remove('active');
