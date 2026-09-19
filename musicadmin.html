@@ -134,12 +134,33 @@
         .btn-secondary:hover {
             background: #1a4a7a;
         }
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #f1c40f);
+            color: #fff;
+        }
+        .btn-warning:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(243,156,18,0.5);
+        }
+        .btn-warning:active {
+            transform: scale(0.98);
+        }
         .btn-danger {
             background: #c0392b;
             color: #fff;
         }
         .btn-danger:hover {
             background: #e74c3c;
+        }
+        /* 按鈕群組（橫排） */
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .btn-row .btn {
+            margin-bottom: 0;
+            flex: 1;
         }
         /* 排程列表 */
         .schedule-list {
@@ -265,12 +286,16 @@
     <div class="card">
         <h2>🎼 預設歌單（無排程時播放）</h2>
         <div class="info-box">
-            📌 這是沒有設定排程時，主頁面會播放的歌曲。預設為全部 30 首隨機播放。
+            📌 這是沒有設定排程時，主頁面會播放的歌曲。預設為全部 30 首隨機播放。<br>
+            📌 按下「🔄 還原預設」會把歌單恢復成全部 30 首。
         </div>
         <div class="song-grid" id="default-grid">
             <!-- 由 JS 動態產生 -->
         </div>
-        <button class="btn btn-primary" onclick="saveDefault()">💾 儲存預設歌單</button>
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="saveDefault()">💾 儲存預設歌單</button>
+            <button class="btn btn-warning" onclick="resetDefault()">🔄 還原預設</button>
+        </div>
     </div>
 </div>
 
@@ -388,6 +413,24 @@
             .catch((err) => {
                 console.error(err);
                 showToast('儲存失敗：' + err.message, true);
+            });
+    }
+
+    /* ===== 還原預設歌單（全部 30 首） ===== */
+    function resetDefault() {
+        if (!confirm('確定要將預設歌單還原成全部 30 首嗎？')) return;
+        
+        scheduleRef.child('default').set(allSongs)
+            .then(() => {
+                // 勾選格全部勾選
+                document.querySelectorAll('#default-grid input[type="checkbox"]').forEach(cb => {
+                    cb.checked = true;
+                });
+                showToast('✅ 已還原預設歌單（全部 30 首）');
+            })
+            .catch((err) => {
+                console.error(err);
+                showToast('還原失敗：' + err.message, true);
             });
     }
 
