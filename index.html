@@ -234,63 +234,63 @@
             transform: rotate(10deg);
         }
 
-        /* --- 旋鈕式音量控制 --- */
-        .volume-knob-wrapper {
+        /* --- 音量 +、- 按鈕控制 --- */
+        .volume-btn-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 4px;
             flex-shrink: 0;
         }
-        .volume-knob {
-            position: relative;
-            width: 44px;
-            height: 44px;
+        .volume-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .volume-btn {
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            background: radial-gradient(circle at 35% 30%, #f0f0f0, #c0c0c0 50%, #888 100%);
-            box-shadow: 
-                0 3px 8px rgba(0,0,0,0.3),
-                inset 0 1px 2px rgba(255,255,255,0.8),
-                inset 0 -2px 4px rgba(0,0,0,0.15);
+            border: 2px solid rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.6);
+            color: #333;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
             user-select: none;
-            touch-action: none;
-            border: 2px solid rgba(255,255,255,0.5);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            padding: 0;
+            line-height: 1;
+            font-family: inherit;
         }
-        .volume-knob .knob-pointer {
-            position: absolute;
-            top: 4px;
-            left: 50%;
-            width: 3px;
-            height: 14px;
-            background: linear-gradient(to bottom, #4A90E2, #2c5fa8);
-            border-radius: 2px;
-            transform-origin: center 18px;
-            transform: translateX(-50%) rotate(0deg);
-            transition: transform 0.1s ease;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        .volume-btn:hover {
+            background: rgba(255,255,255,0.95);
+            transform: scale(1.1);
         }
-        .volume-knob .knob-tick {
-            position: absolute;
-            width: 2px;
-            height: 5px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 1px;
+        .volume-btn:active {
+            transform: scale(0.9);
         }
-        .volume-knob .knob-tick.t0 { bottom: 2px; left: 50%; transform: translateX(-50%); }
-        .volume-knob .knob-tick.t25 { bottom: 8px; right: 6px; transform: rotate(45deg); }
-        .volume-knob .knob-tick.t50 { top: 50%; right: 2px; transform: translateY(-50%); }
-        .volume-knob .knob-tick.t75 { top: 8px; right: 6px; transform: rotate(-45deg); }
-        .volume-knob .knob-tick.t100 { top: 2px; left: 50%; transform: translateX(-50%); }
-
+        .volume-btn.minus {
+            background: rgba(255,255,255,0.5);
+        }
+        .volume-btn.plus {
+            background: rgba(74, 144, 226, 0.3);
+        }
+        .volume-btn.plus:hover {
+            background: rgba(74, 144, 226, 0.5);
+        }
         .volume-value {
             font-size: 11px;
             font-weight: bold;
             color: #333;
             background: rgba(255,255,255,0.8);
-            padding: 1px 6px;
+            padding: 1px 8px;
             border-radius: 8px;
-            min-width: 28px;
+            min-width: 30px;
             text-align: center;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             font-family: Arial, sans-serif;
@@ -675,15 +675,11 @@
                             <span class="label-icon" id="label-icon">♫</span>
                         </div>
                     </div>
-                    <!-- 旋鈕式音量控制 -->
-                    <div class="volume-knob-wrapper">
-                        <div class="volume-knob" id="volume-knob">
-                            <div class="knob-pointer" id="knob-pointer"></div>
-                            <div class="knob-tick t0"></div>
-                            <div class="knob-tick t25"></div>
-                            <div class="knob-tick t50"></div>
-                            <div class="knob-tick t75"></div>
-                            <div class="knob-tick t100"></div>
+                    <!-- 音量 +、- 按鈕控制 -->
+                    <div class="volume-btn-wrapper">
+                        <div class="volume-btn-group">
+                            <button class="volume-btn minus" id="volume-minus" title="音量 -5">−</button>
+                            <button class="volume-btn plus" id="volume-plus" title="音量 +5">+</button>
                         </div>
                         <div class="volume-value" id="volume-value">50</div>
                     </div>
@@ -906,73 +902,85 @@
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const potSpectrum = document.getElementById('pot-spectrum');
-    const volumeKnob = document.getElementById('volume-knob');
-    const knobPointer = document.getElementById('knob-pointer');
+    const volumeMinus = document.getElementById('volume-minus');
+    const volumePlus = document.getElementById('volume-plus');
     const volumeValue = document.getElementById('volume-value');
 
     // 音量設定（0-100）
     let volumePercent = 50;
     audio.volume = volumePercent / 100;
-    updateKnobUI();
+    updateVolumeUI();
 
-    // 更新旋鈕UI（指針旋轉 + 數值顯示）
-    function updateKnobUI() {
-        const angle = -135 + (volumePercent / 100) * 270;
-        knobPointer.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+    // 更新音量UI（數值顯示）
+    function updateVolumeUI() {
         volumeValue.textContent = volumePercent;
     }
 
-    // 旋鈕互動 - 滑鼠/觸控拖曳
-    let isDragging = false;
-    let startY = 0;
-    let startVolume = 0;
-
-    function handleKnobStart(e) {
-        e.preventDefault();
-        isDragging = true;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        startY = clientY;
-        startVolume = volumePercent;
-        document.addEventListener('mousemove', handleKnobMove);
-        document.addEventListener('mouseup', handleKnobEnd);
-        document.addEventListener('touchmove', handleKnobMove, { passive: false });
-        document.addEventListener('touchend', handleKnobEnd);
-    }
-
-    function handleKnobMove(e) {
-        if (!isDragging) return;
-        e.preventDefault();
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        const deltaY = startY - clientY;
-        let newVolume = startVolume + Math.round(deltaY / 10) * 5;
-        newVolume = Math.max(0, Math.min(100, newVolume));
-        volumePercent = newVolume;
+    // +5 按鈕
+    volumePlus.addEventListener('click', function() {
+        volumePercent = Math.min(100, volumePercent + 5);
         audio.volume = volumePercent / 100;
-        updateKnobUI();
+        updateVolumeUI();
+    });
+
+    // -5 按鈕
+    volumeMinus.addEventListener('click', function() {
+        volumePercent = Math.max(0, volumePercent - 5);
+        audio.volume = volumePercent / 100;
+        updateVolumeUI();
+    });
+
+    // 長按連續調整（可選）
+    let holdTimer = null;
+    let holdInterval = null;
+
+    function startHold(action) {
+        action();
+        holdTimer = setTimeout(() => {
+            holdInterval = setInterval(action, 150);
+        }, 500);
     }
 
-    function handleKnobEnd() {
-        isDragging = false;
-        document.removeEventListener('mousemove', handleKnobMove);
-        document.removeEventListener('mouseup', handleKnobEnd);
-        document.removeEventListener('touchmove', handleKnobMove);
-        document.removeEventListener('touchend', handleKnobEnd);
+    function stopHold() {
+        clearTimeout(holdTimer);
+        clearInterval(holdInterval);
     }
 
-    volumeKnob.addEventListener('mousedown', handleKnobStart);
-    volumeKnob.addEventListener('touchstart', handleKnobStart, { passive: false });
-
-    // 滑鼠滾輪控制音量
-    volumeKnob.addEventListener('wheel', function(e) {
+    // + 長按
+    volumePlus.addEventListener('mousedown', () => startHold(() => {
+        volumePercent = Math.min(100, volumePercent + 5);
+        audio.volume = volumePercent / 100;
+        updateVolumeUI();
+    }));
+    volumePlus.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        if (e.deltaY < 0) {
+        startHold(() => {
             volumePercent = Math.min(100, volumePercent + 5);
-        } else {
-            volumePercent = Math.max(0, volumePercent - 5);
-        }
-        audio.volume = volumePercent / 100;
-        updateKnobUI();
+            audio.volume = volumePercent / 100;
+            updateVolumeUI();
+        });
     }, { passive: false });
+
+    // - 長按
+    volumeMinus.addEventListener('mousedown', () => startHold(() => {
+        volumePercent = Math.max(0, volumePercent - 5);
+        audio.volume = volumePercent / 100;
+        updateVolumeUI();
+    }));
+    volumeMinus.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        startHold(() => {
+            volumePercent = Math.max(0, volumePercent - 5);
+            audio.volume = volumePercent / 100;
+            updateVolumeUI();
+        });
+    }, { passive: false });
+
+    // 放開停止長按
+    ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(evt => {
+        volumePlus.addEventListener(evt, stopHold);
+        volumeMinus.addEventListener(evt, stopHold);
+    });
 
     function updatePlayButton() {
         if (isPlaying) {
