@@ -802,7 +802,7 @@
         <div class="shuttle-info">
             使用單位：220 (達德商工) 請輸入數字<br>
             學號：校車編號 (例如 125 校車請輸入 125)<br>
-            密碼：tdvs 車號 000 (例如 125 校車請輸入 tdvs125000)
+            密碼：tdvs 車號 000 (例如 125 校車請輸入 125000)
         </div>
     </div>
 
@@ -875,7 +875,7 @@
 </div>
 
 <script>
-    /* --- 音樂控制：第一首固定（讀 Firebase 排程），之後隨機+循環播放（30首） --- */
+    /* --- 音樂控制：前 N 首照 Firebase 排程，排程歌不出現在隨機中（30首） --- */
     const allSongs = [
         '01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3',
         '06.mp3', '07.mp3', '08.mp3', '09.mp3', '10.mp3',
@@ -885,12 +885,13 @@
         '26.mp3', '27.mp3', '28.mp3', '29.mp3', '30.mp3'
     ];
 
-    // songs 為「隨機用清單」，永遠是全部歌曲
-    let songs = [...allSongs];
+    let songs = [...allSongs];        // 全部歌曲（供 indexOf 查詢）
+    let randomPool = [...allSongs];   // 隨機池（排程歌會被排除）
     let currentSongIndex = 0;
     let lastPlayedIndex = -1;
     let remainingIndices = [];
     let isSongChanging = false;
+    let scheduledQueue = [];          // 尚未播完的排程歌
     
     const audio = new Audio();
     let isPlaying = false;
@@ -930,7 +931,7 @@
         updateVolumeUI();
     });
 
-    // 長按連續調整（可選）
+    // 長按連續調整
     let holdTimer = null;
     let holdInterval = null;
 
@@ -946,7 +947,6 @@
         clearInterval(holdInterval);
     }
 
-    // + 長按
     volumePlus.addEventListener('mousedown', () => startHold(() => {
         volumePercent = Math.min(100, volumePercent + 5);
         audio.volume = volumePercent / 100;
@@ -961,7 +961,6 @@
         });
     }, { passive: false });
 
-    // - 長按
     volumeMinus.addEventListener('mousedown', () => startHold(() => {
         volumePercent = Math.max(0, volumePercent - 5);
         audio.volume = volumePercent / 100;
@@ -976,7 +975,6 @@
         });
     }, { passive: false });
 
-    // 放開停止長按
     ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(evt => {
         volumePlus.addEventListener(evt, stopHold);
         volumeMinus.addEventListener(evt, stopHold);
@@ -1041,12 +1039,20 @@
         }, 400);
     }
 
+    /* ===== 初始化隨機清單（從隨機池建立） ===== */
     function initRemainingList() {
-        remainingIndices = songs.map((_, i) => i);
+        // 從隨機池建立（排除排程歌）
+        const poolIndices = randomPool.map(s => songs.indexOf(s)).filter(i => i >= 0);
+        
+        remainingIndices = [...poolIndices];
+        
+        // Fisher-Yates 洗牌
         for (let i = remainingIndices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [remainingIndices[i], remainingIndices[j]] = [remainingIndices[j], remainingIndices[i]];
         }
+        
+        // 避免第一首跟上一首重複
         if (remainingIndices.length > 1 && remainingIndices[0] === lastPlayedIndex) {
             [remainingIndices[0], remainingIndices[1]] = [remainingIndices[1], remainingIndices[0]];
         }
@@ -1074,22 +1080,39 @@
         }
     }
 
+    /* ===== 播放下一首（優先播排程） ===== */
     function playNext() {
-        const newIndex = getNextSongIndex();
+        let newIndex;
+        
+        if (scheduledQueue.length > 0) {
+            // 還有排程歌 → 播排程
+            const nextSong = scheduledQueue.shift();
+            newIndex = songs.indexOf(nextSong);
+            console.log('📅 播放排程歌：', nextSong, '（剩', scheduledQueue.length, '首）');
+        } else {
+            // 排程播完 → 從隨機池取（已排除排程歌）
+            newIndex = getNextSongIndex();
+        }
+        
         lastPlayedIndex = currentSongIndex;
         playSong(newIndex);
     }
 
+    /* ===== 播放上一首 ===== */
     function playPrev() {
         if (lastPlayedIndex >= 0 && lastPlayedIndex !== currentSongIndex) {
-            remainingIndices.push(currentSongIndex);
             const prev = lastPlayedIndex;
+            
+            // 如果目前這首不是排程歌（在隨機池裡），把它放回剩餘清單
+            const currentSongName = songs[currentSongIndex];
+            if (randomPool.includes(currentSongName)) {
+                remainingIndices.push(currentSongIndex);
+            }
+            
             lastPlayedIndex = currentSongIndex;
             playSong(prev);
         } else {
-            const newIndex = getNextSongIndex();
-            lastPlayedIndex = currentSongIndex;
-            playSong(newIndex);
+            playNext();
         }
     }
 
@@ -1114,8 +1137,8 @@
         playNext();
     };
 
-    /* ===== 從 Firebase 讀取今天的排程（只回傳第一首） ===== */
-    function loadTodayFirstSong() {
+    /* ===== 從 Firebase 讀取今天的完整排程 ===== */
+    function loadTodayPlaylist() {
         return new Promise((resolve) => {
             try {
                 if (typeof firebase === 'undefined' || !firebase.apps.length) {
@@ -1127,17 +1150,15 @@
                 db.ref('music_schedule').once('value').then((snapshot) => {
                     const data = snapshot.val() || {};
                     
-                    // 取得今天日期 YYYY-MM-DD
                     const today = new Date();
                     const yyyy = today.getFullYear();
                     const mm = String(today.getMonth() + 1).padStart(2, '0');
                     const dd = String(today.getDate()).padStart(2, '0');
                     const todayKey = `${yyyy}-${mm}-${dd}`;
                     
-                    // 今天有排程 → 回傳排程第一首
                     if (data[todayKey] && data[todayKey].length > 0) {
-                        console.log(`📅 今天有排程：${todayKey}，第一首：${data[todayKey][0]}`);
-                        resolve(data[todayKey][0]);
+                        console.log(`📅 今天有排程：${todayKey}，共 ${data[todayKey].length} 首`);
+                        resolve(data[todayKey]);
                     } else {
                         resolve(null);
                     }
@@ -1152,28 +1173,40 @@
         });
     }
 
-    /* ===== 初始化播放：第一首固定（有排程）或隨機（無排程） ===== */
+    /* ===== 初始化播放 ===== */
     function initAudio() {
-        loadTodayFirstSong().then((firstSong) => {
-            // songs 永遠是全部歌曲
+        loadTodayPlaylist().then((todayPlaylist) => {
             songs = [...allSongs];
+            randomPool = [...allSongs]; // 重設隨機池
             
-            if (firstSong && songs.includes(firstSong)) {
-                // ===== 有排程：第一首固定播排程歌 =====
-                currentSongIndex = songs.indexOf(firstSong);
-                console.log('🎵 第一首固定播放：', firstSong);
+            if (todayPlaylist && todayPlaylist.length > 0) {
+                // 過濾掉不在 allSongs 裡的歌
+                scheduledQueue = todayPlaylist.filter(s => songs.includes(s));
+                console.log('📅 排程播放佇列：', scheduledQueue);
+                
+                if (scheduledQueue.length > 0) {
+                    // 🔥 把排程歌從隨機池移除（排程歌不會出現在隨機中）
+                    randomPool = allSongs.filter(s => !scheduledQueue.includes(s));
+                    console.log('🎲 隨機池（排除排程歌）：', randomPool.length, '首');
+                    
+                    // 第一首播排程第一首
+                    const firstSong = scheduledQueue.shift();
+                    currentSongIndex = songs.indexOf(firstSong);
+                    console.log('🎵 第一首固定播放：', firstSong);
+                } else {
+                    // 排程歌都不在 allSongs 裡 → 隨機
+                    currentSongIndex = Math.floor(Math.random() * songs.length);
+                }
             } else {
-                // ===== 沒排程：第一首隨機 =====
+                // 沒排程：從全部歌曲隨機
                 currentSongIndex = Math.floor(Math.random() * songs.length);
                 console.log('🎵 今天沒排程，第一首隨機：', songs[currentSongIndex]);
             }
             
             lastPlayedIndex = currentSongIndex;
             
-            // 初始化隨機清單（排除第一首）
+            // 初始化隨機清單（從隨機池建立）
             initRemainingList();
-            const idx = remainingIndices.indexOf(currentSongIndex);
-            if (idx > -1) remainingIndices.splice(idx, 1);
             
             audio.src = songs[currentSongIndex];
             audio.load();
