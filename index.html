@@ -879,8 +879,8 @@
 </div>
 
 <script>
-    /* --- 音樂控制：播放/暫停、上一首、下一首，隨機+循環播放（30首） --- */
-    const songs = [
+    /* --- 音樂控制：第一首固定（讀 Firebase 排程），之後隨機+循環播放（30首） --- */
+    const allSongs = [
         '01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3',
         '06.mp3', '07.mp3', '08.mp3', '09.mp3', '10.mp3',
         '11.mp3', '12.mp3', '13.mp3', '14.mp3', '15.mp3',
@@ -888,6 +888,9 @@
         '21.mp3', '22.mp3', '23.mp3', '24.mp3', '25.mp3',
         '26.mp3', '27.mp3', '28.mp3', '29.mp3', '30.mp3'
     ];
+
+    // songs 為「隨機用清單」，永遠是全部歌曲
+    let songs = [...allSongs];
     let currentSongIndex = 0;
     let lastPlayedIndex = -1;
     let remainingIndices = [];
@@ -1103,34 +1106,89 @@
         playNext();
     };
 
-    function initAudio() {
-        currentSongIndex = Math.floor(Math.random() * songs.length);
-        lastPlayedIndex = currentSongIndex;
-        initRemainingList();
-        const idx = remainingIndices.indexOf(currentSongIndex);
-        if (idx > -1) remainingIndices.splice(idx, 1);
-        
-        audio.src = songs[currentSongIndex];
-        audio.load();
-        
-        audio.play().then(() => {
-            isPlaying = true;
-            updateUI();
-        }).catch(() => {
-            isPlaying = false;
-            updateUI();
-            const enableAudio = () => {
-                if (!isPlaying) {
-                    audio.play().then(() => {
-                        isPlaying = true;
-                        updateUI();
-                    }).catch(() => {});
+    /* ===== 從 Firebase 讀取今天的排程（只回傳第一首） ===== */
+    function loadTodayFirstSong() {
+        return new Promise((resolve) => {
+            try {
+                if (typeof firebase === 'undefined' || !firebase.apps.length) {
+                    resolve(null);
+                    return;
                 }
-                document.removeEventListener('click', enableAudio);
-                document.removeEventListener('touchstart', enableAudio);
-            };
-            document.addEventListener('click', enableAudio);
-            document.addEventListener('touchstart', enableAudio);
+                
+                const db = firebase.database();
+                db.ref('music_schedule').once('value').then((snapshot) => {
+                    const data = snapshot.val() || {};
+                    
+                    // 取得今天日期 YYYY-MM-DD
+                    const today = new Date();
+                    const yyyy = today.getFullYear();
+                    const mm = String(today.getMonth() + 1).padStart(2, '0');
+                    const dd = String(today.getDate()).padStart(2, '0');
+                    const todayKey = `${yyyy}-${mm}-${dd}`;
+                    
+                    // 今天有排程 → 回傳排程第一首
+                    if (data[todayKey] && data[todayKey].length > 0) {
+                        console.log(`📅 今天有排程：${todayKey}，第一首：${data[todayKey][0]}`);
+                        resolve(data[todayKey][0]);
+                    } else {
+                        resolve(null);
+                    }
+                }).catch((err) => {
+                    console.error('讀取排程失敗', err);
+                    resolve(null);
+                });
+            } catch (err) {
+                console.error('讀取排程錯誤', err);
+                resolve(null);
+            }
+        });
+    }
+
+    /* ===== 初始化播放：第一首固定（有排程）或隨機（無排程） ===== */
+    function initAudio() {
+        loadTodayFirstSong().then((firstSong) => {
+            // songs 永遠是全部歌曲
+            songs = [...allSongs];
+            
+            if (firstSong && songs.includes(firstSong)) {
+                // ===== 有排程：第一首固定播排程歌 =====
+                currentSongIndex = songs.indexOf(firstSong);
+                console.log('🎵 第一首固定播放：', firstSong);
+            } else {
+                // ===== 沒排程：第一首隨機 =====
+                currentSongIndex = Math.floor(Math.random() * songs.length);
+                console.log('🎵 今天沒排程，第一首隨機：', songs[currentSongIndex]);
+            }
+            
+            lastPlayedIndex = currentSongIndex;
+            
+            // 初始化隨機清單（排除第一首）
+            initRemainingList();
+            const idx = remainingIndices.indexOf(currentSongIndex);
+            if (idx > -1) remainingIndices.splice(idx, 1);
+            
+            audio.src = songs[currentSongIndex];
+            audio.load();
+            
+            audio.play().then(() => {
+                isPlaying = true;
+                updateUI();
+            }).catch(() => {
+                isPlaying = false;
+                updateUI();
+                const enableAudio = () => {
+                    if (!isPlaying) {
+                        audio.play().then(() => {
+                            isPlaying = true;
+                            updateUI();
+                        }).catch(() => {});
+                    }
+                    document.removeEventListener('click', enableAudio);
+                    document.removeEventListener('touchstart', enableAudio);
+                };
+                document.addEventListener('click', enableAudio);
+                document.addEventListener('touchstart', enableAudio);
+            });
         });
     }
 
