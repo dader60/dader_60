@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 音樂排程管理後台</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .admin-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #4A90E2;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+        .card {
+            background: #16213e;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .card h2 {
+            color: #6ab0ff;
+            font-size: 17px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #aaa;
+        }
+        input[type="date"], input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #0f3460;
+            background: #0f3460;
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+        input[type="date"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #4A90E2;
+        }
+        /* 歌曲勾選格 */
+        .song-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .song-checkbox {
+            position: relative;
+        }
+        .song-checkbox input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .song-checkbox label {
+            display: block;
+            padding: 8px 4px;
+            background: #0f3460;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
+            color: #ccc;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            margin: 0;
+        }
+        .song-checkbox input:checked + label {
+            background: #4A90E2;
+            color: #fff;
+            border-color: #6ab0ff;
+            font-weight: bold;
+        }
+        .song-checkbox label:hover {
+            background: #1a4a7a;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4A90E2, #6ab0ff);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(74,144,226,0.5);
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        .btn-secondary {
+            background: #0f3460;
+            color: #ccc;
+        }
+        .btn-secondary:hover {
+            background: #1a4a7a;
+        }
+        .btn-danger {
+            background: #c0392b;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #e74c3c;
+        }
+        /* 排程列表 */
+        .schedule-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .schedule-item {
+            background: #0f3460;
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .schedule-item .date {
+            font-weight: bold;
+            color: #6ab0ff;
+            font-size: 14px;
+        }
+        .schedule-item .songs-preview {
+            font-size: 12px;
+            color: #aaa;
+            flex: 1;
+            word-break: break-all;
+        }
+        .schedule-item .delete-btn {
+            background: #c0392b;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            flex-shrink: 0;
+            font-family: inherit;
+        }
+        .schedule-item .delete-btn:hover {
+            background: #e74c3c;
+        }
+        /* Toast 提示 */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #27ae60;
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+            z-index: 9999;
+        }
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        #toast.error {
+            background: #c0392b;
+        }
+        .empty-hint {
+            text-align: center;
+            color: #666;
+            font-size: 13px;
+            padding: 20px;
+        }
+        .loading {
+            text-align: center;
+            color: #6ab0ff;
+            padding: 20px;
+        }
+        .info-box {
+            background: rgba(74,144,226,0.1);
+            border-left: 3px solid #4A90E2;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <h1>🎵 音樂排程管理後台</h1>
+    <div class="subtitle">靠北達德速度版｜設定特定日期播放指定歌曲</div>
+
+    <!-- 新增排程 -->
+    <div class="card">
+        <h2>➕ 新增排程</h2>
+        <div class="info-box">
+            📌 選擇日期 + 勾選要播放的歌曲，儲存後，當天主頁面就會播放這些歌。<br>
+            📌 如果當天沒有排程，會播放「預設歌單」（全部 30 首隨機）。
+        </div>
+        
+        <label>選擇日期</label>
+        <input type="date" id="schedule-date">
+        
+        <label>勾選歌曲（可多選）</label>
+        <div class="song-grid" id="song-grid">
+            <!-- 由 JS 動態產生 -->
+        </div>
+        
+        <button class="btn btn-primary" onclick="saveSchedule()">💾 儲存排程</button>
+        <button class="btn btn-secondary" onclick="selectAllSongs()">✅ 全選</button>
+        <button class="btn btn-secondary" onclick="clearAllSongs()">⬜ 全部取消</button>
+    </div>
+
+    <!-- 現有排程 -->
+    <div class="card">
+        <h2>📋 現有排程</h2>
+        <div class="schedule-list" id="schedule-list">
+            <div class="loading">載入中...</div>
+        </div>
+    </div>
+
+    <!-- 預設歌單 -->
+    <div class="card">
+        <h2>🎼 預設歌單（無排程時播放）</h2>
+        <div class="info-box">
+            📌 這是沒有設定排程時，主頁面會播放的歌曲。預設為全部 30 首隨機播放。
+        </div>
+        <div class="song-grid" id="default-grid">
+            <!-- 由 JS 動態產生 -->
+        </div>
+        <button class="btn btn-primary" onclick="saveDefault()">💾 儲存預設歌單</button>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<script>
+    /* ===== Firebase 設定 ===== */
+    const firebaseConfig = {
+        databaseURL: "https://total-views-969ba-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const scheduleRef = db.ref('music_schedule');
+
+    /* ===== 全部歌曲清單（30首） ===== */
+    const allSongs = [
+        '01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3',
+        '06.mp3', '07.mp3', '08.mp3', '09.mp3', '10.mp3',
+        '11.mp3', '12.mp3', '13.mp3', '14.mp3', '15.mp3',
+        '16.mp3', '17.mp3', '18.mp3', '19.mp3', '20.mp3',
+        '21.mp3', '22.mp3', '23.mp3', '24.mp3', '25.mp3',
+        '26.mp3', '27.mp3', '28.mp3', '29.mp3', '30.mp3'
+    ];
+
+    /* ===== Toast 提示 ===== */
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = isError ? 'error show' : 'show';
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2500);
+    }
+
+    /* ===== 產生歌曲勾選格 ===== */
+    function buildSongGrid(containerId, namePrefix) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        allSongs.forEach((song, i) => {
+            const num = String(i + 1).padStart(2, '0');
+            const div = document.createElement('div');
+            div.className = 'song-checkbox';
+            div.innerHTML = `
+                <input type="checkbox" id="${namePrefix}-${num}" value="${song}">
+                <label for="${namePrefix}-${num}">${num}</label>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    buildSongGrid('song-grid', 'song');
+    buildSongGrid('default-grid', 'default');
+
+    /* ===== 全選 / 全取消 ===== */
+    function selectAllSongs() {
+        document.querySelectorAll('#song-grid input[type="checkbox"]').forEach(cb => cb.checked = true);
+    }
+    function clearAllSongs() {
+        document.querySelectorAll('#song-grid input[type="checkbox"]').forEach(cb => cb.checked = false);
+    }
+
+    /* ===== 取得勾選的歌曲 ===== */
+    function getCheckedSongs(containerId) {
+        const checked = [];
+        document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`).forEach(cb => {
+            checked.push(cb.value);
+        });
+        return checked.sort();
+    }
+
+    /* ===== 儲存排程 ===== */
+    function saveSchedule() {
+        const dateInput = document.getElementById('schedule-date');
+        const date = dateInput.value; // 格式：YYYY-MM-DD
+        
+        if (!date) {
+            showToast('請先選擇日期！', true);
+            return;
+        }
+        
+        const selectedSongs = getCheckedSongs('song-grid');
+        if (selectedSongs.length === 0) {
+            showToast('請至少勾選一首歌！', true);
+            return;
+        }
+        
+        // 寫入 Firebase
+        scheduleRef.child(date).set(selectedSongs)
+            .then(() => {
+                showToast(`✅ 已儲存 ${date} 的排程（${selectedSongs.length} 首）`);
+                dateInput.value = '';
+                clearAllSongs();
+                loadSchedules();
+            })
+            .catch((err) => {
+                console.error(err);
+                showToast('儲存失敗：' + err.message, true);
+            });
+    }
+
+    /* ===== 儲存預設歌單 ===== */
+    function saveDefault() {
+        const selectedSongs = getCheckedSongs('default-grid');
+        if (selectedSongs.length === 0) {
+            showToast('請至少勾選一首歌！', true);
+            return;
+        }
+        
+        scheduleRef.child('default').set(selectedSongs)
+            .then(() => {
+                showToast(`✅ 已儲存預設歌單（${selectedSongs.length} 首）`);
+            })
+            .catch((err) => {
+                console.error(err);
+                showToast('儲存失敗：' + err.message, true);
+            });
+    }
+
+    /* ===== 刪除排程 ===== */
+    function deleteSchedule(date) {
+        if (!confirm(`確定要刪除 ${date} 的排程嗎？`)) return;
+        
+        scheduleRef.child(date).remove()
+            .then(() => {
+                showToast(`✅ 已刪除 ${date} 的排程`);
+                loadSchedules();
+            })
+            .catch((err) => {
+                showToast('刪除失敗：' + err.message, true);
+            });
+    }
+
+    /* ===== 載入排程列表 ===== */
+    function loadSchedules() {
+        scheduleRef.on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            const listEl = document.getElementById('schedule-list');
+            
+            // 過濾掉 default
+            const dates = Object.keys(data).filter(k => k !== 'default').sort();
+            
+            if (dates.length === 0) {
+                listEl.innerHTML = '<div class="empty-hint">目前沒有任何排程</div>';
+            } else {
+                listEl.innerHTML = dates.map(date => {
+                    const songList = data[date] || [];
+                    const preview = songList.map(s => s.replace('.mp3', '')).join(', ');
+                    return `
+                        <div class="schedule-item">
+                            <div>
+                                <div class="date">📅 ${date}</div>
+                                <div class="songs-preview">${preview}</div>
+                            </div>
+                            <button class="delete-btn" onclick="deleteSchedule('${date}')">刪除</button>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            // 載入預設歌單到勾選格
+            const defaultSongs = data['default'] || allSongs;
+            document.querySelectorAll('#default-grid input[type="checkbox"]').forEach(cb => {
+                cb.checked = defaultSongs.includes(cb.value);
+            });
+        });
+    }
+
+    /* ===== 初始化 ===== */
+    loadSchedules();
+</script>
+</body>
+</html>
