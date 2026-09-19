@@ -875,7 +875,7 @@
 </div>
 
 <script>
-    /* --- 音樂控制：前 N 首照 Firebase 排程，排程歌不出現在隨機中（30首）+ 跨日自動換排程 --- */
+    /* --- 音樂控制：前 N 首照 Firebase 排程，排程歌不出現在隨機中（30首）+ 跨日換排程 + 即時監聽 --- */
     const allSongs = [
         '01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3',
         '06.mp3', '07.mp3', '08.mp3', '09.mp3', '10.mp3',
@@ -885,15 +885,16 @@
         '26.mp3', '27.mp3', '28.mp3', '29.mp3', '30.mp3'
     ];
 
-    let songs = [...allSongs];        // 全部歌曲（供 indexOf 查詢）
-    let randomPool = [...allSongs];   // 隨機池（排程歌會被排除）
+    let songs = [...allSongs];
+    let randomPool = [...allSongs];
     let currentSongIndex = 0;
     let lastPlayedIndex = -1;
     let remainingIndices = [];
     let isSongChanging = false;
-    let scheduledQueue = [];          // 尚未播完的排程歌
-    let currentScheduleDate = '';     // 目前排程對應的日期
-    let dateCheckInterval = null;     // 跨日檢查定時器
+    let scheduledQueue = [];
+    let currentScheduleDate = '';
+    let dateCheckInterval = null;
+    let scheduleListener = null;
     
     const audio = new Audio();
     let isPlaying = false;
@@ -909,7 +910,7 @@
     const volumePlus = document.getElementById('volume-plus');
     const volumeValue = document.getElementById('volume-value');
 
-    // 音量設定（0-100）
+    // 音量設定
     let volumePercent = 50;
     audio.volume = volumePercent / 100;
     updateVolumeUI();
@@ -1037,7 +1038,6 @@
         }, 400);
     }
 
-    /* ===== 取得今天日期字串 YYYY-MM-DD ===== */
     function getTodayKey() {
         const today = new Date();
         const yyyy = today.getFullYear();
@@ -1046,17 +1046,13 @@
         return `${yyyy}-${mm}-${dd}`;
     }
 
-    /* ===== 初始化隨機清單（從隨機池建立） ===== */
     function initRemainingList() {
         const poolIndices = randomPool.map(s => songs.indexOf(s)).filter(i => i >= 0);
-        
         remainingIndices = [...poolIndices];
-        
         for (let i = remainingIndices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [remainingIndices[i], remainingIndices[j]] = [remainingIndices[j], remainingIndices[i]];
         }
-        
         if (remainingIndices.length > 1 && remainingIndices[0] === lastPlayedIndex) {
             [remainingIndices[0], remainingIndices[1]] = [remainingIndices[1], remainingIndices[0]];
         }
@@ -1084,10 +1080,8 @@
         }
     }
 
-    /* ===== 播放下一首（優先播排程） ===== */
     function playNext() {
         let newIndex;
-        
         if (scheduledQueue.length > 0) {
             const nextSong = scheduledQueue.shift();
             newIndex = songs.indexOf(nextSong);
@@ -1095,12 +1089,10 @@
         } else {
             newIndex = getNextSongIndex();
         }
-        
         lastPlayedIndex = currentSongIndex;
         playSong(newIndex);
     }
 
-    /* ===== 播放上一首 ===== */
     function playPrev() {
         if (lastPlayedIndex >= 0 && lastPlayedIndex !== currentSongIndex) {
             const prev = lastPlayedIndex;
@@ -1136,7 +1128,6 @@
         playNext();
     };
 
-    /* ===== 從 Firebase 讀取今天的完整排程 ===== */
     function loadTodayPlaylist() {
         return new Promise((resolve) => {
             try {
@@ -1144,51 +1135,37 @@
                     resolve(null);
                     return;
                 }
-                
                 const db = firebase.database();
                 db.ref('music_schedule').once('value').then((snapshot) => {
                     const data = snapshot.val() || {};
                     const todayKey = getTodayKey();
-                    
                     if (data[todayKey] && data[todayKey].length > 0) {
-                        console.log(`📅 今天有排程：${todayKey}，共 ${data[todayKey].length} 首`);
                         resolve(data[todayKey]);
                     } else {
                         resolve(null);
                     }
-                }).catch((err) => {
-                    console.error('讀取排程失敗', err);
-                    resolve(null);
-                });
+                }).catch(() => resolve(null));
             } catch (err) {
-                console.error('讀取排程錯誤', err);
                 resolve(null);
             }
         });
     }
 
-    /* ===== 套用排程 ===== */
     function applySchedule(todayPlaylist, isDateChange = false) {
         songs = [...allSongs];
         randomPool = [...allSongs];
         
         if (todayPlaylist && todayPlaylist.length > 0) {
             scheduledQueue = todayPlaylist.filter(s => songs.includes(s));
-            console.log('📅 排程播放佇列：', scheduledQueue);
-            
             if (scheduledQueue.length > 0) {
                 randomPool = allSongs.filter(s => !scheduledQueue.includes(s));
-                console.log('🎲 隨機池（排除排程歌）：', randomPool.length, '首');
-                
                 const firstSong = scheduledQueue.shift();
                 currentSongIndex = songs.indexOf(firstSong);
-                console.log('🎵 第一首固定播放：', firstSong);
             } else {
                 currentSongIndex = Math.floor(Math.random() * songs.length);
             }
         } else {
             currentSongIndex = Math.floor(Math.random() * songs.length);
-            console.log('🎵 今天沒排程，第一首隨機：', songs[currentSongIndex]);
         }
         
         lastPlayedIndex = currentSongIndex;
@@ -1220,30 +1197,99 @@
         });
     }
 
-    /* ===== 初始化播放 ===== */
+    /* ===== 🔥 處理排程更新（管理後台改排程時觸發） ===== */
+    function handleScheduleUpdate(todayPlaylist) {
+        const currentSongName = songs[currentSongIndex];
+        const newQueue = todayPlaylist ? todayPlaylist.filter(s => allSongs.includes(s)) : [];
+        
+        // 情況 1：新排程是空的（今天沒排程）
+        if (newQueue.length === 0) {
+            console.log('📭 今天排程被清空，更新隨機池（不中斷播放）');
+            songs = [...allSongs];
+            randomPool = [...allSongs];
+            scheduledQueue = [];
+            initRemainingList();
+            return;
+        }
+        
+        // 情況 2：目前正在播的歌 = 新排程第一首
+        if (currentSongName === newQueue[0]) {
+            console.log('✅ 目前播的歌就是新排程第一首，不中斷');
+            scheduledQueue = newQueue.slice(1);
+            randomPool = allSongs.filter(s => !newQueue.includes(s));
+            initRemainingList();
+            return;
+        }
+        
+        // 情況 3：目前正在播的歌在新排程裡（但不是第一首）
+        if (newQueue.includes(currentSongName)) {
+            console.log('✅ 目前播的歌在新排程裡，保留播完再切');
+            const currentPos = newQueue.indexOf(currentSongName);
+            scheduledQueue = newQueue.slice(currentPos + 1);
+            randomPool = allSongs.filter(s => !newQueue.includes(s));
+            initRemainingList();
+            return;
+        }
+        
+        // 🔥 情況 4：目前正在播的歌不在新排程裡 → 等它播完再換
+        console.log('⏳ 目前播的歌不在新排程，等它播完再切換');
+        
+        // 更新隨機池（排除新排程歌）
+        randomPool = allSongs.filter(s => !newQueue.includes(s));
+        
+        // 把整個新排程放進排程佇列（等目前這首播完，下一首就會播排程第一首）
+        scheduledQueue = [...newQueue];
+        
+        // 重新初始化隨機清單
+        initRemainingList();
+        
+        // 不中斷目前播放，什麼都不做
+        // 等目前這首播完 → playNext() 會自動從 scheduledQueue 取第一首
+    }
+
+    /* ===== 🔥 即時監聽排程變化 ===== */
+    function listenScheduleChanges() {
+        if (typeof firebase === 'undefined' || !firebase.apps.length) return;
+        
+        const db = firebase.database();
+        const scheduleRef = db.ref('music_schedule');
+        
+        if (scheduleListener) {
+            scheduleRef.off('value', scheduleListener);
+        }
+        
+        scheduleListener = scheduleRef.on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            const todayKey = getTodayKey();
+            const todayPlaylist = (data[todayKey] && data[todayKey].length > 0) ? data[todayKey] : null;
+            
+            console.log('🔔 排程有變化，重新檢查今天排程：', todayKey);
+            handleScheduleUpdate(todayPlaylist);
+        });
+        
+        console.log('👂 已開始即時監聽排程變化');
+    }
+
     function initAudio() {
         loadTodayPlaylist().then((todayPlaylist) => {
             currentScheduleDate = getTodayKey();
             applySchedule(todayPlaylist, false);
+            listenScheduleChanges();
         });
     }
 
-    /* ===== 跨日檢查（每分鐘） ===== */
     function checkDateChange() {
         const todayKey = getTodayKey();
-        
         if (todayKey !== currentScheduleDate) {
             console.log(`🌅 跨日了！從 ${currentScheduleDate} → ${todayKey}`);
             currentScheduleDate = todayKey;
             
             loadTodayPlaylist().then((newPlaylist) => {
                 if (newPlaylist && newPlaylist.length > 0) {
-                    console.log('📅 新的一天有排程，切換播放');
                     audio.pause();
                     isPlaying = false;
                     applySchedule(newPlaylist, true);
                 } else {
-                    console.log('🎵 新的一天沒排程，更新隨機池（不中斷播放）');
                     songs = [...allSongs];
                     randomPool = [...allSongs];
                     scheduledQueue = [];
@@ -1368,7 +1414,6 @@
         startLiveClock();
         initAudio();
 
-        // 🔥 啟動跨日檢查（每分鐘）
         if (dateCheckInterval) clearInterval(dateCheckInterval);
         dateCheckInterval = setInterval(checkDateChange, 60 * 1000);
         console.log('⏰ 已啟動跨日檢查（每分鐘）');
