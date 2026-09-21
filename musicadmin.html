@@ -67,6 +67,41 @@
             outline: none;
             border-color: #4A90E2;
         }
+        /* 日期區間（兩欄） */
+        .date-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        .date-row > div {
+            flex: 1;
+        }
+        .date-row input {
+            margin-bottom: 0;
+        }
+        /* 快速選項按鈕 */
+        .quick-dates {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+        .quick-btn {
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid #0f3460;
+            background: #0f3460;
+            color: #aaa;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .quick-btn:hover {
+            background: #1a4a7a;
+            color: #fff;
+        }
         /* 歌曲勾選格 */
         .song-grid {
             display: grid;
@@ -152,7 +187,6 @@
         .btn-danger:hover {
             background: #e74c3c;
         }
-        /* 按鈕群組（橫排） */
         .btn-row {
             display: flex;
             gap: 10px;
@@ -255,14 +289,31 @@
 
     <!-- 新增排程 -->
     <div class="card">
-        <h2>➕ 新增排程</h2>
+        <h2>➕ 新增排程（可多天）</h2>
         <div class="info-box">
-            📌 選擇日期 + 勾選要播放的歌曲，儲存後，當天主頁面就會播放這些歌。<br>
-            📌 如果當天沒有排程，會播放「預設歌單」（全部 30 首隨機）。
+            📌 選擇「開始日期」和「結束日期」，一次把這幾天都設成同一批歌。<br>
+            📌 如果只設一天，把開始和結束都選同一天即可。<br>
+            📌 當天主頁面就會播這些歌，排完之後才隨機。
         </div>
         
-        <label>選擇日期</label>
-        <input type="date" id="schedule-date">
+        <div class="date-row">
+            <div>
+                <label>開始日期</label>
+                <input type="date" id="start-date">
+            </div>
+            <div>
+                <label>結束日期</label>
+                <input type="date" id="end-date">
+            </div>
+        </div>
+        
+        <div class="quick-dates">
+            <button class="quick-btn" onclick="setToday()">今天</button>
+            <button class="quick-btn" onclick="setTomorrow()">明天</button>
+            <button class="quick-btn" onclick="setNextWeek()">未來 7 天</button>
+            <button class="quick-btn" onclick="setNextMonth()">未來 30 天</button>
+            <button class="quick-btn" onclick="setThisWeekend()">這週末</button>
+        </div>
         
         <label>勾選歌曲（可多選）</label>
         <div class="song-grid" id="song-grid">
@@ -329,7 +380,78 @@
         toast.className = isError ? 'error show' : 'show';
         setTimeout(() => {
             toast.classList.remove('show');
-        }, 2500);
+        }, 3000);
+    }
+
+    /* ===== 日期工具 ===== */
+    function formatDate(date) {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function getDateRange(startStr, endStr) {
+        const dates = [];
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+        
+        if (start > end) return dates; // 開始大於結束，回傳空
+        
+        const current = new Date(start);
+        while (current <= end) {
+            dates.push(formatDate(current));
+            current.setDate(current.getDate() + 1);
+        }
+        return dates;
+    }
+
+    /* ===== 快速選日期 ===== */
+    function setToday() {
+        const today = formatDate(new Date());
+        document.getElementById('start-date').value = today;
+        document.getElementById('end-date').value = today;
+    }
+
+    function setTomorrow() {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const t = formatDate(tomorrow);
+        document.getElementById('start-date').value = t;
+        document.getElementById('end-date').value = t;
+    }
+
+    function setNextWeek() {
+        const start = new Date();
+        const end = new Date();
+        end.setDate(end.getDate() + 6);
+        document.getElementById('start-date').value = formatDate(start);
+        document.getElementById('end-date').value = formatDate(end);
+    }
+
+    function setNextMonth() {
+        const start = new Date();
+        const end = new Date();
+        end.setDate(end.getDate() + 29);
+        document.getElementById('start-date').value = formatDate(start);
+        document.getElementById('end-date').value = formatDate(end);
+    }
+
+    function setThisWeekend() {
+        const today = new Date();
+        const dayOfWeek = today.getDay(); // 0=日, 6=六
+        
+        // 找最近的星期六
+        const saturday = new Date(today);
+        const daysUntilSat = (6 - dayOfWeek + 7) % 7;
+        saturday.setDate(saturday.getDate() + daysUntilSat);
+        
+        // 星期日 = 星期六 + 1
+        const sunday = new Date(saturday);
+        sunday.setDate(sunday.getDate() + 1);
+        
+        document.getElementById('start-date').value = formatDate(saturday);
+        document.getElementById('end-date').value = formatDate(sunday);
     }
 
     /* ===== 產生歌曲勾選格 ===== */
@@ -368,13 +490,18 @@
         return checked.sort();
     }
 
-    /* ===== 儲存排程 ===== */
+    /* ===== 儲存排程（多天） ===== */
     function saveSchedule() {
-        const dateInput = document.getElementById('schedule-date');
-        const date = dateInput.value; // 格式：YYYY-MM-DD
+        const startDate = document.getElementById('start-date').value;
+        const endDate = document.getElementById('end-date').value;
         
-        if (!date) {
-            showToast('請先選擇日期！', true);
+        if (!startDate || !endDate) {
+            showToast('請選擇開始與結束日期！', true);
+            return;
+        }
+        
+        if (startDate > endDate) {
+            showToast('開始日期不能大於結束日期！', true);
             return;
         }
         
@@ -384,11 +511,25 @@
             return;
         }
         
-        // 寫入 Firebase
-        scheduleRef.child(date).set(selectedSongs)
+        // 取得日期範圍
+        const dates = getDateRange(startDate, endDate);
+        if (dates.length === 0) {
+            showToast('日期範圍錯誤！', true);
+            return;
+        }
+        
+        // 建立批次寫入
+        const updates = {};
+        dates.forEach(date => {
+            updates[date] = selectedSongs;
+        });
+        
+        // 寫入 Firebase（一次寫多筆）
+        scheduleRef.update(updates)
             .then(() => {
-                showToast(`✅ 已儲存 ${date} 的排程（${selectedSongs.length} 首）`);
-                dateInput.value = '';
+                showToast(`✅ 已儲存 ${dates.length} 天的排程（共 ${selectedSongs.length} 首）`);
+                document.getElementById('start-date').value = '';
+                document.getElementById('end-date').value = '';
                 clearAllSongs();
                 loadSchedules();
             })
@@ -416,13 +557,12 @@
             });
     }
 
-    /* ===== 還原預設歌單（全部 30 首） ===== */
+    /* ===== 還原預設歌單 ===== */
     function resetDefault() {
         if (!confirm('確定要將預設歌單還原成全部 30 首嗎？')) return;
         
         scheduleRef.child('default').set(allSongs)
             .then(() => {
-                // 勾選格全部勾選
                 document.querySelectorAll('#default-grid input[type="checkbox"]').forEach(cb => {
                     cb.checked = true;
                 });
@@ -441,6 +581,43 @@
         scheduleRef.child(date).remove()
             .then(() => {
                 showToast(`✅ 已刪除 ${date} 的排程`);
+                loadSchedules();
+            })
+            .catch((err) => {
+                showToast('刪除失敗：' + err.message, true);
+            });
+    }
+
+    /* ===== 批次刪除（日期區間） ===== */
+    function deleteScheduleRange() {
+        const startDate = document.getElementById('start-date').value;
+        const endDate = document.getElementById('end-date').value;
+        
+        if (!startDate || !endDate) {
+            showToast('請先選擇要刪除的日期範圍！', true);
+            return;
+        }
+        
+        if (startDate > endDate) {
+            showToast('開始日期不能大於結束日期！', true);
+            return;
+        }
+        
+        const dates = getDateRange(startDate, endDate);
+        if (dates.length === 0) return;
+        
+        if (!confirm(`確定要刪除 ${startDate} ~ ${endDate} 共 ${dates.length} 天的排程嗎？`)) return;
+        
+        const updates = {};
+        dates.forEach(date => {
+            updates[date] = null; // null = 刪除
+        });
+        
+        scheduleRef.update(updates)
+            .then(() => {
+                showToast(`✅ 已刪除 ${dates.length} 天的排程`);
+                document.getElementById('start-date').value = '';
+                document.getElementById('end-date').value = '';
                 loadSchedules();
             })
             .catch((err) => {
@@ -484,6 +661,7 @@
     }
 
     /* ===== 初始化 ===== */
+    setToday(); // 預設帶入今天
     loadSchedules();
 </script>
 </body>
