@@ -67,7 +67,6 @@
             outline: none;
             border-color: #4A90E2;
         }
-        /* 日期區間（兩欄） */
         .date-row {
             display: flex;
             gap: 10px;
@@ -79,7 +78,6 @@
         .date-row input {
             margin-bottom: 0;
         }
-        /* 快速選項按鈕 */
         .quick-dates {
             display: flex;
             gap: 8px;
@@ -102,7 +100,6 @@
             background: #1a4a7a;
             color: #fff;
         }
-        /* 歌曲勾選格 */
         .song-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
@@ -196,9 +193,41 @@
             margin-bottom: 0;
             flex: 1;
         }
+        /* 編輯模式提示 */
+        .edit-mode-banner {
+            display: none;
+            background: linear-gradient(135deg, #f39c12, #f1c40f);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .edit-mode-banner.show {
+            display: flex;
+        }
+        .edit-mode-banner .cancel-edit {
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            border: none;
+            border-radius: 15px;
+            padding: 4px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: inherit;
+        }
+        .edit-mode-banner .cancel-edit:hover {
+            background: rgba(0,0,0,0.5);
+        }
         /* 排程列表 */
         .schedule-list {
-            max-height: 400px;
+            max-height: 500px;
             overflow-y: auto;
         }
         .schedule-item {
@@ -211,6 +240,14 @@
             align-items: center;
             gap: 10px;
         }
+        .schedule-item.editing {
+            border: 2px solid #f39c12;
+            box-shadow: 0 0 15px rgba(243,156,18,0.4);
+        }
+        .schedule-item .info {
+            flex: 1;
+            min-width: 0;
+        }
         .schedule-item .date {
             font-weight: bold;
             color: #6ab0ff;
@@ -219,8 +256,27 @@
         .schedule-item .songs-preview {
             font-size: 12px;
             color: #aaa;
-            flex: 1;
             word-break: break-all;
+            margin-top: 4px;
+        }
+        .schedule-item .actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .schedule-item .edit-btn {
+            background: #f39c12;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: inherit;
+            font-weight: bold;
+        }
+        .schedule-item .edit-btn:hover {
+            background: #e67e22;
         }
         .schedule-item .delete-btn {
             background: #c0392b;
@@ -232,11 +288,11 @@
             font-size: 12px;
             flex-shrink: 0;
             font-family: inherit;
+            font-weight: bold;
         }
         .schedule-item .delete-btn:hover {
             background: #e74c3c;
         }
-        /* Toast 提示 */
         #toast {
             position: fixed;
             bottom: 30px;
@@ -287,10 +343,17 @@
     <h1>🎵 音樂排程管理後台</h1>
     <div class="subtitle">靠北達德速度版｜設定特定日期播放指定歌曲</div>
 
-    <!-- 新增排程 -->
+    <!-- 新增/編輯排程 -->
     <div class="card">
-        <h2>➕ 新增排程（可多天）</h2>
-        <div class="info-box">
+        <h2 id="form-title">➕ 新增排程（可多天）</h2>
+        
+        <!-- 編輯模式提示 -->
+        <div class="edit-mode-banner" id="edit-banner">
+            <span>✏️ 編輯模式：<span id="edit-date-label"></span></span>
+            <button class="cancel-edit" onclick="cancelEdit()">取消編輯</button>
+        </div>
+        
+        <div class="info-box" id="form-info">
             📌 選擇「開始日期」和「結束日期」，一次把這幾天都設成同一批歌。<br>
             📌 如果只設一天，把開始和結束都選同一天即可。<br>
             📌 當天主頁面就會播這些歌，排完之後才隨機。
@@ -320,7 +383,7 @@
             <!-- 由 JS 動態產生 -->
         </div>
         
-        <button class="btn btn-primary" onclick="saveSchedule()">💾 儲存排程</button>
+        <button class="btn btn-primary" id="save-btn" onclick="saveSchedule()">💾 儲存排程</button>
         <button class="btn btn-secondary" onclick="selectAllSongs()">✅ 全選</button>
         <button class="btn btn-secondary" onclick="clearAllSongs()">⬜ 全部取消</button>
     </div>
@@ -373,6 +436,9 @@
         '26.mp3', '27.mp3', '28.mp3', '29.mp3', '30.mp3'
     ];
 
+    /* ===== 編輯狀態 ===== */
+    let editingDate = null; // null = 新增模式，有值 = 編輯模式
+
     /* ===== Toast 提示 ===== */
     function showToast(msg, isError = false) {
         const toast = document.getElementById('toast');
@@ -395,9 +461,7 @@
         const dates = [];
         const start = new Date(startStr);
         const end = new Date(endStr);
-        
-        if (start > end) return dates; // 開始大於結束，回傳空
-        
+        if (start > end) return dates;
         const current = new Date(start);
         while (current <= end) {
             dates.push(formatDate(current));
@@ -408,48 +472,39 @@
 
     /* ===== 快速選日期 ===== */
     function setToday() {
-        const today = formatDate(new Date());
-        document.getElementById('start-date').value = today;
-        document.getElementById('end-date').value = today;
-    }
-
-    function setTomorrow() {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const t = formatDate(tomorrow);
+        const t = formatDate(new Date());
         document.getElementById('start-date').value = t;
         document.getElementById('end-date').value = t;
     }
-
+    function setTomorrow() {
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        const t = formatDate(d);
+        document.getElementById('start-date').value = t;
+        document.getElementById('end-date').value = t;
+    }
     function setNextWeek() {
-        const start = new Date();
-        const end = new Date();
-        end.setDate(end.getDate() + 6);
-        document.getElementById('start-date').value = formatDate(start);
-        document.getElementById('end-date').value = formatDate(end);
+        const s = new Date();
+        const e = new Date();
+        e.setDate(e.getDate() + 6);
+        document.getElementById('start-date').value = formatDate(s);
+        document.getElementById('end-date').value = formatDate(e);
     }
-
     function setNextMonth() {
-        const start = new Date();
-        const end = new Date();
-        end.setDate(end.getDate() + 29);
-        document.getElementById('start-date').value = formatDate(start);
-        document.getElementById('end-date').value = formatDate(end);
+        const s = new Date();
+        const e = new Date();
+        e.setDate(e.getDate() + 29);
+        document.getElementById('start-date').value = formatDate(s);
+        document.getElementById('end-date').value = formatDate(e);
     }
-
     function setThisWeekend() {
         const today = new Date();
-        const dayOfWeek = today.getDay(); // 0=日, 6=六
-        
-        // 找最近的星期六
+        const dayOfWeek = today.getDay();
         const saturday = new Date(today);
         const daysUntilSat = (6 - dayOfWeek + 7) % 7;
         saturday.setDate(saturday.getDate() + daysUntilSat);
-        
-        // 星期日 = 星期六 + 1
         const sunday = new Date(saturday);
         sunday.setDate(sunday.getDate() + 1);
-        
         document.getElementById('start-date').value = formatDate(saturday);
         document.getElementById('end-date').value = formatDate(sunday);
     }
@@ -490,7 +545,85 @@
         return checked.sort();
     }
 
-    /* ===== 儲存排程（多天） ===== */
+    /* ===== 🔥 進入編輯模式 ===== */
+    function editSchedule(date) {
+        // 從 Firebase 讀取該日期的歌單
+        scheduleRef.child(date).once('value').then((snapshot) => {
+            const songList = snapshot.val() || [];
+            
+            if (songList.length === 0) {
+                showToast('此排程已不存在', true);
+                loadSchedules();
+                return;
+            }
+            
+            // 設定編輯狀態
+            editingDate = date;
+            
+            // 帶入日期（開始 = 結束 = 該日期）
+            document.getElementById('start-date').value = date;
+            document.getElementById('end-date').value = date;
+            
+            // 清空並勾選歌曲
+            document.querySelectorAll('#song-grid input[type="checkbox"]').forEach(cb => {
+                cb.checked = songList.includes(cb.value);
+            });
+            
+            // 更新 UI
+            document.getElementById('form-title').textContent = '✏️ 編輯排程';
+            document.getElementById('edit-banner').classList.add('show');
+            document.getElementById('edit-date-label').textContent = date;
+            document.getElementById('save-btn').textContent = '💾 更新排程';
+            document.getElementById('form-info').innerHTML = 
+                '📌 修改日期或歌曲後，按「💾 更新排程」儲存。<br>' +
+                '📌 如果改成多天，會把這個區間內每一天都設成這批歌。<br>' +
+                '📌 原本的排程會被覆蓋。';
+            
+            // 標記正在編輯的項目
+            document.querySelectorAll('.schedule-item').forEach(item => {
+                item.classList.remove('editing');
+                if (item.dataset.date === date) {
+                    item.classList.add('editing');
+                }
+            });
+            
+            // 捲動到表單
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            showToast(`✏️ 正在編輯 ${date} 的排程`);
+        }).catch((err) => {
+            console.error(err);
+            showToast('讀取失敗：' + err.message, true);
+        });
+    }
+
+    /* ===== 🔥 取消編輯 ===== */
+    function cancelEdit() {
+        editingDate = null;
+        
+        // 清空表單
+        document.getElementById('start-date').value = '';
+        document.getElementById('end-date').value = '';
+        clearAllSongs();
+        
+        // 更新 UI
+        document.getElementById('form-title').textContent = '➕ 新增排程（可多天）';
+        document.getElementById('edit-banner').classList.remove('show');
+        document.getElementById('save-btn').textContent = '💾 儲存排程';
+        document.getElementById('form-info').innerHTML = 
+            '📌 選擇「開始日期」和「結束日期」，一次把這幾天都設成同一批歌。<br>' +
+            '📌 如果只設一天，把開始和結束都選同一天即可。<br>' +
+            '📌 當天主頁面就會播這些歌，排完之後才隨機。';
+        
+        // 移除編輯標記
+        document.querySelectorAll('.schedule-item').forEach(item => {
+            item.classList.remove('editing');
+        });
+        
+        showToast('已取消編輯');
+    }
+
+    /* ===== 儲存排程（新增 / 更新） ===== */
     function saveSchedule() {
         const startDate = document.getElementById('start-date').value;
         const endDate = document.getElementById('end-date').value;
@@ -511,26 +644,30 @@
             return;
         }
         
-        // 取得日期範圍
         const dates = getDateRange(startDate, endDate);
         if (dates.length === 0) {
             showToast('日期範圍錯誤！', true);
             return;
         }
         
-        // 建立批次寫入
         const updates = {};
         dates.forEach(date => {
             updates[date] = selectedSongs;
         });
         
-        // 寫入 Firebase（一次寫多筆）
+        // 編輯模式：如果原本的日期不在新範圍內，要刪除原本的
+        if (editingDate && !dates.includes(editingDate)) {
+            updates[editingDate] = null; // 刪除原日期
+        }
+        
         scheduleRef.update(updates)
             .then(() => {
-                showToast(`✅ 已儲存 ${dates.length} 天的排程（共 ${selectedSongs.length} 首）`);
-                document.getElementById('start-date').value = '';
-                document.getElementById('end-date').value = '';
-                clearAllSongs();
+                if (editingDate) {
+                    showToast(`✅ 已更新排程（${dates.length} 天）`);
+                } else {
+                    showToast(`✅ 已儲存 ${dates.length} 天的排程（共 ${selectedSongs.length} 首）`);
+                }
+                cancelEdit();
                 loadSchedules();
             })
             .catch((err) => {
@@ -580,44 +717,11 @@
         
         scheduleRef.child(date).remove()
             .then(() => {
+                // 如果正在編輯這個日期，取消編輯
+                if (editingDate === date) {
+                    cancelEdit();
+                }
                 showToast(`✅ 已刪除 ${date} 的排程`);
-                loadSchedules();
-            })
-            .catch((err) => {
-                showToast('刪除失敗：' + err.message, true);
-            });
-    }
-
-    /* ===== 批次刪除（日期區間） ===== */
-    function deleteScheduleRange() {
-        const startDate = document.getElementById('start-date').value;
-        const endDate = document.getElementById('end-date').value;
-        
-        if (!startDate || !endDate) {
-            showToast('請先選擇要刪除的日期範圍！', true);
-            return;
-        }
-        
-        if (startDate > endDate) {
-            showToast('開始日期不能大於結束日期！', true);
-            return;
-        }
-        
-        const dates = getDateRange(startDate, endDate);
-        if (dates.length === 0) return;
-        
-        if (!confirm(`確定要刪除 ${startDate} ~ ${endDate} 共 ${dates.length} 天的排程嗎？`)) return;
-        
-        const updates = {};
-        dates.forEach(date => {
-            updates[date] = null; // null = 刪除
-        });
-        
-        scheduleRef.update(updates)
-            .then(() => {
-                showToast(`✅ 已刪除 ${dates.length} 天的排程`);
-                document.getElementById('start-date').value = '';
-                document.getElementById('end-date').value = '';
                 loadSchedules();
             })
             .catch((err) => {
@@ -631,7 +735,6 @@
             const data = snapshot.val() || {};
             const listEl = document.getElementById('schedule-list');
             
-            // 過濾掉 default
             const dates = Object.keys(data).filter(k => k !== 'default').sort();
             
             if (dates.length === 0) {
@@ -640,13 +743,17 @@
                 listEl.innerHTML = dates.map(date => {
                     const songList = data[date] || [];
                     const preview = songList.map(s => s.replace('.mp3', '')).join(', ');
+                    const isEditing = (editingDate === date);
                     return `
-                        <div class="schedule-item">
-                            <div>
-                                <div class="date">📅 ${date}</div>
+                        <div class="schedule-item ${isEditing ? 'editing' : ''}" data-date="${date}">
+                            <div class="info">
+                                <div class="date">📅 ${date}${isEditing ? ' ✏️' : ''}</div>
                                 <div class="songs-preview">${preview}</div>
                             </div>
-                            <button class="delete-btn" onclick="deleteSchedule('${date}')">刪除</button>
+                            <div class="actions">
+                                <button class="edit-btn" onclick="editSchedule('${date}')">編輯</button>
+                                <button class="delete-btn" onclick="deleteSchedule('${date}')">刪除</button>
+                            </div>
                         </div>
                     `;
                 }).join('');
@@ -661,7 +768,7 @@
     }
 
     /* ===== 初始化 ===== */
-    setToday(); // 預設帶入今天
+    setToday();
     loadSchedules();
 </script>
 </body>
