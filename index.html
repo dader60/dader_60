@@ -85,7 +85,6 @@
         .container { width: 100%; max-width: 400px; }
         .profile-pic { width: 110px; height: 110px; border-radius: 50%; background-color: white; border: 3px solid white; margin: 0; display: block; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
-        /* --- 頭像與音樂控制區域 --- */
         .avatar-wrapper {
             display: flex;
             flex-direction: column;
@@ -111,7 +110,6 @@
             gap: 12px;
         }
 
-        /* --- 黑膠唱片 + 指針 --- */
         .vinyl-wrapper {
             position: relative;
             display: inline-block;
@@ -234,7 +232,6 @@
             transform: rotate(10deg);
         }
 
-        /* --- 音量 +、- 按鈕控制 --- */
         .volume-btn-wrapper {
             display: flex;
             flex-direction: column;
@@ -297,7 +294,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* --- PotPlayer 風格頻譜可視化 --- */
         .pot-spectrum {
             display: flex;
             align-items: center;
@@ -383,7 +379,6 @@
             transform: scaleY(1);
         }
 
-        /* 控制按鈕區 */
         .music-controls {
             display: flex;
             align-items: center;
@@ -503,16 +498,6 @@
             gap: 10px;
         }
 
-        .disaster-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
         .typhoon-card {
             background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
             color: white;
@@ -522,12 +507,6 @@
             justify-content: center;
             gap: 10px;
         }
-
-        .warning-box { background: #fdf2f2; border: 2px solid #ef4444; border-radius: 15px; padding: 12px; margin-bottom: 15px; text-align: left; display: block; }
-        .warning-title { color: #ef4444; font-size: 16px; font-weight: bold; display: flex; align-items: center; gap: 5px; margin-bottom: 5px; justify-content: center; }
-        .warning-content { font-size: 13px; color: #4b5563; line-height: 1.4; text-align: center; }
-        .warning-active { background: #fee2e2; border-color: #dc2626; animation: warning-pulse 2s infinite; }
-        @keyframes warning-pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
         .video-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 12px; margin-bottom: 5px; background: #000; overflow: hidden; }
         .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0; }
@@ -675,7 +654,6 @@
                             <span class="label-icon" id="label-icon">♫</span>
                         </div>
                     </div>
-                    <!-- 音量 +、- 按鈕控制 -->
                     <div class="volume-btn-wrapper">
                         <div class="volume-btn-group">
                             <button class="volume-btn minus" id="volume-minus" title="音量 -5">−</button>
@@ -684,7 +662,6 @@
                         <div class="volume-value" id="volume-value">50</div>
                     </div>
                 </div>
-                <!-- PotPlayer 風格頻譜可視化 -->
                 <div class="pot-spectrum" id="pot-spectrum">
                     <span class="pot-bar"></span>
                     <span class="pot-bar"></span>
@@ -875,7 +852,7 @@
 </div>
 
 <script>
-    /* --- 音樂控制：前 N 首照 Firebase 排程，排程歌不出現在隨機中（30首）+ 跨日換排程 + 即時監聽 --- */
+    /* --- 音樂控制：排程 + 預設歌單 + 跨日 + 即時監聽 --- */
     const allSongs = [
         '01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3',
         '06.mp3', '07.mp3', '08.mp3', '09.mp3', '10.mp3',
@@ -910,7 +887,6 @@
     const volumePlus = document.getElementById('volume-plus');
     const volumeValue = document.getElementById('volume-value');
 
-    // 音量設定
     let volumePercent = 50;
     audio.volume = volumePercent / 100;
     updateVolumeUI();
@@ -1085,7 +1061,6 @@
         if (scheduledQueue.length > 0) {
             const nextSong = scheduledQueue.shift();
             newIndex = songs.indexOf(nextSong);
-            console.log('📅 播放排程歌：', nextSong, '（剩', scheduledQueue.length, '首）');
         } else {
             newIndex = getNextSongIndex();
         }
@@ -1128,6 +1103,7 @@
         playNext();
     };
 
+    /* ===== 讀取今天的設定（排程 / 預設歌單 / 全部） ===== */
     function loadTodayPlaylist() {
         return new Promise((resolve) => {
             try {
@@ -1139,10 +1115,16 @@
                 db.ref('music_schedule').once('value').then((snapshot) => {
                     const data = snapshot.val() || {};
                     const todayKey = getTodayKey();
+                    
                     if (data[todayKey] && data[todayKey].length > 0) {
-                        resolve(data[todayKey]);
+                        console.log(`📅 今天有排程：${todayKey}`);
+                        resolve({ type: 'schedule', songs: data[todayKey] });
+                    } else if (data['default'] && data['default'].length > 0) {
+                        console.log(`🎼 今天沒排程，使用預設歌單：${data['default'].length} 首`);
+                        resolve({ type: 'default', songs: data['default'] });
                     } else {
-                        resolve(null);
+                        console.log('🎵 沒有任何設定，使用全部歌曲');
+                        resolve({ type: 'all', songs: allSongs });
                     }
                 }).catch(() => resolve(null));
             } catch (err) {
@@ -1151,16 +1133,32 @@
         });
     }
 
-    function applySchedule(todayPlaylist, isDateChange = false) {
+    /* ===== 套用設定 ===== */
+    function applySchedule(result, isDateChange = false) {
         songs = [...allSongs];
         randomPool = [...allSongs];
         
-        if (todayPlaylist && todayPlaylist.length > 0) {
-            scheduledQueue = todayPlaylist.filter(s => songs.includes(s));
-            if (scheduledQueue.length > 0) {
-                randomPool = allSongs.filter(s => !scheduledQueue.includes(s));
-                const firstSong = scheduledQueue.shift();
-                currentSongIndex = songs.indexOf(firstSong);
+        if (result && result.songs && result.songs.length > 0) {
+            if (result.type === 'schedule') {
+                scheduledQueue = result.songs.filter(s => songs.includes(s));
+                if (scheduledQueue.length > 0) {
+                    randomPool = allSongs.filter(s => !scheduledQueue.includes(s));
+                    const firstSong = scheduledQueue.shift();
+                    currentSongIndex = songs.indexOf(firstSong);
+                    console.log('🎵 播放排程歌：', firstSong);
+                } else {
+                    currentSongIndex = Math.floor(Math.random() * songs.length);
+                }
+            } else if (result.type === 'default') {
+                const defaultSongs = result.songs.filter(s => songs.includes(s));
+                if (defaultSongs.length > 0) {
+                    randomPool = [...defaultSongs];
+                    const randomIdx = Math.floor(Math.random() * randomPool.length);
+                    currentSongIndex = songs.indexOf(randomPool[randomIdx]);
+                    console.log('🎼 播放預設歌單隨機：', songs[currentSongIndex]);
+                } else {
+                    currentSongIndex = Math.floor(Math.random() * songs.length);
+                }
             } else {
                 currentSongIndex = Math.floor(Math.random() * songs.length);
             }
@@ -1197,33 +1195,34 @@
         });
     }
 
-    /* ===== 🔥 處理排程更新（管理後台改排程時觸發） ===== */
+    /* ===== 處理即時排程更新 ===== */
     function handleScheduleUpdate(todayPlaylist) {
         const currentSongName = songs[currentSongIndex];
         const newQueue = todayPlaylist ? todayPlaylist.filter(s => allSongs.includes(s)) : [];
         
-        // 情況 1：新排程是空的（今天沒排程）
         if (newQueue.length === 0) {
-            console.log('📭 今天排程被清空，更新隨機池（不中斷播放）');
-            songs = [...allSongs];
-            randomPool = [...allSongs];
-            scheduledQueue = [];
-            initRemainingList();
+            console.log('📭 今天排程被清空');
+            loadTodayPlaylist().then((result) => {
+                songs = [...allSongs];
+                if (result && result.type === 'default') {
+                    randomPool = result.songs.filter(s => songs.includes(s));
+                } else {
+                    randomPool = [...allSongs];
+                }
+                scheduledQueue = [];
+                initRemainingList();
+            });
             return;
         }
         
-        // 情況 2：目前正在播的歌 = 新排程第一首
         if (currentSongName === newQueue[0]) {
-            console.log('✅ 目前播的歌就是新排程第一首，不中斷');
             scheduledQueue = newQueue.slice(1);
             randomPool = allSongs.filter(s => !newQueue.includes(s));
             initRemainingList();
             return;
         }
         
-        // 情況 3：目前正在播的歌在新排程裡（但不是第一首）
         if (newQueue.includes(currentSongName)) {
-            console.log('✅ 目前播的歌在新排程裡，保留播完再切');
             const currentPos = newQueue.indexOf(currentSongName);
             scheduledQueue = newQueue.slice(currentPos + 1);
             randomPool = allSongs.filter(s => !newQueue.includes(s));
@@ -1231,26 +1230,14 @@
             return;
         }
         
-        // 🔥 情況 4：目前正在播的歌不在新排程裡 → 等它播完再換
         console.log('⏳ 目前播的歌不在新排程，等它播完再切換');
-        
-        // 更新隨機池（排除新排程歌）
         randomPool = allSongs.filter(s => !newQueue.includes(s));
-        
-        // 把整個新排程放進排程佇列（等目前這首播完，下一首就會播排程第一首）
         scheduledQueue = [...newQueue];
-        
-        // 重新初始化隨機清單
         initRemainingList();
-        
-        // 不中斷目前播放，什麼都不做
-        // 等目前這首播完 → playNext() 會自動從 scheduledQueue 取第一首
     }
 
-    /* ===== 🔥 即時監聽排程變化 ===== */
     function listenScheduleChanges() {
         if (typeof firebase === 'undefined' || !firebase.apps.length) return;
-        
         const db = firebase.database();
         const scheduleRef = db.ref('music_schedule');
         
@@ -1262,18 +1249,15 @@
             const data = snapshot.val() || {};
             const todayKey = getTodayKey();
             const todayPlaylist = (data[todayKey] && data[todayKey].length > 0) ? data[todayKey] : null;
-            
-            console.log('🔔 排程有變化，重新檢查今天排程：', todayKey);
+            console.log('🔔 排程有變化');
             handleScheduleUpdate(todayPlaylist);
         });
-        
-        console.log('👂 已開始即時監聽排程變化');
     }
 
     function initAudio() {
-        loadTodayPlaylist().then((todayPlaylist) => {
+        loadTodayPlaylist().then((result) => {
             currentScheduleDate = getTodayKey();
-            applySchedule(todayPlaylist, false);
+            applySchedule(result, false);
             listenScheduleChanges();
         });
     }
@@ -1284,14 +1268,18 @@
             console.log(`🌅 跨日了！從 ${currentScheduleDate} → ${todayKey}`);
             currentScheduleDate = todayKey;
             
-            loadTodayPlaylist().then((newPlaylist) => {
-                if (newPlaylist && newPlaylist.length > 0) {
+            loadTodayPlaylist().then((result) => {
+                if (result && result.type === 'schedule' && result.songs.length > 0) {
                     audio.pause();
                     isPlaying = false;
-                    applySchedule(newPlaylist, true);
+                    applySchedule(result, true);
                 } else {
                     songs = [...allSongs];
-                    randomPool = [...allSongs];
+                    if (result && result.type === 'default') {
+                        randomPool = result.songs.filter(s => songs.includes(s));
+                    } else {
+                        randomPool = [...allSongs];
+                    }
                     scheduledQueue = [];
                     initRemainingList();
                 }
@@ -1332,8 +1320,6 @@
             togglePlay();
         }
     });
-
-    const API_KEY = "CWA-E16D81B4-7836-43CA-95E5-51D9A434B120";
 
     function showPauseNotice(e) {
         if (e) e.preventDefault();
@@ -1416,7 +1402,6 @@
 
         if (dateCheckInterval) clearInterval(dateCheckInterval);
         dateCheckInterval = setInterval(checkDateChange, 60 * 1000);
-        console.log('⏰ 已啟動跨日檢查（每分鐘）');
 
         setTimeout(() => {
             const splash = document.getElementById('splash-overlay');
