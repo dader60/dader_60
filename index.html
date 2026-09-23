@@ -608,9 +608,9 @@
 </head>
 <body>
 
-<div id="splash-overlay">
+<div id="splash-overlay" onclick="hideSplash()">
     <div class="splash-logo-box">
-        <img src="avatar.jpg" alt="Logo" class="splash-logo">
+        <img src="avatar.jpg" alt="Logo" class="splash-logo" onerror="this.style.display='none'">
     </div>
     <div class="wave-text">
         <span style="animation-delay: 0.1s;">歡</span>
@@ -642,7 +642,7 @@
 <div class="container">
     <div class="avatar-wrapper">
         <div class="avatar-row">
-            <img src="avatar.jpg" alt="版主頭像" class="profile-pic">
+            <img src="avatar.jpg" alt="版主頭像" class="profile-pic" onerror="this.style.display='none'">
             <div class="music-icon-wrapper">
                 <div class="music-top-row">
                     <div class="vinyl-wrapper">
@@ -785,14 +785,14 @@
 
     <div class="line-section">
         <strong>官方 LINE ⚡</strong><br>
-        <img src="line-qr.jpg" class="qrcode-img">
+        <img src="line-qr.jpg" class="qrcode-img" onerror="this.style.display='none'">
         <a href="https://lin.ee/94g8LGJ" target="_blank" style="color: #00b900; text-decoration: none; display: block; margin: 10px 0;">👉 點我加入好友 👈</a>
         <div class="line-id" onclick="copyID()">複製 ID: @768mnxcr</div>
     </div>
 
     <div class="line-section" style="border: 2px solid #06c755;">
         <strong>靠達消息第一線賴社群 ⚡</strong><br>
-        <img src="LINE OpenChat-QR.jpg" class="qrcode-img">
+        <img src="LINE OpenChat-QR.jpg" class="qrcode-img" onerror="this.style.display='none'">
         <div style="font-size: 13.5px; color: #d32f2f; font-weight: bold; margin: 10px 0; line-height: 1.5;">
             密碼為靠達創立西元年月日20230517<br>請先複製密碼再點擊我進入
         </div>
@@ -852,6 +852,35 @@
 </div>
 
 <script>
+    /* ===== 🔥 隱藏歡迎介面（多重保險） ===== */
+    function hideSplash() {
+        const splash = document.getElementById('splash-overlay');
+        if (splash && splash.style.display !== 'none') {
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.display = 'none';
+            }, 500);
+        }
+    }
+
+    /* ===== 🔥 全域錯誤處理（避免 JS 錯誤卡住） ===== */
+    window.addEventListener('error', function(e) {
+        console.error('⚠️ 網頁發生錯誤：', e.message);
+        hideSplash();
+    });
+
+    /* ===== 🔥 備用計時器（3 秒後無條件隱藏） ===== */
+    window.addEventListener('load', function() {
+        setTimeout(hideSplash, 1500);
+        setTimeout(function() {
+            const splash = document.getElementById('splash-overlay');
+            if (splash && splash.style.display !== 'none') {
+                console.warn('⚠️ 歡迎介面卡住，強制隱藏');
+                hideSplash();
+            }
+        }, 3000);
+    });
+
     /* --- 音樂控制：排程 + 預設歌單 + 跨日 + 即時監聽 --- */
     const allSongs = [
         '01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3',
@@ -1103,7 +1132,6 @@
         playNext();
     };
 
-    /* ===== 讀取今天的設定（排程 / 預設歌單 / 全部） ===== */
     function loadTodayPlaylist() {
         return new Promise((resolve) => {
             try {
@@ -1117,13 +1145,10 @@
                     const todayKey = getTodayKey();
                     
                     if (data[todayKey] && data[todayKey].length > 0) {
-                        console.log(`📅 今天有排程：${todayKey}`);
                         resolve({ type: 'schedule', songs: data[todayKey] });
                     } else if (data['default'] && data['default'].length > 0) {
-                        console.log(`🎼 今天沒排程，使用預設歌單：${data['default'].length} 首`);
                         resolve({ type: 'default', songs: data['default'] });
                     } else {
-                        console.log('🎵 沒有任何設定，使用全部歌曲');
                         resolve({ type: 'all', songs: allSongs });
                     }
                 }).catch(() => resolve(null));
@@ -1133,7 +1158,6 @@
         });
     }
 
-    /* ===== 套用設定 ===== */
     function applySchedule(result, isDateChange = false) {
         songs = [...allSongs];
         randomPool = [...allSongs];
@@ -1145,7 +1169,6 @@
                     randomPool = allSongs.filter(s => !scheduledQueue.includes(s));
                     const firstSong = scheduledQueue.shift();
                     currentSongIndex = songs.indexOf(firstSong);
-                    console.log('🎵 播放排程歌：', firstSong);
                 } else {
                     currentSongIndex = Math.floor(Math.random() * songs.length);
                 }
@@ -1155,7 +1178,6 @@
                     randomPool = [...defaultSongs];
                     const randomIdx = Math.floor(Math.random() * randomPool.length);
                     currentSongIndex = songs.indexOf(randomPool[randomIdx]);
-                    console.log('🎼 播放預設歌單隨機：', songs[currentSongIndex]);
                 } else {
                     currentSongIndex = Math.floor(Math.random() * songs.length);
                 }
@@ -1195,13 +1217,11 @@
         });
     }
 
-    /* ===== 處理即時排程更新 ===== */
     function handleScheduleUpdate(todayPlaylist) {
         const currentSongName = songs[currentSongIndex];
         const newQueue = todayPlaylist ? todayPlaylist.filter(s => allSongs.includes(s)) : [];
         
         if (newQueue.length === 0) {
-            console.log('📭 今天排程被清空');
             loadTodayPlaylist().then((result) => {
                 songs = [...allSongs];
                 if (result && result.type === 'default') {
@@ -1230,7 +1250,6 @@
             return;
         }
         
-        console.log('⏳ 目前播的歌不在新排程，等它播完再切換');
         randomPool = allSongs.filter(s => !newQueue.includes(s));
         scheduledQueue = [...newQueue];
         initRemainingList();
@@ -1249,7 +1268,6 @@
             const data = snapshot.val() || {};
             const todayKey = getTodayKey();
             const todayPlaylist = (data[todayKey] && data[todayKey].length > 0) ? data[todayKey] : null;
-            console.log('🔔 排程有變化');
             handleScheduleUpdate(todayPlaylist);
         });
     }
@@ -1265,7 +1283,6 @@
     function checkDateChange() {
         const todayKey = getTodayKey();
         if (todayKey !== currentScheduleDate) {
-            console.log(`🌅 跨日了！從 ${currentScheduleDate} → ${todayKey}`);
             currentScheduleDate = todayKey;
             
             loadTodayPlaylist().then((result) => {
@@ -1403,15 +1420,11 @@
         if (dateCheckInterval) clearInterval(dateCheckInterval);
         dateCheckInterval = setInterval(checkDateChange, 60 * 1000);
 
-        setTimeout(() => {
-            const splash = document.getElementById('splash-overlay');
-            if (splash) {
-                splash.style.opacity = '0';
-                setTimeout(() => {
-                    splash.style.display = 'none';
-                }, 500);
-            }
-        }, 1500); 
+        const splash = document.getElementById('splash-overlay');
+        if (splash) {
+            splash.addEventListener('click', hideSplash);
+            splash.addEventListener('touchstart', hideSplash, { passive: true });
+        }
 
         const btt = document.getElementById('back-to-top');
         window.onscroll = function() {
