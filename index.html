@@ -703,8 +703,9 @@
         載入時間中...
     </div>
 
-    <div id="founding-days-counter" style="text-align: center; background-color: #000000; color: #ffffff; font-weight: bold; padding: 12px 15px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); font-size: 15px; letter-spacing: 0.5px;">
-        靠達創立時間：2023年05月27日 (已創立 <span id="founding-days-num" style="color: #ffdd44; font-size: 17px;">讀取中</span> 天)
+    <div id="founding-days-counter" onclick="cycleFoundingDisplay()" style="text-align: center; background-color: #000000; color: #ffffff; font-weight: bold; padding: 12px 15px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); font-size: 15px; letter-spacing: 0.5px; cursor: pointer; user-select: none; transition: transform 0.15s ease;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+        靠達創立時間：2023年05月27日 (<span id="founding-days-num" style="color: #ffdd44; font-size: 17px;">已創立 讀取中</span>)
+        <div style="font-size: 10px; color: #888; margin-top: 3px; font-weight: normal;">👆 點擊切換顯示模式</div>
     </div>
 
     <a href="https://sites.google.com/view/dader60/%E7%89%88%E8%A6%8F" target="_blank" class="card">📄 版規及簡歷冊</a>
@@ -880,6 +881,86 @@
             }
         }, 3000);
     });
+
+    /* ===== 🔥 靠達創立日顯示模式（點擊切換） ===== */
+    let foundingDisplayMode = 0;
+    const FOUNDING_DATE = new Date(2023, 4, 27, 0, 0, 0); // 2023-05-27
+
+    function cycleFoundingDisplay() {
+        foundingDisplayMode = (foundingDisplayMode + 1) % 4;
+        updateFoundingDisplay();
+    }
+
+    function getMonthsDiff(start, end) {
+        let months = (end.getFullYear() - start.getFullYear()) * 12;
+        months += end.getMonth() - start.getMonth();
+        if (end.getDate() < start.getDate()) {
+            months--;
+        }
+        return months;
+    }
+
+    function updateFoundingDisplay() {
+        const now = new Date();
+        const daysElem = document.getElementById("founding-days-num");
+        if (!daysElem) return;
+        
+        const diffMs = now.getTime() - FOUNDING_DATE.getTime();
+        const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        
+        if (totalDays < 0) {
+            daysElem.innerText = "尚未創立";
+            return;
+        }
+        
+        if (foundingDisplayMode === 0) {
+            daysElem.innerText = `已創立 ${totalDays} 天`;
+        } else if (foundingDisplayMode === 1) {
+            const weeks = Math.floor(totalDays / 7);
+            const remainingDays = totalDays % 7;
+            if (weeks > 0 && remainingDays > 0) {
+                daysElem.innerText = `已創立 ${weeks} 週 ${remainingDays} 天`;
+            } else if (weeks > 0) {
+                daysElem.innerText = `已創立 ${weeks} 週`;
+            } else {
+                daysElem.innerText = `已創立 ${totalDays} 天`;
+            }
+        } else if (foundingDisplayMode === 2) {
+            const months = getMonthsDiff(FOUNDING_DATE, now);
+            const tempDate = new Date(FOUNDING_DATE);
+            tempDate.setMonth(tempDate.getMonth() + months);
+            const remainingDays = Math.floor((now.getTime() - tempDate.getTime()) / (1000 * 60 * 60 * 24));
+            
+            if (months > 0 && remainingDays > 0) {
+                daysElem.innerText = `已創立 ${months} 個月 ${remainingDays} 天`;
+            } else if (months > 0) {
+                daysElem.innerText = `已創立 ${months} 個月`;
+            } else {
+                daysElem.innerText = `已創立 ${remainingDays} 天`;
+            }
+        } else if (foundingDisplayMode === 3) {
+            let years = now.getFullYear() - FOUNDING_DATE.getFullYear();
+            let months = now.getMonth() - FOUNDING_DATE.getMonth();
+            let days = now.getDate() - FOUNDING_DATE.getDate();
+            
+            if (days < 0) {
+                months--;
+                const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+                days += lastMonth.getDate();
+            }
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+            
+            let result = '已創立 ';
+            if (years > 0) result += `${years} 年 `;
+            if (months > 0) result += `${months} 個月 `;
+            if (days > 0 || (years === 0 && months === 0)) result += `${days} 天`;
+            
+            daysElem.innerText = result.trim();
+        }
+    }
 
     /* --- 音樂控制：排程 + 預設歌單 + 跨日 + 即時監聽 --- */
     const allSongs = [
@@ -1403,10 +1484,8 @@
             const clockText = `${year}年${month}月${date}日 ${hours}點${minutes}分${seconds}秒 ${dayOfWeek}`;
             const clockElem = document.getElementById("custom-live-clock");
             if (clockElem) clockElem.innerText = clockText;
-            const foundingDate = new Date(2023, 4, 27, 0, 0, 0); 
-            const diffDays = Math.floor((now.getTime() - foundingDate.getTime()) / (1000 * 60 * 60 * 24));
-            const daysElem = document.getElementById("founding-days-num");
-            if (daysElem) daysElem.innerText = diffDays;
+            
+            updateFoundingDisplay();
         }
         updateTime();
         setInterval(updateTime, 1000);
