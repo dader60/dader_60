@@ -823,8 +823,6 @@
         <div class="video-container"><iframe src="https://www.youtube.com/embed/2VU1H3JQDe0?autoplay=1&mute=1&rel=0&iv_load_policy=3&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
         <span class="video-label">八卦山美景即時影像</span>
         <div class="video-container"><iframe src="https://www.youtube.com/embed/RaTbGYKMUtk?autoplay=1&mute=1&rel=0&iv_load_policy=3&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
-        <span class="video-label">台灣彰化溪湖即時影像</span>
-        <div class="video-container"><iframe src="https://www.youtube.com/embed/7vNt6dkNt6I?autoplay=1&mute=1&rel=0&iv_load_policy=3&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
         <span class="video-label">彰化王功漁港即時影像</span>
         <div class="video-container"><iframe width="560" height="315" src="https://www.youtube.com/embed/bsmxwRLdB3k?si=qLCQNCFX2KSqu06U&autoplay=1&mute=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
     </div>
@@ -864,13 +862,11 @@
         }
     }
 
-    /* ===== 🔥 全域錯誤處理（避免 JS 錯誤卡住） ===== */
     window.addEventListener('error', function(e) {
         console.error('⚠️ 網頁發生錯誤：', e.message);
         hideSplash();
     });
 
-    /* ===== 🔥 備用計時器（3 秒後無條件隱藏） ===== */
     window.addEventListener('load', function() {
         setTimeout(hideSplash, 1500);
         setTimeout(function() {
@@ -884,7 +880,7 @@
 
     /* ===== 🔥 靠達創立日顯示模式（點擊切換） ===== */
     let foundingDisplayMode = 0;
-    const FOUNDING_DATE = new Date(2023, 4, 27, 0, 0, 0); // 2023-05-27
+    const FOUNDING_DATE = new Date(2023, 4, 27, 0, 0, 0);
 
     function cycleFoundingDisplay() {
         foundingDisplayMode = (foundingDisplayMode + 1) % 4;
