@@ -1,1 +1,1564 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>靠北達德速度版⚡⚡⚡</title>
+    <style>
+        /* --- 啟動動畫樣式 (僅修改動畫時間為總計 1.5 秒---)  */
+        #splash-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #87CEEB; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 10000; 
+            transition: opacity 0.5s ease;
+        }
+        .splash-logo-box {
+            perspective: 1000px;
+            margin-bottom: 30px;
+        }
+        .splash-logo {
+            width: 150px;
+            border-radius: 50%;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+            animation: 
+                logo-spin-h 0.75s linear 0s 1,
+                logo-spin-v 0.75s linear 0.75s 1;
+        }
+        
+        .wave-text {
+            display: flex;
+            gap: 2px;
+        }
+        .wave-text span {
+            display: inline-block;
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 0 0 10px rgba(255,255,255,0.8);
+            animation: word-wave 1s ease-in-out infinite;
+        }
 
+        @keyframes logo-spin-h { 
+            from { transform: rotateY(0deg); } 
+            to { transform: rotateY(720deg); } 
+        }
+        @keyframes logo-spin-v { 
+            from { transform: rotateX(0deg); } 
+            to { transform: rotateX(720deg); } 
+        }
+        @keyframes word-wave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); color: #ff4500; }
+        }
+
+        .marquee-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            color: #d32f2f;
+            z-index: 2000;
+            height: 35px;
+            line-height: 35px;
+            overflow: hidden;
+            font-weight: bold;
+            font-size: 14px;
+            border-bottom: 2px solid #ff0000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .marquee-text {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%;
+            animation: marquee 25s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        body { font-family: "Microsoft JhengHei", Arial, sans-serif; background-color: #ADD8E6; margin: 0; display: flex; flex-direction: column; align-items: center; padding: 55px 20px 80px 20px; }
+        
+        .container { width: 100%; max-width: 400px; }
+        .profile-pic { width: 110px; height: 110px; border-radius: 50%; background-color: white; border: 3px solid white; margin: 0; display: block; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        .avatar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            margin: 10px auto 15px auto;
+        }
+        .avatar-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+        .music-icon-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .music-top-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .vinyl-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            flex-shrink: 0;
+        }
+        .vinyl-disc {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #444, #222 40%, #0a0a0a 70%, #000 100%);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4), inset 0 0 30px rgba(255,255,255,0.03);
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        .vinyl-disc::before {
+            content: '';
+            position: absolute;
+            top: 8%;
+            left: 8%;
+            width: 84%;
+            height: 84%;
+            border-radius: 50%;
+            background: 
+                repeating-conic-gradient(
+                    rgba(255,255,255,0.04) 0deg 1.5deg,
+                    transparent 1.5deg 3deg
+                ),
+                repeating-conic-gradient(
+                    rgba(255,255,255,0.02) 0deg 0.8deg,
+                    transparent 0.8deg 1.6deg
+                );
+            pointer-events: none;
+        }
+        .vinyl-disc .label-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 22px;
+            font-family: "Times New Roman", serif;
+            color: rgba(200,200,200,0.5);
+            transition: color 0.3s ease;
+            text-shadow: 0 0 10px rgba(255,255,255,0.05);
+            pointer-events: none;
+            line-height: 1;
+        }
+        .vinyl-disc .label-icon.playing {
+            animation: icon-rainbow 1.2s ease-in-out infinite alternate;
+        }
+        @keyframes icon-rainbow {
+            0% { color: #ff0000; text-shadow: 0 0 20px rgba(255,0,0,0.5); }
+            14% { color: #ff8800; text-shadow: 0 0 20px rgba(255,136,0,0.5); }
+            28% { color: #ffff00; text-shadow: 0 0 20px rgba(255,255,0,0.5); }
+            42% { color: #00ff44; text-shadow: 0 0 20px rgba(0,255,68,0.5); }
+            57% { color: #0088ff; text-shadow: 0 0 20px rgba(0,136,255,0.5); }
+            71% { color: #4400ff; text-shadow: 0 0 20px rgba(68,0,255,0.5); }
+            85% { color: #ff00ff; text-shadow: 0 0 20px rgba(255,0,255,0.5); }
+            100% { color: #ff0044; text-shadow: 0 0 20px rgba(255,0,68,0.5); }
+        }
+        .vinyl-disc.playing {
+            animation: vinyl-spin 2.5s linear infinite;
+        }
+        @keyframes vinyl-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .tonearm {
+            position: absolute;
+            top: -8px;
+            right: -20px;
+            width: 35px;
+            height: 35px;
+            transform-origin: top right;
+            transform: rotate(25deg);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 5;
+            pointer-events: none;
+        }
+        .tonearm .arm {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 28px;
+            height: 3px;
+            background: linear-gradient(to left, #999, #ddd);
+            border-radius: 2px;
+            transform-origin: top right;
+            transform: rotate(-10deg);
+            box-shadow: 0 0 4px rgba(0,0,0,0.2);
+        }
+        .tonearm .arm::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #eee, #aaa);
+            border-radius: 50%;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+        .tonearm .base {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle at 40% 35%, #ccc, #777);
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .tonearm.down {
+            transform: rotate(-35deg);
+        }
+        .tonearm.down .arm {
+            transform: rotate(10deg);
+        }
+
+        .volume-btn-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .volume-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .volume-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.6);
+            color: #333;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            user-select: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            padding: 0;
+            line-height: 1;
+            font-family: inherit;
+        }
+        .volume-btn:hover {
+            background: rgba(255,255,255,0.95);
+            transform: scale(1.1);
+        }
+        .volume-btn:active {
+            transform: scale(0.9);
+        }
+        .volume-btn.minus {
+            background: rgba(255,255,255,0.5);
+        }
+        .volume-btn.plus {
+            background: rgba(74, 144, 226, 0.3);
+        }
+        .volume-btn.plus:hover {
+            background: rgba(74, 144, 226, 0.5);
+        }
+        .volume-value {
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+            background: rgba(255,255,255,0.8);
+            padding: 1px 8px;
+            border-radius: 8px;
+            min-width: 30px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-family: Arial, sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .pot-spectrum {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            height: 32px;
+            padding: 4px 0;
+        }
+        .pot-spectrum .pot-bar {
+            width: 4px;
+            border-radius: 1px;
+            transition: height 0.08s ease;
+            height: 3px;
+            transform-origin: bottom;
+            opacity: 0.7;
+            flex-shrink: 0;
+            background: #4A90E2;
+        }
+        .pot-spectrum .pot-bar:nth-child(1) { background: #0044ff; }
+        .pot-spectrum .pot-bar:nth-child(2) { background: #0066ff; }
+        .pot-spectrum .pot-bar:nth-child(3) { background: #0088ff; }
+        .pot-spectrum .pot-bar:nth-child(4) { background: #00aaff; }
+        .pot-spectrum .pot-bar:nth-child(5) { background: #00ccff; }
+        .pot-spectrum .pot-bar:nth-child(6) { background: #00ffcc; }
+        .pot-spectrum .pot-bar:nth-child(7) { background: #00ffaa; }
+        .pot-spectrum .pot-bar:nth-child(8) { background: #00ff88; }
+        .pot-spectrum .pot-bar:nth-child(9) { background: #44ff44; }
+        .pot-spectrum .pot-bar:nth-child(10) { background: #88ff00; }
+        .pot-spectrum .pot-bar:nth-child(11) { background: #aaff00; }
+        .pot-spectrum .pot-bar:nth-child(12) { background: #ccff00; }
+        .pot-spectrum .pot-bar:nth-child(13) { background: #ffdd00; }
+        .pot-spectrum .pot-bar:nth-child(14) { background: #ffbb00; }
+        .pot-spectrum .pot-bar:nth-child(15) { background: #ff9900; }
+        .pot-spectrum .pot-bar:nth-child(16) { background: #ff7700; }
+        .pot-spectrum .pot-bar:nth-child(17) { background: #ff5500; }
+        .pot-spectrum .pot-bar:nth-child(18) { background: #ff3300; }
+        .pot-spectrum .pot-bar:nth-child(19) { background: #ff1100; }
+        .pot-spectrum .pot-bar:nth-child(20) { background: #ff0000; }
+        .pot-spectrum .pot-bar:nth-child(21) { background: #ff0044; }
+        .pot-spectrum .pot-bar:nth-child(22) { background: #ff0088; }
+        .pot-spectrum .pot-bar:nth-child(23) { background: #ff00cc; }
+        .pot-spectrum .pot-bar:nth-child(24) { background: #cc00ff; }
+
+        .pot-spectrum.active .pot-bar {
+            animation: pot-bounce 0.5s ease-in-out infinite alternate;
+        }
+        .pot-spectrum.active .pot-bar:nth-child(1) { animation-delay: 0.00s; height: 6px; }
+        .pot-spectrum.active .pot-bar:nth-child(2) { animation-delay: 0.02s; height: 14px; }
+        .pot-spectrum.active .pot-bar:nth-child(3) { animation-delay: 0.04s; height: 22px; }
+        .pot-spectrum.active .pot-bar:nth-child(4) { animation-delay: 0.06s; height: 30px; }
+        .pot-spectrum.active .pot-bar:nth-child(5) { animation-delay: 0.08s; height: 18px; }
+        .pot-spectrum.active .pot-bar:nth-child(6) { animation-delay: 0.10s; height: 34px; }
+        .pot-spectrum.active .pot-bar:nth-child(7) { animation-delay: 0.12s; height: 10px; }
+        .pot-spectrum.active .pot-bar:nth-child(8) { animation-delay: 0.14s; height: 26px; }
+        .pot-spectrum.active .pot-bar:nth-child(9) { animation-delay: 0.16s; height: 20px; }
+        .pot-spectrum.active .pot-bar:nth-child(10) { animation-delay: 0.18s; height: 32px; }
+        .pot-spectrum.active .pot-bar:nth-child(11) { animation-delay: 0.20s; height: 14px; }
+        .pot-spectrum.active .pot-bar:nth-child(12) { animation-delay: 0.22s; height: 28px; }
+        .pot-spectrum.active .pot-bar:nth-child(13) { animation-delay: 0.24s; height: 8px; }
+        .pot-spectrum.active .pot-bar:nth-child(14) { animation-delay: 0.26s; height: 24px; }
+        .pot-spectrum.active .pot-bar:nth-child(15) { animation-delay: 0.28s; height: 16px; }
+        .pot-spectrum.active .pot-bar:nth-child(16) { animation-delay: 0.30s; height: 30px; }
+        .pot-spectrum.active .pot-bar:nth-child(17) { animation-delay: 0.32s; height: 12px; }
+        .pot-spectrum.active .pot-bar:nth-child(18) { animation-delay: 0.34s; height: 22px; }
+        .pot-spectrum.active .pot-bar:nth-child(19) { animation-delay: 0.36s; height: 18px; }
+        .pot-spectrum.active .pot-bar:nth-child(20) { animation-delay: 0.38s; height: 26px; }
+        .pot-spectrum.active .pot-bar:nth-child(21) { animation-delay: 0.40s; height: 10px; }
+        .pot-spectrum.active .pot-bar:nth-child(22) { animation-delay: 0.42s; height: 20px; }
+        .pot-spectrum.active .pot-bar:nth-child(23) { animation-delay: 0.44s; height: 14px; }
+        .pot-spectrum.active .pot-bar:nth-child(24) { animation-delay: 0.46s; height: 8px; }
+
+        @keyframes pot-bounce {
+            0% { transform: scaleY(0.15); opacity: 0.3; }
+            40% { transform: scaleY(0.6); opacity: 0.7; }
+            80% { transform: scaleY(0.9); opacity: 0.9; }
+            100% { transform: scaleY(1); opacity: 1; }
+        }
+
+        .pot-spectrum .pot-bar.stopped {
+            animation: none !important;
+            height: 3px !important;
+            opacity: 0.12 !important;
+            transform: scaleY(1);
+        }
+
+        .music-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.7);
+            padding: 6px 16px 6px 12px;
+            border-radius: 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .ctrl-btn {
+            font-size: 20px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.6);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            user-select: none;
+            color: #333;
+            flex-shrink: 0;
+        }
+        .ctrl-btn:hover {
+            background: rgba(255,255,255,0.9);
+            transform: scale(1.1);
+        }
+        .ctrl-btn:active {
+            transform: scale(0.9);
+        }
+        .ctrl-btn.play-btn {
+            font-size: 24px;
+            background: rgba(74, 144, 226, 0.2);
+        }
+        .ctrl-btn.play-btn:hover {
+            background: rgba(74, 144, 226, 0.4);
+        }
+
+        h2 { 
+            text-align: center; 
+            color: #333; 
+            text-shadow: 1px 1px 2px white; 
+            margin-bottom: 25px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .card, .line-section, .live-section, .shuttle-section { background: white; border-radius: 20px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: #333; display: block; font-weight: bold; box-sizing: border-box; }
+        .owner-ig { background: #fff5f5; border: 2px solid #fd5d93; color: #fd5d93; }
+        .owner-tiktok { background: #000000; color: #ffffff; border: 2px solid #25F4EE; }
+        
+        .toolbox-card { 
+            background: linear-gradient(135deg, #6e8efb, #a777e3); 
+            color: white; 
+            border: none; 
+            position: relative; 
+            overflow: hidden; 
+            animation: glowing 2s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .toolbox-card::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(30deg);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine {
+            0% { left: -100%; }
+            20% { left: 100%; }
+            100% { left: 100%; }
+        }
+        @keyframes glowing {
+            0% { box-shadow: 0 0 5px #6e8efb; }
+            50% { box-shadow: 0 0 20px #a777e3; }
+            100% { box-shadow: 0 0 5px #6e8efb; }
+        }
+
+        .shuttle-section { border: 2px solid #4A90E2; background: #f0f7ff; }
+        .shuttle-title { color: #4A90E2; font-size: 18px; margin-bottom: 10px; display: block; }
+        .shuttle-info { font-size: 13px; color: #555; text-align: left; font-weight: normal; line-height: 1.6; background: #fff; padding: 10px; border-radius: 10px; border: 1px solid #d1e3f8; }
+
+        .yt-card { background: #fff1f1; border: 2px solid #ff0000; color: #ff0000; margin-bottom: 10px; }
+        .qrcode-img { width: 180px; height: 180px; margin: 10px auto; display: block; border-radius: 10px; }
+        .line-id { background: #00b900; color: white; padding: 10px 25px; border-radius: 50px; display: inline-block; cursor: pointer; margin-top: 10px; }
+        
+        .weather-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .countdown-card {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            color: #d32f2f;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .typhoon-card {
+            background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 12px; margin-bottom: 5px; background: #000; overflow: hidden; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0; }
+        .video-label { font-size: 14px; color: #333; margin-top: 15px; margin-bottom: 8px; font-weight: bold; display: block; border-left: 4px solid #4A90E2; padding-left: 10px; text-align: left; }
+        .eq-warning { color: #ff0000; font-size: 15px; font-weight: bold; margin-top: 10px; display: block; animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        .mute-hint { font-size: 12px; color: #666; margin-top: 10px; display: block; font-weight: normal; }
+
+        .fixed-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: white; color: black; text-align: center; padding: 10px 0; font-size: 14px; font-weight: bold; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 999; }
+        .tutorial-card { background: #FFD700; color: #000; border: 2px solid #DAA520; }
+        
+        .feedback-section { background: #f9f9f9; border: 2px dashed #666; }
+
+        /* 🔥 綠色閃爍燈 */
+        .green-blink {
+            display: inline-block;
+            animation: green-blink-anim 1s ease-in-out infinite;
+        }
+
+        @keyframes green-blink-anim {
+            0%, 100% { 
+                opacity: 1; 
+                filter: drop-shadow(0 0 4px rgba(0, 255, 0, 0.8));
+            }
+            50% { 
+                opacity: 0.3; 
+                filter: drop-shadow(0 0 0px rgba(0, 255, 0, 0));
+            }
+        }
+
+        #back-to-top {
+            position: fixed;
+            bottom: 85px; 
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(74, 144, 226, 0.9);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid white;
+        }
+        #back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        #back-to-top:hover {
+            transform: scale(1.1);
+            background: #4A90E2;
+        }
+
+        .daily-chat-section {
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(253, 29, 29, 0.25);
+            padding: 18px;
+            margin-bottom: 15px;
+            text-align: left;
+            box-sizing: border-box;
+            border-radius: 20px;
+        }
+        .daily-chat-section .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-align: center;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .daily-chat-section .section-content {
+            font-size: 13.5px;
+            color: #ffffff;
+            text-align: left;
+            font-weight: bold;
+            line-height: 1.8;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 12px 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+        }
+        .daily-chat-section .section-content span {
+            display: block;
+        }
+        .daily-chat-section .join-btn {
+            background: white;
+            color: #fd1d1d;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            padding: 10px;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            font-size: 15px;
+            transition: transform 0.2s;
+        }
+        .daily-chat-section .join-btn:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+
+<div id="splash-overlay" onclick="hideSplash()">
+    <div class="splash-logo-box">
+        <img src="avatar.jpg" alt="Logo" class="splash-logo" onerror="this.style.display='none'">
+    </div>
+    <div class="wave-text">
+        <span style="animation-delay: 0.1s;">歡</span>
+        <span style="animation-delay: 0.2s;">迎</span>
+        <span style="animation-delay: 0.3s;">使</span>
+        <span style="animation-delay: 0.4s;">用</span>
+        <span style="animation-delay: 0.5s;">靠</span>
+        <span style="animation-delay: 0.6s;">北</span>
+        <span style="animation-delay: 0.7s;">達</span>
+        <span style="animation-delay: 0.8s;">德</span>
+        <span style="animation-delay: 0.9s;">⚡</span>
+    </div>
+    <div class="wave-text" style="margin-top: 10px;">
+        <span style="animation-delay: 1.0s;">多</span>
+        <span style="animation-delay: 1.1s;">元</span>
+        <span style="animation-delay: 1.2s;">匿</span>
+        <span style="animation-delay: 1.3s;">名</span>
+        <span style="animation-delay: 1.4s;">系</span>
+        <span style="animation-delay: 1.5s;">統</span>
+    </div>
+</div>
+
+<div class="marquee-container">
+    <div class="marquee-text">
+        📢 歡迎來到靠北達德多元匿名！請善用本網頁匿名投稿 💬 那些不敢當面說的話、找不到人問的問題，就交給我們吧！⚠️ 溫馨提醒：靠北是為了紓壓，不是為了傷人!匿名是保護大家，不是讓人亂來!歡迎追蹤大版主ig：hbingzhe10.10，靠達官方賴id:@768mnxcr(記得要打@), 版主weplay語音房房號:C820553，歡迎追蹤房間，會有不定時活動
+    </div>
+</div>
+
+<div class="container">
+    <div class="avatar-wrapper">
+        <div class="avatar-row">
+            <img src="avatar.jpg" alt="版主頭像" class="profile-pic" onerror="this.style.display='none'">
+            <div class="music-icon-wrapper">
+                <div class="music-top-row">
+                    <div class="vinyl-wrapper">
+                        <div class="tonearm" id="tonearm">
+                            <div class="arm"></div>
+                            <div class="base"></div>
+                        </div>
+                        <div class="vinyl-disc" id="vinyl-disc">
+                            <span class="label-icon" id="label-icon">♫</span>
+                        </div>
+                    </div>
+                    <div class="volume-btn-wrapper">
+                        <div class="volume-btn-group">
+                            <button class="volume-btn minus" id="volume-minus" title="音量 -5">−</button>
+                            <button class="volume-btn plus" id="volume-plus" title="音量 +5">+</button>
+                        </div>
+                        <div class="volume-value" id="volume-value">50</div>
+                    </div>
+                </div>
+                <div class="pot-spectrum" id="pot-spectrum">
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                    <span class="pot-bar"></span>
+                </div>
+                <div class="music-controls">
+                    <button class="ctrl-btn" id="prev-btn" title="上一首">⏮</button>
+                    <button class="ctrl-btn play-btn" id="play-btn" title="播放/暫停">▶</button>
+                    <button class="ctrl-btn" id="next-btn" title="下一首">⏭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <h2>靠北達德速度版⚡⚡⚡</h2>
+
+    <div id="custom-live-clock" style="text-align: center; background-color: #000000; color: #ffffff; font-weight: bold; padding: 12px 15px; border-radius: 15px; margin-bottom: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); font-size: 15px; letter-spacing: 0.5px;">
+        載入時間中...
+    </div>
+
+    <div id="founding-days-counter" onclick="cycleFoundingDisplay()" style="text-align: center; background-color: #000000; color: #ffffff; font-weight: bold; padding: 12px 15px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); font-size: 15px; letter-spacing: 0.5px; cursor: pointer; user-select: none; transition: transform 0.15s ease;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+        靠達創立時間：2023年05月27日 (<span id="founding-days-num" style="color: #ffdd44; font-size: 17px;">已創立 讀取中</span>)
+        <div style="font-size: 10px; color: #888; margin-top: 3px; font-weight: normal;">👆 點擊切換顯示模式</div>
+    </div>
+
+    <a href="https://sites.google.com/view/dader60/%E7%89%88%E8%A6%8F" target="_blank" class="card">📄 版規及簡歷冊</a>
+    <a href="https://tellonym.me/dader_.60?rel=web" target="_blank" rel="noopener noreferrer" class="card" onclick="forceWeb(event)">🔗 匿名投稿連結 🔗</a>
+    <a href="https://youtube.com/shorts/VVvFNDugpKA?feature=share" target="_blank" class="card tutorial-card">🎬 投稿匿名教學影片</a>
+    
+    <a href="https://dader60.github.io/dader/" target="_blank" class="card">🚨 投訴系統</a>
+    
+    <a href="Countdown.html" target="_blank" class="card countdown-card">📅 倒數日系統 ⏳</a>
+    
+    <div class="daily-chat-section">
+        <div class="section-title">💬 達德日常討論群</div>
+        <div class="section-content">
+            <span>📌 入群者請追蹤靠北達德版帳</span>
+            <span>✨ 也🉑追蹤版主Ig @hbingzhe10.10</span>
+            <span>🤝 達德人想進群組聊天的歡迎加入</span>
+        </div>
+        <a href="https://ig.me/j/l3p1iGOTZDJVhtjJ/" target="_blank" class="join-btn">🚀 點擊我加入群聊</a>
+    </div>
+    
+    <div class="card" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; box-shadow: 0 4px 12px rgba(56, 239, 125, 0.25); padding: 18px; margin-bottom: 15px; text-align: center; box-sizing: border-box;">
+        <div style="font-size: 18px; font-weight: bold; margin-bottom: 12px; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            📝 聘職靠達小編表單
+        </div>
+        <div style="font-size: 13.5px; color: #ffffff; text-align: center; font-weight: bold; line-height: 1.6; background: rgba(0, 0, 0, 0.15); padding: 12px 15px; border-radius: 12px; margin-bottom: 12px;">
+            歡迎填寫，真誠再來❗<br>
+            ❗認真填完表單會再進行考核 ❗
+        </div>
+        <a href="https://forms.gle/EQ8WZSqr72bx63xU7" target="_blank" style="background: white; color: #11998e; text-decoration: none; display: block; text-align: center; padding: 10px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.15); font-size: 15px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            🚀 點擊填寫表單
+        </a>
+    </div>
+    
+    <div class="card" style="background: linear-gradient(135deg, #25f4ee, #fe0979); color: white; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.15); padding: 15px; text-align: center; margin-bottom: 15px;">
+        <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">🎙️ 版主weplay語音房</div>
+        <div style="font-size: 15px; margin-bottom: 12px; background: rgba(0,0,0,0.2); display: inline-block; padding: 3px 12px; border-radius: 10px; letter-spacing: 1px;">房號: C820553</div>
+        <a href="https://weplay.run/C/qQrv41" target="_blank" class="card" style="background: white; color: #fe0979; border: none; padding: 10px; font-size: 15px; margin-bottom: 10px; display: block; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
+            🚀 點擊我開啟
+        </a>
+        <div id="weplay-copy-btn" onclick="copyWePlayRoom()" class="card" style="background: white; color: #25f4ee; border: none; padding: 10px; font-size: 15px; margin: 0; cursor: pointer; display: block; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
+            📋 點我複製房號
+        </div>
+    </div>
+
+    <a href="https://www.instagram.com/channel/AbaNRbRrwua33brb/" target="_blank" class="card">🔥 靠北達德專區 (IG 頻道)</a>
+    <a href="https://www.instagram.com/hbingzhe10.10/" target="_blank" class="card owner-ig">👤 版主個人 IG</a>
+    <a href="https://www.instagram.com/channel/AbZByxGjVLjC7N7H/" target="_blank" class="card">📸 版主專區 (IG 頻道)</a>
+
+    <div class="card owner-ig" style="text-align: center; padding: 18px; margin-bottom: 15px;">
+        <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">💬 問版主問題(目前暫停使用)</div>
+        <div style="font-size: 13.5px; color: #fd5d93; font-weight: bold; margin-bottom: 15px; line-height: 1.5;">
+            📌 追蹤版主ig在匿名，會看內容決定是否回覆
+        </div>
+        <a href="https://ngl.link/hbingzhe10.1017833" target="_blank" onclick="showPauseNotice(event)" style="background: #fd5d93; color: white; text-decoration: none; display: block; text-align: center; padding: 10px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 6px rgba(253, 93, 147, 0.2); font-size: 15px;">
+            🚀 點擊前往匿名發問
+        </a>
+    </div>
+
+    <a href="https://www.instagram.com/love_dader?igsh=M3dpaXBrMjZmcHYw" target="_blank" class="card owner-ig">💖 情感語錄</a>
+    <a href="https://www.tiktok.com/@hbingzhe10.10" target="_blank" class="card owner-tiktok">🎵 版主抖音 (TikTok)</a>
+    <a href="https://www.tiktok.com/@dader_.60?is_from_webapp=1&sender_device=pc" target="_blank" class="card owner-tiktok">🎵 靠北達德抖音</a>
+    
+    <a href="weather.html" target="_blank" class="card weather-card">☀️ 天氣即時查詢系統 ☁️</a>
+    
+    <a href="toolbox.html" target="_blank" class="card toolbox-card">🧰 萬用工具箱 </a>
+    <a href="https://www.dgpa.gov.tw/typh/daily/nds.html" target="_blank" class="card typhoon-card">🌀 停班課查詢</a>
+
+    <div class="shuttle-section">
+        <a href="https://www.eup.tw/shuttle/entry_view.html?197" target="_blank" style="text-decoration: none;">
+            <strong class="shuttle-title">🚌 達德校車查詢系統</strong>
+        </a>
+        <div class="shuttle-info">
+            使用單位：220 (達德商工) 請輸入數字<br>
+            學號：校車編號 (例如 125 校車請輸入 125)<br>
+            密碼：tdvs 車號 000 (例如 125 校車請輸入 125000)
+        </div>
+    </div>
+
+    <div class="line-section">
+        <strong>官方 LINE ⚡</strong><br>
+        <img src="line-qr.jpg" class="qrcode-img" onerror="this.style.display='none'">
+        <a href="https://lin.ee/94g8LGJ" target="_blank" style="color: #00b900; text-decoration: none; display: block; margin: 10px 0;">👉 點我加入好友 👈</a>
+        <div class="line-id" onclick="copyID()">複製 ID: @768mnxcr</div>
+    </div>
+
+    <div class="line-section" style="border: 2px solid #06c755;">
+        <strong>靠達消息第一線賴社群 ⚡</strong><br>
+        <img src="LINE OpenChat-QR.jpg" class="qrcode-img" onerror="this.style.display='none'">
+        <div style="font-size: 13.5px; color: #d32f2f; font-weight: bold; margin: 10px 0; line-height: 1.5;">
+            密碼為靠達創立西元年月日20230517<br>請先複製密碼再點擊我進入
+        </div>
+        <div id="openchat-copy-btn" onclick="copyOpenChatPassword()" class="line-id" style="background: #00b900; color: white; display: inline-block; cursor: pointer; margin-bottom: 12px; padding: 10px 25px;">
+            點擊我複製密碼
+        </div>
+        <a href="https://line.me/ti/g2/Wdby5SjN-wFsSrEkIu7ljopZGlxLx7Fghls74A?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" style="color: #00b900; text-decoration: none; display: block; font-weight: bold; margin-top: 5px;">👉 點擊我進入 👈</a>
+    </div>
+
+    <div class="live-section">
+        <strong style="display: block; margin-bottom: 15px; text-align: center;">🚨 地震即時直播專區</strong>
+        <div class="video-container">
+            <iframe src="https://www.youtube.com/embed/KyT4qSK8lJo?autoplay=1&mute=1&rel=0&iv_load_policy=3&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+        <span class="eq-warning">⚠️地震發生時請保持冷靜，注意安全！</span>
+        <span class="eq-warning">地震三步驟：趴下、掩護、穩住</span>
+        <span class="video-label">新聞網最新地震觀測</span>
+        <div class="video-container">
+            <iframe src="https://www.youtube.com/embed/0eOhU2J_MXE?si=EqHRXn5lwmV3sT_g&autoplay=1&mute=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+        <span class="mute-hint">🔊 由於自動播放，影片預設靜音，如需聲音請點擊播放器手動開啟。</span>
+    </div>
+
+    <div class="live-section">
+        <strong style="display: block; margin-bottom: 15px; text-align: center;">📹 彰化縣即時直播專區</strong>
+        <span class="video-label">彰化縣重要路口即時影像</span>
+        <div class="video-container"><iframe src="https://www.youtube.com/embed/2VU1H3JQDe0?autoplay=1&mute=1&rel=0&iv_load_policy=3&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
+        <span class="video-label">八卦山美景即時影像</span>
+        <div class="video-container"><iframe src="https://www.youtube.com/embed/RaTbGYKMUtk?autoplay=1&mute=1&rel=0&iv_load_policy=3&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
+        <span class="video-label">彰化王功漁港即時影像</span>
+        <div class="video-container"><iframe width="560" height="315" src="https://www.youtube.com/embed/bsmxwRLdB3k?si=qLCQNCFX2KSqu06U&autoplay=1&mute=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+    </div>
+
+    <div class="live-section">
+        <strong style="display: block; margin-bottom: 15px; text-align: center;">🎬 達德商工 YouTube 專區</strong>
+        <a href="https://youtube.com/channel/UCmvPBFxN0SJw9ATLiajD9vQ?si=vD6X6CMUKx5RS_7n" target="_blank" class="card yt-card">靠北達德速度版⚡⚡⚡</a>
+        <a href="https://youtu.be/4cjaIKp_f50?si=KHUVBdntugOWpmYc" target="_blank" class="card yt-card">達德校歌</a>
+        <a href="https://youtu.be/8B8pj3l6jDw?si=0Ylm50sRUQEqSq7R" target="_blank" class="card yt-card">達德電子書宣導</a>
+        <a href="https://youtube.com/channel/UCQi21ZNZ5tZkVuhMABjxOIw?si=EgnjHz6Pl4uiHiJ3" target="_blank" class="card yt-card">達德商工學務處專區</a>
+        <a href="https://youtube.com/@dader520?si=YjGZfEZ0W1ysRggB" target="_blank" class="card yt-card">達德商工專區</a>
+    </div>
+
+    <div class="live-section feedback-section">
+        <strong style="display: block; margin-bottom: 15px; text-align: center;">📝 意見回饋</strong>
+        <a href="https://forms.gle/2BeEDdipjShpKbzh7" target="_blank" class="card" style="background: #666; color: white; border: none;">點此填寫意見改善單</a>
+    </div>
+
+</div>
+
+<div id="back-to-top" title="回到頂端">▲</div>
+
+<div class="fixed-footer">
+    <div>𝓭𝓪𝓭𝓮𝓻 靠北達德速度版 ⚡️｜版主小編團隊</div>
+    <div style="font-size: 11px; font-weight: normal; color: #666; margin-top: 3px;"><span class="green-blink">🟢</span> 📊 總瀏覽次數：<span id="total_view_display" style="color:#ff4500; font-weight:bold;">讀取中...</span></div>
+</div>
+
+<script>
+    /* ===== 🔥 隱藏歡迎介面（多重保險） ===== */
+    function hideSplash() {
+        const splash = document.getElementById('splash-overlay');
+        if (splash && splash.style.display !== 'none') {
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.display = 'none';
+            }, 500);
+        }
+    }
+
+    window.addEventListener('error', function(e) {
+        console.error('⚠️ 網頁發生錯誤：', e.message);
+        hideSplash();
+    });
+
+    window.addEventListener('load', function() {
+        setTimeout(hideSplash, 1500);
+        setTimeout(function() {
+            const splash = document.getElementById('splash-overlay');
+            if (splash && splash.style.display !== 'none') {
+                console.warn('⚠️ 歡迎介面卡住，強制隱藏');
+                hideSplash();
+            }
+        }, 3000);
+    });
+
+    /* ===== 🔥 靠達創立日顯示模式（點擊切換） ===== */
+    let foundingDisplayMode = 0;
+    const FOUNDING_DATE = new Date(2023, 4, 27, 0, 0, 0);
+
+    function cycleFoundingDisplay() {
+        foundingDisplayMode = (foundingDisplayMode + 1) % 4;
+        updateFoundingDisplay();
+    }
+
+    function getMonthsDiff(start, end) {
+        let months = (end.getFullYear() - start.getFullYear()) * 12;
+        months += end.getMonth() - start.getMonth();
+        if (end.getDate() < start.getDate()) {
+            months--;
+        }
+        return months;
+    }
+
+    function updateFoundingDisplay() {
+        const now = new Date();
+        const daysElem = document.getElementById("founding-days-num");
+        if (!daysElem) return;
+        
+        const diffMs = now.getTime() - FOUNDING_DATE.getTime();
+        const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        
+        if (totalDays < 0) {
+            daysElem.innerText = "尚未創立";
+            return;
+        }
+        
+        if (foundingDisplayMode === 0) {
+            daysElem.innerText = `已創立 ${totalDays} 天`;
+        } else if (foundingDisplayMode === 1) {
+            const weeks = Math.floor(totalDays / 7);
+            const remainingDays = totalDays % 7;
+            if (weeks > 0 && remainingDays > 0) {
+                daysElem.innerText = `已創立 ${weeks} 週 ${remainingDays} 天`;
+            } else if (weeks > 0) {
+                daysElem.innerText = `已創立 ${weeks} 週`;
+            } else {
+                daysElem.innerText = `已創立 ${totalDays} 天`;
+            }
+        } else if (foundingDisplayMode === 2) {
+            const months = getMonthsDiff(FOUNDING_DATE, now);
+            const tempDate = new Date(FOUNDING_DATE);
+            tempDate.setMonth(tempDate.getMonth() + months);
+            const remainingDays = Math.floor((now.getTime() - tempDate.getTime()) / (1000 * 60 * 60 * 24));
+            
+            if (months > 0 && remainingDays > 0) {
+                daysElem.innerText = `已創立 ${months} 個月 ${remainingDays} 天`;
+            } else if (months > 0) {
+                daysElem.innerText = `已創立 ${months} 個月`;
+            } else {
+                daysElem.innerText = `已創立 ${remainingDays} 天`;
+            }
+        } else if (foundingDisplayMode === 3) {
+            let years = now.getFullYear() - FOUNDING_DATE.getFullYear();
+            let months = now.getMonth() - FOUNDING_DATE.getMonth();
+            let days = now.getDate() - FOUNDING_DATE.getDate();
+            
+            if (days < 0) {
+                months--;
+                const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+                days += lastMonth.getDate();
+            }
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+            
+            let result = '已創立 ';
+            if (years > 0) result += `${years} 年 `;
+            if (months > 0) result += `${months} 個月 `;
+            if (days > 0 || (years === 0 && months === 0)) result += `${days} 天`;
+            
+            daysElem.innerText = result.trim();
+        }
+    }
+
+    /* --- 音樂控制：排程 + 預設歌單 + 跨日 + 即時監聽 --- */
+    const allSongs = [
+        '01.mp3', '02.mp3', '03.mp3', '04.mp3', '05.mp3',
+        '06.mp3', '07.mp3', '08.mp3', '09.mp3', '10.mp3',
+        '11.mp3', '12.mp3', '13.mp3', '14.mp3', '15.mp3',
+        '16.mp3', '17.mp3', '18.mp3', '19.mp3', '20.mp3',
+        '21.mp3', '22.mp3', '23.mp3', '24.mp3', '25.mp3',
+        '26.mp3', '27.mp3', '28.mp3', '29.mp3', '30.mp3'
+    ];
+
+    let songs = [...allSongs];
+    let randomPool = [...allSongs];
+    let currentSongIndex = 0;
+    let lastPlayedIndex = -1;
+    let remainingIndices = [];
+    let isSongChanging = false;
+    let scheduledQueue = [];
+    let currentScheduleDate = '';
+    let dateCheckInterval = null;
+    let scheduleListener = null;
+    
+    const audio = new Audio();
+    let isPlaying = false;
+
+    const vinylDisc = document.getElementById('vinyl-disc');
+    const labelIcon = document.getElementById('label-icon');
+    const tonearm = document.getElementById('tonearm');
+    const playBtn = document.getElementById('play-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const potSpectrum = document.getElementById('pot-spectrum');
+    const volumeMinus = document.getElementById('volume-minus');
+    const volumePlus = document.getElementById('volume-plus');
+    const volumeValue = document.getElementById('volume-value');
+
+    let volumePercent = 50;
+    audio.volume = volumePercent / 100;
+    updateVolumeUI();
+
+    function updateVolumeUI() {
+        volumeValue.textContent = volumePercent;
+    }
+
+    volumePlus.addEventListener('click', function() {
+        volumePercent = Math.min(100, volumePercent + 5);
+        audio.volume = volumePercent / 100;
+        updateVolumeUI();
+    });
+
+    volumeMinus.addEventListener('click', function() {
+        volumePercent = Math.max(0, volumePercent - 5);
+        audio.volume = volumePercent / 100;
+        updateVolumeUI();
+    });
+
+    let holdTimer = null;
+    let holdInterval = null;
+
+    function startHold(action) {
+        action();
+        holdTimer = setTimeout(() => {
+            holdInterval = setInterval(action, 150);
+        }, 500);
+    }
+
+    function stopHold() {
+        clearTimeout(holdTimer);
+        clearInterval(holdInterval);
+    }
+
+    volumePlus.addEventListener('mousedown', () => startHold(() => {
+        volumePercent = Math.min(100, volumePercent + 5);
+        audio.volume = volumePercent / 100;
+        updateVolumeUI();
+    }));
+    volumePlus.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        startHold(() => {
+            volumePercent = Math.min(100, volumePercent + 5);
+            audio.volume = volumePercent / 100;
+            updateVolumeUI();
+        });
+    }, { passive: false });
+
+    volumeMinus.addEventListener('mousedown', () => startHold(() => {
+        volumePercent = Math.max(0, volumePercent - 5);
+        audio.volume = volumePercent / 100;
+        updateVolumeUI();
+    }));
+    volumeMinus.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        startHold(() => {
+            volumePercent = Math.max(0, volumePercent - 5);
+            audio.volume = volumePercent / 100;
+            updateVolumeUI();
+        });
+    }, { passive: false });
+
+    ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(evt => {
+        volumePlus.addEventListener(evt, stopHold);
+        volumeMinus.addEventListener(evt, stopHold);
+    });
+
+    function updatePlayButton() {
+        if (isPlaying) {
+            playBtn.textContent = '⏸';
+            playBtn.title = '暫停';
+        } else {
+            playBtn.textContent = '▶';
+            playBtn.title = '播放';
+        }
+    }
+
+    function updateVinyl() {
+        if (isPlaying) {
+            vinylDisc.classList.add('playing');
+            labelIcon.classList.add('playing');
+            tonearm.classList.add('down');
+        } else {
+            vinylDisc.classList.remove('playing');
+            labelIcon.classList.remove('playing');
+            tonearm.classList.remove('down');
+        }
+    }
+
+    function updateSpectrum() {
+        if (isPlaying && !isSongChanging) {
+            potSpectrum.classList.add('active');
+            potSpectrum.querySelectorAll('.pot-bar').forEach(bar => {
+                bar.classList.remove('stopped');
+            });
+        } else {
+            potSpectrum.classList.remove('active');
+            potSpectrum.querySelectorAll('.pot-bar').forEach(bar => {
+                bar.classList.add('stopped');
+            });
+        }
+    }
+
+    function updateUI() {
+        updatePlayButton();
+        updateVinyl();
+        updateSpectrum();
+    }
+
+    function pauseSpectrumForSongChange() {
+        isSongChanging = true;
+        potSpectrum.classList.remove('active');
+        potSpectrum.querySelectorAll('.pot-bar').forEach(bar => {
+            bar.classList.add('stopped');
+        });
+        setTimeout(() => {
+            isSongChanging = false;
+            if (isPlaying) {
+                potSpectrum.classList.add('active');
+                potSpectrum.querySelectorAll('.pot-bar').forEach(bar => {
+                    bar.classList.remove('stopped');
+                });
+            }
+        }, 400);
+    }
+
+    function getTodayKey() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function initRemainingList() {
+        const poolIndices = randomPool.map(s => songs.indexOf(s)).filter(i => i >= 0);
+        remainingIndices = [...poolIndices];
+        for (let i = remainingIndices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [remainingIndices[i], remainingIndices[j]] = [remainingIndices[j], remainingIndices[i]];
+        }
+        if (remainingIndices.length > 1 && remainingIndices[0] === lastPlayedIndex) {
+            [remainingIndices[0], remainingIndices[1]] = [remainingIndices[1], remainingIndices[0]];
+        }
+    }
+
+    function getNextSongIndex() {
+        if (!remainingIndices || remainingIndices.length === 0) {
+            initRemainingList();
+        }
+        return remainingIndices.shift();
+    }
+
+    function playSong(index) {
+        if (index >= 0 && index < songs.length) {
+            currentSongIndex = index;
+            audio.src = songs[currentSongIndex];
+            pauseSpectrumForSongChange();
+            audio.play().then(() => {
+                isPlaying = true;
+                updateUI();
+            }).catch(() => {
+                isPlaying = false;
+                updateUI();
+            });
+        }
+    }
+
+    function playNext() {
+        let newIndex;
+        if (scheduledQueue.length > 0) {
+            const nextSong = scheduledQueue.shift();
+            newIndex = songs.indexOf(nextSong);
+        } else {
+            newIndex = getNextSongIndex();
+        }
+        lastPlayedIndex = currentSongIndex;
+        playSong(newIndex);
+    }
+
+    function playPrev() {
+        if (lastPlayedIndex >= 0 && lastPlayedIndex !== currentSongIndex) {
+            const prev = lastPlayedIndex;
+            const currentSongName = songs[currentSongIndex];
+            if (randomPool.includes(currentSongName)) {
+                remainingIndices.push(currentSongIndex);
+            }
+            lastPlayedIndex = currentSongIndex;
+            playSong(prev);
+        } else {
+            playNext();
+        }
+    }
+
+    function togglePlay() {
+        if (isPlaying) {
+            audio.pause();
+            isPlaying = false;
+            updateUI();
+        } else {
+            if (!audio.src || audio.ended) {
+                playSong(currentSongIndex);
+            } else {
+                audio.play().then(() => {
+                    isPlaying = true;
+                    updateUI();
+                }).catch(() => {});
+            }
+        }
+    }
+
+    audio.onended = function() {
+        playNext();
+    };
+
+    function loadTodayPlaylist() {
+        return new Promise((resolve) => {
+            try {
+                if (typeof firebase === 'undefined' || !firebase.apps.length) {
+                    resolve(null);
+                    return;
+                }
+                const db = firebase.database();
+                db.ref('music_schedule').once('value').then((snapshot) => {
+                    const data = snapshot.val() || {};
+                    const todayKey = getTodayKey();
+                    
+                    if (data[todayKey] && data[todayKey].length > 0) {
+                        resolve({ type: 'schedule', songs: data[todayKey] });
+                    } else if (data['default'] && data['default'].length > 0) {
+                        resolve({ type: 'default', songs: data['default'] });
+                    } else {
+                        resolve({ type: 'all', songs: allSongs });
+                    }
+                }).catch(() => resolve(null));
+            } catch (err) {
+                resolve(null);
+            }
+        });
+    }
+
+    function applySchedule(result, isDateChange = false) {
+        songs = [...allSongs];
+        randomPool = [...allSongs];
+        
+        if (result && result.songs && result.songs.length > 0) {
+            if (result.type === 'schedule') {
+                scheduledQueue = result.songs.filter(s => songs.includes(s));
+                if (scheduledQueue.length > 0) {
+                    randomPool = allSongs.filter(s => !scheduledQueue.includes(s));
+                    const firstSong = scheduledQueue.shift();
+                    currentSongIndex = songs.indexOf(firstSong);
+                } else {
+                    currentSongIndex = Math.floor(Math.random() * songs.length);
+                }
+            } else if (result.type === 'default') {
+                const defaultSongs = result.songs.filter(s => songs.includes(s));
+                if (defaultSongs.length > 0) {
+                    randomPool = [...defaultSongs];
+                    const randomIdx = Math.floor(Math.random() * randomPool.length);
+                    currentSongIndex = songs.indexOf(randomPool[randomIdx]);
+                } else {
+                    currentSongIndex = Math.floor(Math.random() * songs.length);
+                }
+            } else {
+                currentSongIndex = Math.floor(Math.random() * songs.length);
+            }
+        } else {
+            currentSongIndex = Math.floor(Math.random() * songs.length);
+        }
+        
+        lastPlayedIndex = currentSongIndex;
+        initRemainingList();
+        
+        audio.src = songs[currentSongIndex];
+        audio.load();
+        
+        audio.play().then(() => {
+            isPlaying = true;
+            updateUI();
+        }).catch(() => {
+            isPlaying = false;
+            updateUI();
+            if (!isDateChange) {
+                const enableAudio = () => {
+                    if (!isPlaying) {
+                        audio.play().then(() => {
+                            isPlaying = true;
+                            updateUI();
+                        }).catch(() => {});
+                    }
+                    document.removeEventListener('click', enableAudio);
+                    document.removeEventListener('touchstart', enableAudio);
+                };
+                document.addEventListener('click', enableAudio);
+                document.addEventListener('touchstart', enableAudio);
+            }
+        });
+    }
+
+    function handleScheduleUpdate(todayPlaylist) {
+        const currentSongName = songs[currentSongIndex];
+        const newQueue = todayPlaylist ? todayPlaylist.filter(s => allSongs.includes(s)) : [];
+        
+        if (newQueue.length === 0) {
+            loadTodayPlaylist().then((result) => {
+                songs = [...allSongs];
+                if (result && result.type === 'default') {
+                    randomPool = result.songs.filter(s => songs.includes(s));
+                } else {
+                    randomPool = [...allSongs];
+                }
+                scheduledQueue = [];
+                initRemainingList();
+            });
+            return;
+        }
+        
+        if (currentSongName === newQueue[0]) {
+            scheduledQueue = newQueue.slice(1);
+            randomPool = allSongs.filter(s => !newQueue.includes(s));
+            initRemainingList();
+            return;
+        }
+        
+        if (newQueue.includes(currentSongName)) {
+            const currentPos = newQueue.indexOf(currentSongName);
+            scheduledQueue = newQueue.slice(currentPos + 1);
+            randomPool = allSongs.filter(s => !newQueue.includes(s));
+            initRemainingList();
+            return;
+        }
+        
+        randomPool = allSongs.filter(s => !newQueue.includes(s));
+        scheduledQueue = [...newQueue];
+        initRemainingList();
+    }
+
+    function listenScheduleChanges() {
+        if (typeof firebase === 'undefined' || !firebase.apps.length) return;
+        const db = firebase.database();
+        const scheduleRef = db.ref('music_schedule');
+        
+        if (scheduleListener) {
+            scheduleRef.off('value', scheduleListener);
+        }
+        
+        scheduleListener = scheduleRef.on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            const todayKey = getTodayKey();
+            const todayPlaylist = (data[todayKey] && data[todayKey].length > 0) ? data[todayKey] : null;
+            handleScheduleUpdate(todayPlaylist);
+        });
+    }
+
+    function initAudio() {
+        loadTodayPlaylist().then((result) => {
+            currentScheduleDate = getTodayKey();
+            applySchedule(result, false);
+            listenScheduleChanges();
+        });
+    }
+
+    function checkDateChange() {
+        const todayKey = getTodayKey();
+        if (todayKey !== currentScheduleDate) {
+            currentScheduleDate = todayKey;
+            
+            loadTodayPlaylist().then((result) => {
+                if (result && result.type === 'schedule' && result.songs.length > 0) {
+                    audio.pause();
+                    isPlaying = false;
+                    applySchedule(result, true);
+                } else {
+                    songs = [...allSongs];
+                    if (result && result.type === 'default') {
+                        randomPool = result.songs.filter(s => songs.includes(s));
+                    } else {
+                        randomPool = [...allSongs];
+                    }
+                    scheduledQueue = [];
+                    initRemainingList();
+                }
+            });
+        }
+    }
+
+    function stopAudioOnUnload() {
+        if (audio) {
+            audio.pause();
+            isPlaying = false;
+            updateUI();
+        }
+    }
+    window.addEventListener('beforeunload', stopAudioOnUnload);
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden && isPlaying) {
+            audio.pause();
+            isPlaying = false;
+            updateUI();
+        }
+    });
+
+    playBtn.addEventListener('click', togglePlay);
+    nextBtn.addEventListener('click', function() {
+        audio.pause();
+        playNext();
+    });
+    prevBtn.addEventListener('click', function() {
+        audio.pause();
+        playPrev();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (e.code === 'Space') {
+            e.preventDefault();
+            togglePlay();
+        }
+    });
+
+    function showPauseNotice(e) {
+        if (e) e.preventDefault();
+        let modal = document.getElementById('pause-notice-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'pause-notice-modal';
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:99999;';
+            modal.innerHTML = `
+                <div style="background:white;padding:22px 25px;border-radius:18px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.25);max-width:320px;width:85%;animation: fadeIn 0.2s ease;">
+                    <div style="font-size:18px;font-weight:bold;color:#ef4444;margin-bottom:10px;">⚠️ 系統提示</div>
+                    <div style="font-size:15px;color:#333;margin-bottom:20px;line-height:1.5;font-weight:bold;">目前暫停使用!非常抱歉造成不便!</div>
+                    <button onclick="document.getElementById('pause-notice-modal').style.display='none'" style="background:#fd5d93;color:white;border:none;padding:9px 24px;border-radius:50px;font-weight:bold;cursor:pointer;font-size:14px;box-shadow: 0 4px 6px rgba(253, 93, 147, 0.3);">確定</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        } else {
+            modal.style.display = 'flex';
+        }
+    }
+
+    function copyID() { navigator.clipboard.writeText("@768mnxcr").then(() => {
+        const btn = document.querySelector('.line-id');
+        btn.innerText = "✅ 已複製！"; setTimeout(() => btn.innerText = "複製 ID: @768mnxcr", 2000);
+    }); }
+
+    function copyOpenChatPassword() {
+        const el = document.createElement('textarea');
+        el.value = '20230527';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        const btn = document.getElementById('openchat-copy-btn');
+        btn.innerText = "✅ 密碼已複製！"; 
+        setTimeout(() => btn.innerText = "點擊我複製密碼", 2000);
+    }
+
+    function copyWePlayRoom() {
+        const el = document.createElement('textarea');
+        el.value = 'C820553';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        const btn = document.getElementById('weplay-copy-btn');
+        btn.innerText = "✅ 已複製房號！"; 
+        setTimeout(() => btn.innerText = "📋 點我複製房號", 2000);
+    }
+
+    function forceWeb(e) { e.preventDefault(); window.location.href = "https://tellonym.me/dader_.60?rel=web"; }
+
+    function startLiveClock() {
+        function updateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const days = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+            const dayOfWeek = days[now.getDay()];
+            const clockText = `${year}年${month}月${date}日 ${hours}點${minutes}分${seconds}秒 ${dayOfWeek}`;
+            const clockElem = document.getElementById("custom-live-clock");
+            if (clockElem) clockElem.innerText = clockText;
+            
+            updateFoundingDisplay();
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    }
+
+    window.onload = function() {
+        startRealtimeCounter(); 
+        startLiveClock();
+        initAudio();
+
+        if (dateCheckInterval) clearInterval(dateCheckInterval);
+        dateCheckInterval = setInterval(checkDateChange, 60 * 1000);
+
+        const splash = document.getElementById('splash-overlay');
+        if (splash) {
+            splash.addEventListener('click', hideSplash);
+            splash.addEventListener('touchstart', hideSplash, { passive: true });
+        }
+
+        const btt = document.getElementById('back-to-top');
+        window.onscroll = function() {
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                btt.classList.add('show');
+            } else {
+                btt.classList.remove('show');
+            }
+        };
+        btt.onclick = function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+    };
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<script>
+    const firebaseConfig = {
+        databaseURL: "https://total-views-969ba-default-rtdb.asia-southeast1.firebasedatabase.app/" 
+    };
+    
+    function startRealtimeCounter() {
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.database();
+            const viewsRef = db.ref('total_views');
+            viewsRef.transaction((currentValue) => {
+                return (currentValue || 0) + 1;
+            });
+            viewsRef.on('value', (snapshot) => {
+                const count = snapshot.val();
+                const viewElem = document.getElementById('total_view_display');
+                if (viewElem && count !== null) {
+                    viewElem.innerText = count.toLocaleString();
+                }
+            });
+        } catch (err) {
+            console.error("Firebase Error:", err);
+            document.getElementById('total_view_display').innerText = "暫時無法顯示";
+        }
+    }
+</script>
+</body>
+</html>
