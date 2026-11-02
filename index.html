@@ -77,10 +77,10 @@
             transform-origin: 50% 100%;
             animation:
                 whip-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both,
-                text-flash 0.9s ease-in-out 1.3s 1;
+                text-flash 0.7s ease-in-out 0.8s 1;
         }
         .wave-text + .wave-text {
-            animation-delay: 0.25s, 1.55s;
+            animation-delay: 0.25s, 1.05s;
         }
         /* 彈入後閃亮一下 */
         @keyframes text-flash {
@@ -152,6 +152,7 @@
             color: #555;
             text-align: center;
         }
+        .net-status.slow { color: #d32f2f; font-size: 13px; }
 
         .marquee-container {
             position: fixed;
@@ -1104,22 +1105,112 @@
     const audio = new Audio();
     let isPlaying = false;
 
-    /* --- 慢速網路（例如 128kbps）支援 --- */
-    function isSlowConnection() {
-        const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-        if (!c) return false;
-        if (c.saveData) return true;
-        if (c.effectiveType === 'slow-2g' || c.effectiveType === '2g') return true;
-        if (typeof c.downlink === 'number' && c.downlink > 0 && c.downlink <= 0.5) return true;
-        return false;
-    }
-    const SLOW_NET = isSlowConnection();
-    audio.preload = SLOW_NET ? 'none' : 'metadata';
+    /* --- 網路速度檢測：網路慢→不能播放並提示；網路快→直接播放（不顯示任何提示） --- */
+    const SLOW_MSG = '⚠️ 當前網路慢，請換順暢網路';
+    const PROBE_BYTES = 98304;      // 測速取樣大小 (96KB)
+    const PROBE_TIMEOUT = 3000;     // 3 秒內抓不到取樣量 → 視為網路慢
+    const MIN_KBPS = 400;           // 低於 400kbps → 視為網路慢
+    let netState = 'checking';      // 'checking' | 'fast' | 'slow'
+    let netChecking = false;
+    audio.preload = 'none';
 
     function setNetStatus(msg) {
         const el = document.getElementById('net-status');
-        if (el) el.textContent = msg || '';
+        if (!el) return;
+        if (netState === 'slow') {
+            el.textContent = SLOW_MSG;
+            el.classList.add('slow');
+        } else {
+            el.textContent = msg || '';
+            el.classList.remove('slow');
+        }
     }
+
+    function getConn() {
+        return navigator.connection || navigator.mozConnection || navigator.webkitConnection || null;
+    }
+
+    async function measureSpeedKbps() {
+        const ctrl = new AbortController();
+        const t0 = performance.now();
+        const timer = setTimeout(() => ctrl.abort(), PROBE_TIMEOUT);
+        try {
+            const res = await fetch(allSongs[0] + '?nc=' + Date.now(), {
+                headers: { Range: 'bytes=0-' + (PROBE_BYTES - 1) },
+                cache: 'no-store',
+                signal: ctrl.signal
+            });
+            if (!res.ok) return null;
+            let bytes = 0;
+            if (res.body && res.body.getReader) {
+                const reader = res.body.getReader();
+                while (bytes < PROBE_BYTES) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    bytes += value.length;
+                }
+                try { reader.cancel(); } catch (e) {}
+            } else {
+                bytes = (await res.arrayBuffer()).byteLength;
+            }
+            if (bytes < 20000) return null;   // 檔案太小，無法判斷
+            const ms = Math.max(performance.now() - t0, 1);
+            return (bytes * 8) / ms;          // bits / ms = kbps
+        } catch (e) {
+            return ctrl.signal.aborted ? 0 : null;   // 逾時 = 太慢；其他錯誤 = 無法判斷
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
+    async function checkNetwork() {
+        if (netChecking) return { was: netState, now: netState };
+        netChecking = true;
+        const was = netState;
+        let slow;
+        const c = getConn();
+        if (c && (c.saveData || c.effectiveType === 'slow-2g' || c.effectiveType === '2g')) {
+            slow = true;
+        } else {
+            const kbps = await measureSpeedKbps();
+            if (kbps === null) {
+                slow = !!(c && typeof c.downlink === 'number' && c.downlink > 0 && c.downlink <= 0.5);
+            } else {
+                slow = kbps < MIN_KBPS;
+            }
+        }
+        netState = slow ? 'slow' : 'fast';
+        netChecking = false;
+        if (slow) {
+            audio.pause();
+            isPlaying = false;
+            updateUI();
+        }
+        setNetStatus('');
+        return { was: was, now: netState };
+    }
+
+    /* 網路慢（或檢測中）時擋下播放 */
+    function blockedByNet() {
+        if (netState === 'fast') return false;
+        if (netState === 'checking') setNetStatus('📶 檢測網路中…');
+        else setNetStatus('');
+        return true;
+    }
+
+    /* 重新檢測；變順暢就直接播放 */
+    function recheckNetwork() {
+        checkNetwork().then(function(r) {
+            if (r.was === 'slow' && r.now === 'fast') playSong(currentSongIndex);
+        });
+    }
+    window.addEventListener('online', recheckNetwork);
+    (function() {
+        const c = getConn();
+        if (c && c.addEventListener) c.addEventListener('change', function() {
+            if (netState === 'slow') recheckNetwork();
+        });
+    })();
 
     let failStreak = 0;
     audio.addEventListener('waiting', function() { setNetStatus('⏳ 網路較慢，緩衝中…'); });
@@ -1313,6 +1404,7 @@
     }
 
     function playSong(index) {
+        if (blockedByNet()) return;
         if (index >= 0 && index < songs.length) {
             currentSongIndex = index;
             audio.src = songs[currentSongIndex];
@@ -1328,6 +1420,7 @@
     }
 
     function playNext() {
+        if (blockedByNet()) return;
         let newIndex;
         if (scheduledQueue.length > 0) {
             const nextSong = scheduledQueue.shift();
@@ -1340,6 +1433,7 @@
     }
 
     function playPrev() {
+        if (blockedByNet()) return;
         if (lastPlayedIndex >= 0 && lastPlayedIndex !== currentSongIndex) {
             const prev = lastPlayedIndex;
             const currentSongName = songs[currentSongIndex];
@@ -1354,6 +1448,12 @@
     }
 
     function togglePlay() {
+        if (netState === 'slow' && !isPlaying) {
+            setNetStatus('');
+            recheckNetwork();      // 再測一次，若已變順暢就直接播放
+            return;
+        }
+        if (blockedByNet()) return;
         if (isPlaying) {
             audio.pause();
             isPlaying = false;
@@ -1435,11 +1535,11 @@
         
         audio.src = songs[currentSongIndex];
 
-        if (SLOW_NET && !isDateChange) {
-            // 慢速網路：先把頻寬留給網頁，按播放才開始下載音樂
+        if (netState !== 'fast') {
+            // 網路慢：不能播放，只顯示提示
             isPlaying = false;
             updateUI();
-            setNetStatus('📶 偵測到網路較慢，已暫停自動播放，請按 ▶ 播放');
+            setNetStatus('');
             return;
         }
         audio.load();
@@ -1523,7 +1623,7 @@
     }
 
     function initAudio() {
-        loadTodayPlaylist().then((result) => {
+        checkNetwork().then(() => loadTodayPlaylist()).then((result) => {
             currentScheduleDate = getTodayKey();
             applySchedule(result, false);
             listenScheduleChanges();
