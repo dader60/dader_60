@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>靠北達德速度版⚡⚡⚡</title>
     <style>
-        /* --- 啟動動畫樣式 (僅修改動畫時間為總計 1.5 秒---)  */
+            /* --- 啟動動畫樣式 (僅修改動畫時間為總計 1.5 秒---)  */
         #splash-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -22,11 +22,54 @@
             width: 150px;
             border-radius: 50%;
             filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
-            animation: 
-                logo-spin-h 0.75s linear 0s 1,
-                logo-spin-v 0.75s linear 0.75s 1;
         }
         
+        /* 外層共用邊框：Google TV 開機風格的四色流動邊框 */
+        @property --gtv-angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+        .splash-text-frame {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 28px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.15);
+            isolation: isolate;
+        }
+        .splash-text-frame::before,
+        .splash-text-frame::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 4px;
+            background: conic-gradient(from var(--gtv-angle),
+                #4285F4 0deg 90deg,
+                #EA4335 90deg 180deg,
+                #FBBC05 180deg 270deg,
+                #34A853 270deg 360deg);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+            animation: gtv-border-spin 3s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+        /* 外發光 */
+        .splash-text-frame::after {
+            filter: blur(10px);
+            opacity: 0.8;
+        }
+        @keyframes gtv-border-spin {
+            to { --gtv-angle: 360deg; }
+        }
+
         .wave-text {
             display: flex;
             gap: 2px;
@@ -35,22 +78,29 @@
             display: inline-block;
             font-size: 28px;
             font-weight: bold;
-            color: #333;
-            text-shadow: 0 0 10px rgba(255,255,255,0.8);
-            animation: word-wave 1s ease-in-out infinite;
+            color: #ffffff;
+            text-shadow: 
+                -2px -2px 0 #4285F4,
+                 2px -2px 0 #EA4335,
+                -2px  2px 0 #FBBC05,
+                 2px  2px 0 #34A853,
+                 0 0 12px rgba(255,255,255,0.9);
         }
 
-        @keyframes logo-spin-h { 
-            from { transform: rotateY(0deg); } 
-            to { transform: rotateY(720deg); } 
+        /* Windows 11 開機轉圈載入動畫（單圈） */
+        .win11-loader {
+            margin-top: 34px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 4px solid rgba(255,255,255,0.25);
+            border-top-color: #ffffff;
+            box-sizing: border-box;
+            animation: win11-spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
-        @keyframes logo-spin-v { 
-            from { transform: rotateX(0deg); } 
-            to { transform: rotateX(720deg); } 
-        }
-        @keyframes word-wave {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); color: #ff4500; }
+        @keyframes win11-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .marquee-container {
@@ -629,25 +679,28 @@
     <div class="splash-logo-box">
         <img src="avatar.jpg" alt="Logo" class="splash-logo" onerror="this.style.display='none'">
     </div>
-    <div class="wave-text">
-        <span style="animation-delay: 0.1s;">歡</span>
-        <span style="animation-delay: 0.2s;">迎</span>
-        <span style="animation-delay: 0.3s;">使</span>
-        <span style="animation-delay: 0.4s;">用</span>
-        <span style="animation-delay: 0.5s;">靠</span>
-        <span style="animation-delay: 0.6s;">北</span>
-        <span style="animation-delay: 0.7s;">達</span>
-        <span style="animation-delay: 0.8s;">德</span>
-        <span style="animation-delay: 0.9s;">⚡</span>
+    <div class="splash-text-frame">
+        <div class="wave-text">
+            <span>歡</span>
+            <span>迎</span>
+            <span>使</span>
+            <span>用</span>
+            <span>靠</span>
+            <span>北</span>
+            <span>達</span>
+            <span>德</span>
+            <span>⚡</span>
+        </div>
+        <div class="wave-text">
+            <span>多</span>
+            <span>元</span>
+            <span>匿</span>
+            <span>名</span>
+            <span>系</span>
+            <span>統</span>
+        </div>
     </div>
-    <div class="wave-text" style="margin-top: 10px;">
-        <span style="animation-delay: 1.0s;">多</span>
-        <span style="animation-delay: 1.1s;">元</span>
-        <span style="animation-delay: 1.2s;">匿</span>
-        <span style="animation-delay: 1.3s;">名</span>
-        <span style="animation-delay: 1.4s;">系</span>
-        <span style="animation-delay: 1.5s;">統</span>
-    </div>
+    <div class="win11-loader"></div>
 </div>
 
 <div class="marquee-container">
