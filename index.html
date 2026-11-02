@@ -109,8 +109,22 @@
         }
 
         /* Windows 11 開機轉圈載入動畫（單圈） */
-        .win11-loader {
+        .loader-row {
             margin-top: 34px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+        .loader-text {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.35);
+        }
+        .win11-loader {
+            flex-shrink: 0;
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -751,7 +765,10 @@
             <span>統</span>
         </div>
     </div>
-    <div class="win11-loader"></div>
+    <div class="loader-row">
+        <div class="win11-loader"></div>
+        <span class="loader-text">歡迎</span>
+    </div>
     <button type="button" class="splash-skip-btn" onclick="event.stopPropagation(); hideSplash();">跳過 ⏭</button>
 </div>
 
