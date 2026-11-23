@@ -591,6 +591,7 @@
         .notice-badge.new { background: #ffe5e5; color: #d32f2f; }
         .notice-badge.seen { background: #e3f6e8; color: #1b8a3c; }
         .notice-body { text-align: center; margin-bottom: 16px; }
+        .notice-img { display: block; max-width: 100%; max-height: 50vh; margin: 0 auto 10px; border-radius: 14px; object-fit: contain; background: #fff; }
         .notice-title { font-size: 18px; font-weight: bold; color: #222; margin: 10px 0 8px; word-break: break-word; }
         .notice-content { font-size: 15px; color: #444; line-height: 1.6; white-space: pre-wrap; word-break: break-word; text-align: left; background: #fff; border-radius: 14px; padding: 12px 14px; }
         .notice-content:empty { display: none; }
@@ -908,6 +909,7 @@
             <button type="button" class="submit-close" aria-label="關閉" onclick="closeNoticeModal()">✕</button>
             <div class="submit-title" id="notice-heading">📢 重要訊息</div>
             <div class="notice-body">
+                <img class="notice-img" id="notice-img" alt="" style="display:none" referrerpolicy="no-referrer" onerror="this.style.display='none'">
                 <span class="notice-badge" id="notice-modal-badge"></span>
                 <div class="notice-title" id="notice-title"></div>
                 <div class="notice-content" id="notice-content"></div>
@@ -1981,15 +1983,17 @@
     }
 </script>
 <script>
-/* ===== 📢 重要訊息：有新訊息才彈窗；按 X 下次再提醒；點過瀏覽就標示「已看過」且不再彈窗 ===== */
+/* ===== 📢 重要訊息：可附圖片、可排程（開始／結束時間）；有新訊息才彈窗；按 X 下次再提醒；點過瀏覽就標示「已看過」 ===== */
 (function () {
     var KEY = 'dader_notice_seen_v1';   // 這台裝置「已點過瀏覽」的訊息編號
-    var data = null, splashDone = false, poppedId = null, memSeen = null;
+    var items = [], data = null, splashDone = false, poppedId = null, memSeen = null;
+    var offset = 0, imgCache = {}, imageReady = true, started = false;
 
     function $(id) { return document.getElementById(id); }
     function getSeen() { try { return localStorage.getItem(KEY); } catch (e) { return memSeen; } }
     function setSeen(id) { memSeen = id; try { localStorage.setItem(KEY, id); } catch (e) {} }
     function isSeen() { return !!data && getSeen() === data.id; }
+    function nowMs() { return Date.now() + offset; }   // 以 Firebase 伺服器時間為準，不受手機時間影響
     function safeUrl(u) {
         if (!u) return '';
         try {
@@ -1997,6 +2001,7 @@
             return (x.protocol === 'http:' || x.protocol === 'https:') ? x.href : '';
         } catch (e) { return ''; }
     }
+    function fmt(t) { return new Date(t).toLocaleString('zh-TW', { hour12: false }); }
 
     function render() {
         var btn = $('notice-toggle');
@@ -2010,9 +2015,13 @@
         $('notice-modal-badge').className = cls; $('notice-modal-badge').textContent = txt;
         $('notice-title').textContent = data.title;
         $('notice-content').textContent = data.content;
-        var t = Number(data.id);
-        $('notice-time').textContent = isFinite(t) && t > 0 ? '發布時間：' + new Date(t).toLocaleString('zh-TW') : '';
+        $('notice-time').textContent = data.endAt
+            ? '顯示期間：' + fmt(data.startAt) + ' ～ ' + fmt(data.endAt)
+            : '發布時間：' + fmt(data.startAt);
         $('notice-action').textContent = safeUrl(data.url) ? '👀 點擊瀏覽' : '✅ 我知道了';
+        var img = $('notice-img'), src = imgCache[data.id] || safeUrl(data.imageUrl);
+        if (src) { img.src = src; img.style.display = ''; }
+        else { img.removeAttribute('src'); img.style.display = 'none'; }
     }
 
     window.openNoticeModal = function () {
@@ -2054,34 +2063,81 @@
     });
 
     function maybePopup() {
-        if (!splashDone || !data || isSeen() || poppedId === data.id) return;
+        if (!splashDone || !data || !imageReady || isSeen() || poppedId === data.id) return;
         poppedId = data.id;
         window.openNoticeModal();
     }
     window.__noticeSplashDone = function () { splashDone = true; maybePopup(); };
+
+    function isActive(it) {
+        var n = nowMs();
+        return it.startAt <= n && (!it.endAt || n < it.endAt);
+    }
+
+    // 找出「現在這個時間點」該顯示的訊息（多則同時有效時，顯示開始時間最新的那則）
+    function pick() {
+        var act = items.filter(isActive).sort(function (a, b) {
+            return (b.startAt - a.startAt) || (Number(b.id) - Number(a.id));
+        });
+        var next = act[0] || null;
+        if ((next && data && next.id === data.id) || (!next && !data)) return;
+        data = next;
+        if (!data) { window.closeNoticeModal(); render(); return; }
+        imageReady = !data.hasImageData || !!imgCache[data.id];
+        render();
+        if (imageReady) { maybePopup(); return; }
+        var id = data.id;   // 上傳的圖片另外讀取，讀好再彈窗，避免畫面跳動
+        firebase.database().ref('announcements/images/' + id).once('value').then(function (s) {
+            var v = s.val();
+            if (typeof v === 'string' && v.indexOf('data:image/') === 0) imgCache[id] = v;
+        }).catch(function () {}).then(function () {
+            if (data && data.id === id) { imageReady = true; render(); maybePopup(); }
+        });
+    }
+
+    function parseItems(val) {
+        var out = [];
+        Object.keys(val || {}).forEach(function (k) {
+            var v = val[k];
+            if (!v || typeof v !== 'object') return;
+            var id = String(v.id || k);
+            if (!(v.title || v.content || v.url || v.imageUrl || v.hasImageData)) return;
+            out.push({
+                id: id,
+                title: String(v.title || '重要訊息'),
+                content: String(v.content || ''),
+                url: String(v.url || ''),
+                mode: v.mode === 'page' ? 'page' : 'link',
+                imageUrl: String(v.imageUrl || ''),
+                hasImageData: v.hasImageData === true,
+                startAt: Number(v.startAt) || Number(id) || 0,
+                endAt: Number(v.endAt) || 0
+            });
+        });
+        return out;
+    }
+
+    function go() {
+        if (started) return;
+        started = true;
+        firebase.database().ref('announcements/items').on('value', function (snap) {
+            items = parseItems(snap.val());
+            data = null;          // 資料有變動就重新挑選
+            pick();
+        }, function (err) { console.warn('重要訊息讀取失敗：', err && err.message); });
+        setInterval(pick, 30000);   // 每 30 秒檢查一次：到開始時間就顯示、過了結束時間就收起
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) pick(); });
+    }
 
     function start(tries) {
         if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) {
             if (tries < 10) setTimeout(function () { start(tries + 1); }, 1000);
             return;
         }
-        firebase.database().ref('announcements/current').on('value', function (snap) {
-            var v = snap.val();
-            if (v && v.active !== false && v.id && (v.title || v.content || v.url)) {
-                data = {
-                    id: String(v.id),
-                    title: String(v.title || '重要訊息'),
-                    content: String(v.content || ''),
-                    url: String(v.url || ''),
-                    mode: v.mode === 'page' ? 'page' : 'link'
-                };
-            } else {
-                data = null;
-                window.closeNoticeModal();
-            }
-            render();
-            maybePopup();
-        }, function (err) { console.warn('重要訊息讀取失敗：', err && err.message); });
+        setTimeout(go, 2500);   // 取不到伺服器時間就先用裝置時間
+        firebase.database().ref('.info/serverTimeOffset').once('value').then(function (s) {
+            offset = Number(s.val()) || 0;
+        }).catch(function () {}).then(go);
     }
     start(0);
 })();
