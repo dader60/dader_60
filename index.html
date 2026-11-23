@@ -591,11 +591,13 @@
         .notice-badge.new { background: #ffe5e5; color: #d32f2f; }
         .notice-badge.seen { background: #e3f6e8; color: #1b8a3c; }
         /* 紅色閃爍的燈 */
+        .notice-btn-sub { display: block; font-size: clamp(12px, 3.4vw, 13px); font-weight: normal; color: #666; margin-top: 4px; }
         .notice-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ff1744; box-shadow: 0 0 6px 2px rgba(255,23,68,0.75); margin-right: 6px; flex-shrink: 0; animation: notice-blink 1s ease-in-out infinite; }
         @keyframes notice-blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.2; transform: scale(0.7); } }
-        /* 跑馬燈下方的未查看提示 */
-        .notice-unread-bar { display: none; align-items: center; justify-content: center; width: fit-content; max-width: 92%; margin: 8px auto; padding: 8px 16px; font-size: clamp(13px, 3.6vw, 15px); font-weight: bold; color: #d32f2f; background: #fff0f0; border: 1px solid #ffc9c9; border-radius: 50px; cursor: pointer; text-align: center; line-height: 1.4; }
+        /* 跑馬燈下方的重要訊息通知列（和跑馬燈一樣固定在上方，往下滑也會跟著） */
+        .notice-unread-bar { display: none; position: fixed; left: 0; top: 37px; width: 100%; z-index: 1999; box-sizing: border-box; align-items: center; justify-content: center; padding: 8px 12px; cursor: pointer; text-align: center; line-height: 1.35; font-weight: bold; font-size: clamp(13px, 3.8vw, 15px); box-shadow: 0 2px 5px rgba(0,0,0,0.12); }
         .notice-unread-bar.show { display: flex; }
+        .notice-unread-bar.unread { background: #fff0f0; color: #d32f2f; border-bottom: 2px solid #ffb3b3; }
         .notice-box { max-width: min(94vw, 460px) !important; }
         .notice-sub { text-align: center; font-size: clamp(12px, 3.4vw, 14px); color: #666; margin: -8px 0 14px; }
         .notice-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: #fff; border: none; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; font-family: inherit; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
@@ -933,7 +935,7 @@
         <div style="font-size: 10px; color: #888; margin-top: 3px; font-weight: normal;">👆 點擊切換顯示模式</div>
     </div>
 
-    <button type="button" class="card submit-toggle notice-toggle" id="notice-toggle" style="display:none" aria-haspopup="dialog" onclick="openNoticeModal()">📢 重要訊息 <span class="notice-badge" id="notice-badge"></span></button>
+    <button type="button" class="card submit-toggle notice-toggle" id="notice-toggle" style="display:none" aria-haspopup="dialog" onclick="openNoticeModal()">📢 重要訊息 <span class="notice-badge" id="notice-badge"></span><span class="notice-btn-sub" id="notice-btn-sub"></span></button>
     <div class="submit-modal" id="notice-modal" style="z-index:10001" role="dialog" aria-modal="true" aria-labelledby="notice-heading" onclick="if(event.target===this) closeNoticeModal()">
         <div class="submit-modal-box notice-box">
             <button type="button" class="submit-close" aria-label="關閉" onclick="closeNoticeModal()">✕</button>
@@ -2087,6 +2089,47 @@
         if (seen) node.textContent = '✅ 已看過';
         else { node.appendChild(el('span', 'notice-dot')); node.appendChild(document.createTextNode('新')); }
     }
+    var UA = navigator.userAgent || '';
+    var IS_IOS = /iPhone|iPad|iPod/i.test(UA);
+    var IN_APP = /Instagram|FBAN|FBAV|FB_IAB|FBIOS|Line\/|MicroMessenger|TikTok|musical_ly|Snapchat|Twitter|Threads/i.test(UA);
+    function pageUrl() { return location.href.split('#')[0]; }
+    function copyText(t) {
+        function fallback() {
+            return new Promise(function (resolve, reject) {
+                try {
+                    var ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', '');
+                    ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta);
+                    ta.select(); ta.setSelectionRange(0, t.length);
+                    var ok = document.execCommand('copy'); document.body.removeChild(ta);
+                    ok ? resolve() : reject();
+                } catch (e) { reject(e); }
+            });
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t).catch(fallback);
+        return fallback();
+    }
+    function copyPageLink() {
+        copyText(pageUrl()).then(function () { alert('已複製網址，可以貼到瀏覽器開啟'); })
+            .catch(function () { prompt('請長按複製這串網址，貼到瀏覽器開啟：', pageUrl()); });
+    }
+    // 內建瀏覽器（IG／LINE…）跳去系統瀏覽器：Android 用 intent，iPhone 沒有官方做法，改成複製網址＋說明
+    function openInBrowser() {
+        var u = pageUrl();
+        if (/Android/i.test(UA)) {
+            copyText(u).catch(function () {});
+            location.href = 'intent://' + u.replace(/^https?:\/\//, '') + '#Intent;scheme=' + (u.indexOf('https') === 0 ? 'https' : 'http') + ';action=android.intent.action.VIEW;end';
+        } else {
+            copyText(u).then(function () {
+                alert('已複製網址。\n請點右上角「⋯」選「在 Safari 開啟」，或打開 Safari 貼上網址。');
+            }).catch(function () { prompt('請複製這串網址，貼到 Safari 開啟：', u); });
+        }
+    }
+    function canShareFile() {
+        try {
+            return !!(navigator.canShare && window.File && navigator.canShare({ files: [new File([new Uint8Array(1)], 'a.pdf', { type: 'application/pdf' })] }));
+        } catch (e) { return false; }
+    }
+
     function getItem(id) { for (var i = 0; i < active.length; i++) if (active[i].id === id) return active[i]; return null; }
     function modalOpen() { return $('notice-modal').classList.contains('open'); }
 
@@ -2129,22 +2172,41 @@
     /* ---------- 畫面 ---------- */
     function render() {
         var unread = active.filter(function (it) { return !isSeen(it.id); }).length;
+        var seenCount = active.length - unread;
+        var summary = unread > 0
+            ? '已看過 ' + seenCount + ' 則，未看 ' + unread + ' 則，共 ' + active.length + ' 則'
+            : '已看過 ' + seenCount + ' 則，共 ' + active.length + ' 則';
         var btn = $('notice-toggle'), bar = $('notice-unread-bar');
         if (!active.length) {
             btn.style.display = 'none';
-            bar.classList.remove('show');
         } else {
             btn.style.display = '';
             setBadge($('notice-badge'), unread === 0);
-            if (unread > 0) {
-                $('notice-unread-text').textContent = '您有 ' + unread + ' 則重要訊息未查看';
-                bar.classList.add('show');
-            } else bar.classList.remove('show');
+            $('notice-btn-sub').textContent = summary;
         }
-        $('notice-sub').textContent = unread > 0 ? '您有 ' + unread + ' 則重要訊息未查看' : '共 ' + active.length + ' 則，都已看過';
+        // 通知列只在有「未查看」時出現，只有一行字
+        if (unread > 0) {
+            $('notice-unread-text').textContent = '您有 ' + unread + ' 則重要訊息未查看';
+            bar.classList.add('show', 'unread');
+        } else {
+            bar.classList.remove('show', 'unread');
+        }
+        $('notice-sub').textContent = active.length ? summary : '';
+        layoutBar();
         renderList();
         if (detailId) renderDetail();
     }
+
+    // 通知列固定在跑馬燈正下方，並把頁面往下推，避免擋到內容
+    var basePad = null;
+    function layoutBar() {
+        var m = document.querySelector('.marquee-container'), bar = $('notice-unread-bar');
+        if (!m || !bar) return;
+        if (basePad === null) basePad = parseFloat(getComputedStyle(document.body).paddingTop) || 0;
+        bar.style.top = m.offsetHeight + 'px';
+        document.body.style.paddingTop = bar.classList.contains('show') ? (basePad + bar.offsetHeight) + 'px' : '';
+    }
+    window.addEventListener('resize', layoutBar);
 
     function renderList() {
         var box = $('notice-list');
@@ -2200,10 +2262,41 @@
                 pb.onclick = function () { openPdf(it); };
                 box.appendChild(pb);
                 var href = it.hasPdfData ? fileBlob[it.id] : safeUrl(it.pdfUrl);
-                if (href) {
-                    var d = el('a', 'notice-pdf-dl', '⬇ 下載／用瀏覽器開啟'); d.href = href; d.target = '_blank'; d.rel = 'noopener noreferrer';
-                    if (it.pdfName) d.download = it.pdfName;
-                    box.appendChild(d);
+                function shareFile() {
+                    var f = new File([dataUrlToBytes(fileData[it.id])], (it.pdfName || 'file.pdf').replace(/(\.pdf)?$/i, '.pdf'), { type: 'application/pdf' });
+                    return navigator.share({ files: [f], title: it.title });
+                }
+                if (!IN_APP) {
+                    if (href) {
+                        var d = el('a', 'notice-pdf-dl', it.hasPdfData ? '⬇ 下載 PDF' : '↗ 開啟／下載 PDF'); d.href = href; d.target = '_blank'; d.rel = 'noopener noreferrer';
+                        if (it.pdfName) d.download = it.pdfName;
+                        box.appendChild(d);
+                    }
+                    if (it.hasPdfData && canShareFile()) {      // 手機的「分享／儲存」選單
+                        var sh = el('button', 'notice-pdf-dl', '📤 分享／儲存 PDF'); sh.type = 'button';
+                        sh.onclick = function () { try { shareFile().catch(function () {}); } catch (e) {} };
+                        box.appendChild(sh);
+                    }
+                } else {
+                    // IG／LINE 等內建瀏覽器：依序嘗試「分享選單」→「直接在本頁開啟 PDF」，都不行再引導到系統瀏覽器
+                    if (it.hasPdfData) {
+                        var dl = el('button', 'notice-pdf-dl', '⬇ 下載／儲存 PDF'); dl.type = 'button';
+                        dl.onclick = function () {
+                            function nav() { if (fileBlob[it.id]) location.href = fileBlob[it.id]; }
+                            if (canShareFile()) {
+                                try { shareFile().catch(function (err) { if (!err || err.name !== 'AbortError') nav(); }); } catch (e) { nav(); }
+                            } else nav();
+                        };
+                        box.appendChild(dl);
+                    } else if (href) {
+                        var ex = el('a', 'notice-pdf-dl', '↗ 開啟／下載 PDF'); ex.href = href; ex.target = '_self';
+                        box.appendChild(ex);
+                    }
+                    box.appendChild(el('div', 'notice-hint', IS_IOS
+                        ? '您正在 IG／LINE 等內建瀏覽器，iPhone 在這裡無法下載。請點畫面角落的「⋯」（或分享圖示），選「在 Safari 開啟」，再下載 PDF。'
+                        : '您正在 IG／LINE 等內建瀏覽器，下載常被擋住。若沒有反應，請按下面的按鈕改用手機瀏覽器開啟本頁，再下載。'));
+                    var ob = el('button', 'notice-pdf-dl', IS_IOS ? '🌐 用 Safari 開啟（先複製網址）' : '🌐 用瀏覽器開啟本頁'); ob.type = 'button'; ob.onclick = openInBrowser; box.appendChild(ob);
+                    var cb = el('button', 'notice-pdf-dl', '📋 複製本頁網址'); cb.type = 'button'; cb.onclick = copyPageLink; box.appendChild(cb);
                 }
             } else {
                 box.appendChild(el('div', 'notice-wait', '📄 PDF 載入中…'));
