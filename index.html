@@ -587,15 +587,36 @@
 
         /* 重要訊息 */
         .notice-toggle { position: relative; }
-        .notice-badge { display: inline-block; font-size: 12px; font-weight: bold; padding: 2px 10px; border-radius: 50px; margin-left: 6px; vertical-align: middle; }
+        .notice-badge { display: inline-flex; align-items: center; font-size: 12px; font-weight: bold; padding: 2px 10px; border-radius: 50px; margin-left: 6px; vertical-align: middle; white-space: nowrap; }
         .notice-badge.new { background: #ffe5e5; color: #d32f2f; }
         .notice-badge.seen { background: #e3f6e8; color: #1b8a3c; }
-        .notice-body { text-align: center; margin-bottom: 16px; }
+        /* 紅色閃爍的燈 */
+        .notice-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ff1744; box-shadow: 0 0 6px 2px rgba(255,23,68,0.75); margin-right: 6px; flex-shrink: 0; animation: notice-blink 1s ease-in-out infinite; }
+        @keyframes notice-blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.2; transform: scale(0.7); } }
+        /* 跑馬燈下方的未查看提示 */
+        .notice-unread-bar { display: none; align-items: center; justify-content: center; width: fit-content; max-width: 92%; margin: 8px auto; padding: 8px 16px; font-size: clamp(13px, 3.6vw, 15px); font-weight: bold; color: #d32f2f; background: #fff0f0; border: 1px solid #ffc9c9; border-radius: 50px; cursor: pointer; text-align: center; line-height: 1.4; }
+        .notice-unread-bar.show { display: flex; }
+        .notice-box { max-width: min(94vw, 460px) !important; }
+        .notice-sub { text-align: center; font-size: clamp(12px, 3.4vw, 14px); color: #666; margin: -8px 0 14px; }
+        .notice-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: #fff; border: none; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; font-family: inherit; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .notice-item:active { transform: scale(0.98); }
+        .notice-item-main { flex: 1; min-width: 0; }
+        .notice-item-title { font-weight: bold; font-size: clamp(14px, 4vw, 16px); color: #222; word-break: break-word; line-height: 1.4; }
+        .notice-item-time { font-size: 12px; color: #999; margin-top: 3px; }
+        .notice-item-arrow { color: #bbb; font-size: 20px; flex-shrink: 0; }
+        .notice-back { font-family: inherit; font-size: 14px; font-weight: bold; color: #555; background: rgba(0,0,0,0.06); border: none; border-radius: 50px; padding: 6px 14px; cursor: pointer; margin-bottom: 12px; }
+        .notice-body { text-align: center; margin-bottom: 12px; }
         .notice-img { display: block; max-width: 100%; max-height: 50vh; margin: 0 auto 10px; border-radius: 14px; object-fit: contain; background: #fff; }
-        .notice-title { font-size: 18px; font-weight: bold; color: #222; margin: 10px 0 8px; word-break: break-word; }
-        .notice-content { font-size: 15px; color: #444; line-height: 1.6; white-space: pre-wrap; word-break: break-word; text-align: left; background: #fff; border-radius: 14px; padding: 12px 14px; }
+        .notice-title { font-size: clamp(16px, 4.6vw, 19px); font-weight: bold; color: #222; margin: 10px 0 8px; word-break: break-word; line-height: 1.4; }
+        .notice-content { font-size: clamp(14px, 3.9vw, 16px); color: #444; line-height: 1.7; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; text-align: left; background: #fff; border-radius: 14px; padding: 12px 14px; }
         .notice-content:empty { display: none; }
-        .notice-time { font-size: 12px; color: #999; margin-top: 8px; }
+        .notice-time { font-size: 12px; color: #999; margin-top: 8px; line-height: 1.6; }
+        .notice-attach { display: flex; flex-direction: column; gap: 10px; margin: 4px 0 8px; }
+        .notice-attach a, .notice-attach .notice-wait { display: block; text-align: center; padding: 12px 14px; border-radius: 50px; font-weight: bold; text-decoration: none; font-size: clamp(14px, 4vw, 16px); word-break: break-word; font-family: inherit; border: none; cursor: pointer; }
+        .notice-pdf { background: #fff3f0; color: #d84315 !important; border: 2px solid #ff8a65 !important; }
+        .notice-pdf-dl { background: #fff; color: #555 !important; border: 1px solid #ccc !important; font-size: 13px !important; padding: 8px 12px !important; }
+        .notice-link { background: #4285F4; color: #fff !important; }
+        .notice-attach .notice-wait { background: #f0f0f0; color: #888; cursor: default; }
         .notice-viewer { display: none; position: fixed; inset: 0; z-index: 10002; background: #fff; flex-direction: column; }
         .notice-viewer.open { display: flex; }
         .notice-viewer-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #f0f0f0; border-bottom: 1px solid #ddd; padding-top: calc(10px + env(safe-area-inset-top, 0px)); }
@@ -832,6 +853,7 @@
         📢 歡迎來到靠北達德多元匿名！請善用本網頁匿名投稿 💬 那些不敢當面說的話、找不到人問的問題，就交給我們吧！⚠️ 溫馨提醒：靠北是為了紓壓，不是為了傷人!匿名是保護大家，不是讓人亂來!歡迎追蹤大版主ig：hbingzhe10.10，靠達官方賴id:@768mnxcr(記得要打@), 版主weplay語音房房號:C820553，歡迎追蹤房間，會有不定時活動
     </div>
 </div>
+<div class="notice-unread-bar" id="notice-unread-bar" role="button" tabindex="0" onclick="openNoticeModal()" onkeydown="if(event.key==='Enter') openNoticeModal()"><span class="notice-dot"></span><span id="notice-unread-text"></span></div>
 
 <div class="container">
     <div class="avatar-wrapper">
@@ -905,17 +927,24 @@
 
     <button type="button" class="card submit-toggle notice-toggle" id="notice-toggle" style="display:none" aria-haspopup="dialog" onclick="openNoticeModal()">📢 重要訊息 <span class="notice-badge" id="notice-badge"></span></button>
     <div class="submit-modal" id="notice-modal" style="z-index:10001" role="dialog" aria-modal="true" aria-labelledby="notice-heading" onclick="if(event.target===this) closeNoticeModal()">
-        <div class="submit-modal-box">
+        <div class="submit-modal-box notice-box">
             <button type="button" class="submit-close" aria-label="關閉" onclick="closeNoticeModal()">✕</button>
             <div class="submit-title" id="notice-heading">📢 重要訊息</div>
-            <div class="notice-body">
-                <img class="notice-img" id="notice-img" alt="" style="display:none" referrerpolicy="no-referrer" onerror="this.style.display='none'">
-                <span class="notice-badge" id="notice-modal-badge"></span>
-                <div class="notice-title" id="notice-title"></div>
-                <div class="notice-content" id="notice-content"></div>
-                <div class="notice-time" id="notice-time"></div>
+            <div id="notice-list-view">
+                <div class="notice-sub" id="notice-sub"></div>
+                <div id="notice-list"></div>
             </div>
-            <button type="button" class="card submit-toggle" id="notice-action" onclick="noticeAction()">👀 點擊瀏覽</button>
+            <div id="notice-detail-view" style="display:none">
+                <button type="button" class="notice-back" onclick="noticeBack()">← 返回列表</button>
+                <div class="notice-body">
+                    <img class="notice-img" id="notice-img" alt="" style="display:none" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+                    <span class="notice-badge" id="notice-modal-badge"></span>
+                    <div class="notice-title" id="notice-title"></div>
+                    <div class="notice-content" id="notice-content"></div>
+                    <div class="notice-time" id="notice-time"></div>
+                </div>
+                <div class="notice-attach" id="notice-attach"></div>
+            </div>
         </div>
     </div>
     <div class="notice-viewer" id="notice-viewer" role="dialog" aria-modal="true">
@@ -1983,49 +2012,201 @@
     }
 </script>
 <script>
-/* ===== 📢 重要訊息：可附圖片、可排程（開始／結束時間）；有新訊息才彈窗；按 X 下次再提醒；點過瀏覽就標示「已看過」 ===== */
+/* ===== 📢 重要訊息：多則依時間排序、可附圖片／PDF、可排程；未看過的會閃紅燈並顯示「新」；點進去算看過 ===== */
 (function () {
-    var KEY = 'dader_notice_seen_v1';   // 這台裝置「已點過瀏覽」的訊息編號
-    var items = [], data = null, splashDone = false, poppedId = null, memSeen = null;
-    var offset = 0, imgCache = {}, imageReady = true, started = false;
+    var KEY = 'dader_notice_seen_v2', KEY_OLD = 'dader_notice_seen_v1', DEV = 'dader_device_id';
+    var itemsRaw = {}, legacy = null, active = [], splashDone = false, poppedIds = {}, detailId = null;
+    var offset = 0, imgCache = {}, fileCache = {}, filePending = {}, memSeen = [], memDev = null, started = false;
 
     function $(id) { return document.getElementById(id); }
-    function getSeen() { try { return localStorage.getItem(KEY); } catch (e) { return memSeen; } }
-    function setSeen(id) { memSeen = id; try { localStorage.setItem(KEY, id); } catch (e) {} }
-    function isSeen() { return !!data && getSeen() === data.id; }
-    function nowMs() { return Date.now() + offset; }   // 以 Firebase 伺服器時間為準，不受手機時間影響
+    function readSeen() {
+        try {
+            var a = JSON.parse(localStorage.getItem(KEY) || '[]');
+            if (!Array.isArray(a)) a = [];
+            var old = localStorage.getItem(KEY_OLD);
+            if (old && a.indexOf(old) < 0) a.push(old);
+            return a;
+        } catch (e) { return memSeen.slice(); }
+    }
+    function saveSeen(a) { memSeen = a.slice(); try { localStorage.setItem(KEY, JSON.stringify(a.slice(-200))); } catch (e) {} }
+    function isSeen(id) { return readSeen().indexOf(id) >= 0; }
+    function deviceId() {
+        function rnd() { return 'd' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
+        try { var d = localStorage.getItem(DEV); if (!d) { d = rnd(); localStorage.setItem(DEV, d); } return d; }
+        catch (e) { if (!memDev) memDev = rnd(); return memDev; }
+    }
+    function markSeen(id) {
+        if (isSeen(id)) return;
+        var a = readSeen(); a.push(id); saveSeen(a);
+        // 記錄「這台裝置看過」，後台用來統計點閱人數（同一台裝置只算一次）
+        try { firebase.database().ref('announcements/views/' + id + '/' + deviceId()).set(true).catch(function () {}); } catch (e) {}
+    }
+    function nowMs() { return Date.now() + offset; }   // 以 Firebase 伺服器時間為準
     function safeUrl(u) {
         if (!u) return '';
-        try {
-            var x = new URL(u, location.href);
-            return (x.protocol === 'http:' || x.protocol === 'https:') ? x.href : '';
-        } catch (e) { return ''; }
+        try { var x = new URL(u, location.href); return (x.protocol === 'http:' || x.protocol === 'https:') ? x.href : ''; }
+        catch (e) { return ''; }
     }
     function fmt(t) { return new Date(t).toLocaleString('zh-TW', { hour12: false }); }
+    function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+    function setBadge(node, seen) {
+        node.textContent = '';
+        node.className = 'notice-badge ' + (seen ? 'seen' : 'new');
+        if (seen) node.textContent = '✅ 已看過';
+        else { node.appendChild(el('span', 'notice-dot')); node.appendChild(document.createTextNode('新')); }
+    }
+    function getItem(id) { for (var i = 0; i < active.length; i++) if (active[i].id === id) return active[i]; return null; }
+    function modalOpen() { return $('notice-modal').classList.contains('open'); }
 
-    function render() {
-        var btn = $('notice-toggle');
-        if (!btn) return;
-        if (!data) { btn.style.display = 'none'; return; }
-        btn.style.display = '';
-        var seen = isSeen();
-        var cls = 'notice-badge ' + (seen ? 'seen' : 'new');
-        var txt = seen ? '✅ 已看過' : '🔴 新';
-        $('notice-badge').className = cls;       $('notice-badge').textContent = txt;
-        $('notice-modal-badge').className = cls; $('notice-modal-badge').textContent = txt;
-        $('notice-title').textContent = data.title;
-        $('notice-content').textContent = data.content;
-        $('notice-time').textContent = data.endAt
-            ? '顯示期間：' + fmt(data.startAt) + ' ～ ' + fmt(data.endAt)
-            : '發布時間：' + fmt(data.startAt);
-        $('notice-action').textContent = safeUrl(data.url) ? '👀 點擊瀏覽' : '✅ 我知道了';
-        var img = $('notice-img'), src = imgCache[data.id] || safeUrl(data.imageUrl);
-        if (src) { img.src = src; img.style.display = ''; }
-        else { img.removeAttribute('src'); img.style.display = 'none'; }
+    /* ---------- 資料整理 ---------- */
+    function norm(v, k, isLegacy) {
+        if (!v || typeof v !== 'object') return null;
+        if (isLegacy && v.active === false) return null;
+        var id = String(v.id || k);
+        if (!(v.title || v.content || v.url || v.imageUrl || v.hasImageData || v.pdfUrl || v.hasPdfData)) return null;
+        return {
+            id: id,
+            title: String(v.title || '重要訊息'),
+            content: String(v.content || ''),
+            url: String(v.url || ''),
+            mode: v.mode === 'page' ? 'page' : 'link',
+            imageUrl: String(v.imageUrl || ''),
+            hasImageData: v.hasImageData === true,
+            pdfUrl: String(v.pdfUrl || ''),
+            hasPdfData: v.hasPdfData === true,
+            pdfName: String(v.pdfName || ''),
+            startAt: Number(v.startAt) || Number(id) || 0,
+            endAt: Number(v.endAt) || 0
+        };
     }
 
+    function recompute() {
+        var map = {};
+        Object.keys(itemsRaw).forEach(function (k) { var it = norm(itemsRaw[k], k, false); if (it) map[it.id] = it; });
+        if (legacy) { var l = norm(legacy, 'legacy', true); if (l && !map[l.id]) map[l.id] = l; }   // 相容舊版已上架的訊息
+        var n = nowMs();
+        active = Object.keys(map).map(function (k) { return map[k]; })
+            .filter(function (it) { return it.startAt <= n && (!it.endAt || n < it.endAt); })
+            .sort(function (a, b) { return (b.startAt - a.startAt) || (Number(b.id) - Number(a.id)); });   // 新的在上面
+        if (!active.length) window.closeNoticeModal();
+        else if (detailId && !getItem(detailId)) { detailId = null; showList(); }   // 正在看的那則被下架／結束了
+        render();
+        maybePopup();
+    }
+
+    /* ---------- 畫面 ---------- */
+    function render() {
+        var unread = active.filter(function (it) { return !isSeen(it.id); }).length;
+        var btn = $('notice-toggle'), bar = $('notice-unread-bar');
+        if (!active.length) {
+            btn.style.display = 'none';
+            bar.classList.remove('show');
+        } else {
+            btn.style.display = '';
+            setBadge($('notice-badge'), unread === 0);
+            if (unread > 0) {
+                $('notice-unread-text').textContent = '您有 ' + unread + ' 則重要訊息未查看';
+                bar.classList.add('show');
+            } else bar.classList.remove('show');
+        }
+        $('notice-sub').textContent = unread > 0 ? '您有 ' + unread + ' 則重要訊息未查看' : '共 ' + active.length + ' 則，都已看過';
+        renderList();
+        if (detailId) renderDetail();
+    }
+
+    function renderList() {
+        var box = $('notice-list');
+        box.textContent = '';
+        active.forEach(function (it) {
+            var b = el('button', 'notice-item'); b.type = 'button';
+            var badge = el('span'); setBadge(badge, isSeen(it.id)); badge.style.marginLeft = '0';
+            var main = el('div', 'notice-item-main');
+            main.appendChild(el('div', 'notice-item-title', it.title));
+            main.appendChild(el('div', 'notice-item-time', fmt(it.startAt)));
+            b.appendChild(badge); b.appendChild(main); b.appendChild(el('span', 'notice-item-arrow', '›'));
+            b.onclick = function () { openDetail(it.id); };
+            box.appendChild(b);
+        });
+    }
+
+    function showList() {
+        $('notice-detail-view').style.display = 'none';
+        $('notice-list-view').style.display = '';
+    }
+    window.noticeBack = function () { detailId = null; showList(); render(); };
+
+    function openDetail(id) {
+        if (!getItem(id)) return;
+        detailId = id;
+        markSeen(id);
+        $('notice-list-view').style.display = 'none';
+        $('notice-detail-view').style.display = '';
+        render();
+        loadAssets(getItem(id));
+        var m = document.querySelector('#notice-modal .submit-modal-box'); if (m) m.scrollTop = 0;
+    }
+
+    function renderDetail() {
+        var it = getItem(detailId);
+        if (!it) return;
+        setBadge($('notice-modal-badge'), isSeen(it.id));
+        $('notice-title').textContent = it.title;
+        $('notice-content').textContent = it.content;
+        $('notice-time').textContent = it.endAt
+            ? '顯示期間：' + fmt(it.startAt) + ' ～ ' + fmt(it.endAt)
+            : '發布時間：' + fmt(it.startAt);
+        var img = $('notice-img'), src = imgCache[it.id] || safeUrl(it.imageUrl);
+        if (src) { img.src = src; img.style.display = ''; } else { img.removeAttribute('src'); img.style.display = 'none'; }
+
+        var box = $('notice-attach'); box.textContent = '';
+        var pdfHref = safeUrl(it.pdfUrl) || fileCache[it.id] || '';
+        if (it.hasPdfData || it.pdfUrl) {
+            var label = '📄 開啟 PDF' + (it.pdfName ? '：' + it.pdfName : '');
+            if (pdfHref) {
+                var a = el('a', 'notice-pdf', label); a.href = pdfHref; a.target = '_blank'; a.rel = 'noopener noreferrer';
+                box.appendChild(a);
+                var d = el('a', 'notice-pdf-dl', '⬇ 下載 PDF'); d.href = pdfHref; d.download = it.pdfName || 'file.pdf';
+                box.appendChild(d);
+            } else {
+                box.appendChild(el('div', 'notice-wait', '📄 PDF 載入中…'));
+            }
+        }
+        var url = safeUrl(it.url);
+        if (url) {
+            var l = el('a', 'notice-link', '👀 點擊瀏覽'); l.href = url; l.target = '_blank'; l.rel = 'noopener noreferrer';
+            if (it.mode === 'page') l.onclick = function (e) { e.preventDefault(); openViewer(url, it.title); };
+            box.appendChild(l);
+        }
+    }
+
+    // 上傳型的圖片／PDF 另外讀取（點進去才下載，不拖慢首頁）
+    function dataUrlToBlobUrl(d) {
+        var p = d.split(','), bin = atob(p[1]), u8 = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+        return URL.createObjectURL(new Blob([u8], { type: 'application/pdf' }));
+    }
+    function loadAssets(it) {
+        var id = it.id, db = firebase.database();
+        function again() { if (detailId === id) renderDetail(); }
+        if (it.hasImageData && !imgCache[id]) {
+            db.ref('announcements/images/' + id).once('value').then(function (s) {
+                var v = s.val();
+                if (typeof v === 'string' && v.indexOf('data:image/') === 0) imgCache[id] = v;
+            }).catch(function () {}).then(again);
+        }
+        if (it.hasPdfData && !fileCache[id] && !filePending[id]) {
+            filePending[id] = true;
+            db.ref('announcements/files/' + id).once('value').then(function (s) {
+                var v = s.val();
+                if (typeof v === 'string' && v.indexOf('data:application/pdf') === 0) fileCache[id] = dataUrlToBlobUrl(v);
+            }).catch(function () {}).then(function () { filePending[id] = false; again(); });
+        }
+    }
+
+    /* ---------- 開關視窗 ---------- */
     window.openNoticeModal = function () {
-        if (!data) return;
+        if (!active.length) return;
+        if (!detailId) showList();
         render();
         $('notice-modal').classList.add('open');
         document.body.style.overflow = 'hidden';
@@ -2034,16 +2215,8 @@
     window.closeNoticeModal = function () {
         $('notice-modal').classList.remove('open');
         document.body.style.overflow = '';
-    };
-    window.noticeAction = function () {
-        if (!data) return;
-        setSeen(data.id);
-        render();
-        var url = safeUrl(data.url), mode = data.mode, title = data.title;
-        window.closeNoticeModal();
-        if (!url) return;
-        if (mode === 'page') openViewer(url, title);
-        else window.open(url, '_blank', 'noopener');
+        detailId = null;
+        showList();
     };
 
     function openViewer(url, title) {
@@ -2051,82 +2224,35 @@
         $('notice-viewer-newtab').href = url;
         $('notice-viewer-frame').src = url;
         $('notice-viewer').classList.add('open');
-        document.body.style.overflow = 'hidden';
     }
     window.closeNoticeViewer = function () {
         $('notice-viewer').classList.remove('open');
         $('notice-viewer-frame').src = 'about:blank';
-        document.body.style.overflow = '';
     };
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') { window.closeNoticeModal(); window.closeNoticeViewer(); }
+        if (e.key === 'Escape') { window.closeNoticeViewer(); window.closeNoticeModal(); }
     });
 
+    // 有「還沒彈過、也沒看過」的訊息就彈窗（含排程時間到、新發布的）
     function maybePopup() {
-        if (!splashDone || !data || !imageReady || isSeen() || poppedId === data.id) return;
-        poppedId = data.id;
+        if (!splashDone || modalOpen()) return;
+        var fresh = active.filter(function (it) { return !isSeen(it.id) && !poppedIds[it.id]; });
+        if (!fresh.length) return;
+        fresh.forEach(function (it) { poppedIds[it.id] = true; });
         window.openNoticeModal();
     }
     window.__noticeSplashDone = function () { splashDone = true; maybePopup(); };
 
-    function isActive(it) {
-        var n = nowMs();
-        return it.startAt <= n && (!it.endAt || n < it.endAt);
-    }
-
-    // 找出「現在這個時間點」該顯示的訊息（多則同時有效時，顯示開始時間最新的那則）
-    function pick() {
-        var act = items.filter(isActive).sort(function (a, b) {
-            return (b.startAt - a.startAt) || (Number(b.id) - Number(a.id));
-        });
-        var next = act[0] || null;
-        if ((next && data && next.id === data.id) || (!next && !data)) return;
-        data = next;
-        if (!data) { window.closeNoticeModal(); render(); return; }
-        imageReady = !data.hasImageData || !!imgCache[data.id];
-        render();
-        if (imageReady) { maybePopup(); return; }
-        var id = data.id;   // 上傳的圖片另外讀取，讀好再彈窗，避免畫面跳動
-        firebase.database().ref('announcements/images/' + id).once('value').then(function (s) {
-            var v = s.val();
-            if (typeof v === 'string' && v.indexOf('data:image/') === 0) imgCache[id] = v;
-        }).catch(function () {}).then(function () {
-            if (data && data.id === id) { imageReady = true; render(); maybePopup(); }
-        });
-    }
-
-    function parseItems(val) {
-        var out = [];
-        Object.keys(val || {}).forEach(function (k) {
-            var v = val[k];
-            if (!v || typeof v !== 'object') return;
-            var id = String(v.id || k);
-            if (!(v.title || v.content || v.url || v.imageUrl || v.hasImageData)) return;
-            out.push({
-                id: id,
-                title: String(v.title || '重要訊息'),
-                content: String(v.content || ''),
-                url: String(v.url || ''),
-                mode: v.mode === 'page' ? 'page' : 'link',
-                imageUrl: String(v.imageUrl || ''),
-                hasImageData: v.hasImageData === true,
-                startAt: Number(v.startAt) || Number(id) || 0,
-                endAt: Number(v.endAt) || 0
-            });
-        });
-        return out;
-    }
-
+    /* ---------- 連線 ---------- */
     function go() {
         if (started) return;
         started = true;
-        firebase.database().ref('announcements/items').on('value', function (snap) {
-            items = parseItems(snap.val());
-            data = null;          // 資料有變動就重新挑選
-            pick();
-        }, function (err) { console.warn('重要訊息讀取失敗：', err && err.message); });
-        setInterval(pick, 30000);   // 每 30 秒檢查一次：到開始時間就顯示、過了結束時間就收起
-        document.addEventListener('visibilitychange', function () { if (!document.hidden) pick(); });
+        var db = firebase.database();
+        db.ref('announcements/items').on('value', function (snap) { itemsRaw = snap.val() || {}; recompute(); },
+            function (err) { console.warn('重要訊息讀取失敗：', err && err.message); });
+        db.ref('announcements/current').on('value', function (snap) { legacy = snap.val() || null; recompute(); }, function () {});
+        setInterval(recompute, 30000);   // 每 30 秒檢查：排程時間到就顯示、結束時間到就收起
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) recompute(); });
     }
 
     function start(tries) {
