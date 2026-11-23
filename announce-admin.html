@@ -31,6 +31,7 @@
     .item-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .item-title { font-weight: bold; font-size: 15px; word-break: break-word; }
     .item-meta { font-size: 12px; color: #777; margin-top: 6px; line-height: 1.6; word-break: break-all; }
+    .item-views { margin-top: 8px; font-size: 14px; font-weight: bold; color: #4285F4; }
     .badge { font-size: 12px; font-weight: bold; padding: 2px 10px; border-radius: 50px; white-space: nowrap; }
     .b-live { background: #e3f6e8; color: #1b8a3c; }
     .b-wait { background: #fff3d6; color: #b36b00; }
@@ -86,6 +87,14 @@
         <img class="preview" id="preview" alt="預覽">
         <button class="ghost" id="img-clear" style="display:none;margin-top:8px" onclick="clearImage()">移除圖片</button>
 
+        <label for="f-pdf">PDF 檔案（選填）</label>
+        <input type="file" id="f-pdf" accept="application/pdf,.pdf" onchange="pickPdf(this)">
+        <div class="hint">直接上傳限 3MB 以內。檔案較大請改貼網址（可先把 PDF 放進你的 GitHub 儲存庫，再貼 https://…/檔名.pdf）。</div>
+        <input type="text" id="f-pdfurl" placeholder="或貼 PDF 網址 https://...（有上傳檔案時以上傳為準）" style="margin-top:8px">
+        <input type="text" id="f-pdfname" maxlength="60" placeholder="顯示的檔名（選填，例如：活動辦法.pdf）" style="margin-top:8px">
+        <div class="hint" id="pdf-info"></div>
+        <button class="ghost" id="pdf-clear" style="display:none;margin-top:8px" onclick="clearPdf()">移除 PDF</button>
+
         <label for="f-url">連結／網頁（選填）</label>
         <input type="text" id="f-url" placeholder="https://...　（沒有可留空，使用者只會看到文字與圖片）">
 
@@ -134,7 +143,7 @@
     var auth = firebase.auth();
     var db = firebase.database();
     var root = db.ref('announcements');
-    var listening = false, items = {}, offset = 0, pendingImage = '';
+    var listening = false, items = {}, views = {}, offset = 0, pendingImage = '', pendingPdf = '';
 
     function $(id) { return document.getElementById(id); }
     function show(id) { ['login-box', 'denied-box', 'admin-area'].forEach(function (x) { $(x).classList.toggle('hidden', x !== id); }); }
@@ -189,7 +198,31 @@
         listening = true;
         root.child('items').on('value', function (snap) { items = snap.val() || {}; renderList(); },
             function (err) { $('list').textContent = '讀取失敗：' + err.message; });
+        // 點閱人數：announcements/views/<訊息編號>/<裝置編號> = true，一台裝置算一人
+        root.child('views').on('value', function (snap) {
+            views = {};
+            snap.forEach(function (c) { views[c.key] = c.numChildren(); });
+            renderList();
+        }, function () {});
+        migrateLegacy();
         setInterval(renderList, 30000);
+    }
+
+    // 把舊版（announcements/current）已上架的那則，轉成新版清單裡的一則（網站本來就會顯示它，轉過來才管理得到）
+    function migrateLegacy() {
+        root.child('current').once('value').then(function (snap) {
+            var v = snap.val();
+            if (!v) return;
+            var u = { current: null };
+            if (v.active !== false && v.id && (v.title || v.content || v.url || v.imageUrl)) {
+                u['items/' + v.id] = {
+                    id: String(v.id), title: v.title || '', content: v.content || '', url: v.url || '',
+                    mode: v.mode === 'page' ? 'page' : 'link', imageUrl: v.imageUrl || '', hasImageData: false,
+                    startAt: Number(v.startAt) || Number(v.id) || 0, endAt: Number(v.endAt) || 0
+                };
+            }
+            return root.update(u);
+        }).catch(function () {});
     }
 
     function status(it) {
@@ -216,18 +249,20 @@
             var startAt = Number(it.startAt) || Number(it.id) || 0, endAt = Number(it.endAt) || 0;
             meta.textContent = '開始：' + fmt(startAt) + '\n結束：' + (endAt ? fmt(endAt) : '不設結束時間') +
                 '\n圖片：' + (it.hasImageData ? '已上傳' : (it.imageUrl ? '網址圖片' : '無')) +
+                '\nPDF：' + (it.hasPdfData ? '已上傳' + (it.pdfName ? '（' + it.pdfName + '）' : '') : (it.pdfUrl ? '網址' + (it.pdfName ? '（' + it.pdfName + '）' : '') : '無')) +
                 '\n連結：' + (it.url || '無');
             meta.style.whiteSpace = 'pre-line';
+            var vc = document.createElement('div'); vc.className = 'item-views'; vc.textContent = '👁 ' + (views[it.id] || 0) + ' 人點閱';
             var del = document.createElement('button'); del.className = 'danger'; del.textContent = '🗑️ 刪除';
             del.onclick = function () { removeItem(it.id, it.title); };
-            div.appendChild(head); div.appendChild(meta); div.appendChild(del);
+            div.appendChild(head); div.appendChild(meta); div.appendChild(vc); div.appendChild(del);
             box.appendChild(div);
         });
     }
 
     function removeItem(id, title) {
-        if (!confirm('確定要刪除「' + (title || '') + '」嗎？')) return;
-        var u = {}; u['items/' + id] = null; u['images/' + id] = null;
+        if (!confirm('確定要刪除「' + (title || '') + '」嗎？（點閱記錄也會一併刪除）')) return;
+        var u = {}; u['items/' + id] = null; u['images/' + id] = null; u['files/' + id] = null; u['views/' + id] = null;
         root.update(u).catch(function (e) { alert('刪除失敗：' + e.message); });
     }
 
@@ -275,6 +310,29 @@
         pendingImage = ''; $('f-file').value = ''; $('f-imgurl').value = ''; showPreview('');
     }
 
+    /* ---------- PDF ---------- */
+    var PDF_MAX = 3 * 1024 * 1024;
+    function pickPdf(inp) {
+        var f = inp.files && inp.files[0];
+        if (!f) return;
+        if (!(f.type === 'application/pdf' || /\.pdf$/i.test(f.name))) { inp.value = ''; setMsg('pub-msg', '請選擇 PDF 檔案', false); return; }
+        if (f.size > PDF_MAX) { inp.value = ''; setMsg('pub-msg', 'PDF 超過 3MB，請改貼 PDF 網址', false); return; }
+        var fr = new FileReader();
+        fr.onerror = function () { setMsg('pub-msg', '無法讀取 PDF', false); };
+        fr.onload = function () {
+            pendingPdf = String(fr.result).replace(/^data:[^;,]*/, 'data:application/pdf');
+            if (!$('f-pdfname').value) $('f-pdfname').value = f.name;
+            $('pdf-info').textContent = '已選擇：' + f.name + '（' + (f.size / 1024).toFixed(0) + ' KB）';
+            $('pdf-clear').style.display = '';
+            setMsg('pub-msg', '', true);
+        };
+        fr.readAsDataURL(f);
+    }
+    function clearPdf() {
+        pendingPdf = ''; $('f-pdf').value = ''; $('f-pdfurl').value = ''; $('f-pdfname').value = '';
+        $('pdf-info').textContent = ''; $('pdf-clear').style.display = 'none';
+    }
+
     /* ---------- 時間 ---------- */
     function toggleTime() {
         $('f-start').classList.toggle('hidden', $('f-start-mode').value !== 'custom');
@@ -288,6 +346,8 @@
         if (!title) { setMsg('pub-msg', '請填寫標題', false); return; }
         if (!validUrl(url)) { setMsg('pub-msg', '連結格式不正確，需以 http:// 或 https:// 開頭', false); return; }
         if (!pendingImage && imgUrl && !validUrl(imgUrl)) { setMsg('pub-msg', '圖片網址格式不正確', false); return; }
+        var pdfUrl = $('f-pdfurl').value.trim(), pdfName = $('f-pdfname').value.trim();
+        if (!pendingPdf && pdfUrl && !validUrl(pdfUrl)) { setMsg('pub-msg', 'PDF 網址格式不正確', false); return; }
 
         var now = nowMs(), startAt = now, endAt = 0;
         if ($('f-start-mode').value === 'custom') {
@@ -305,16 +365,21 @@
             id: id, title: title, content: content, url: url, mode: mode,
             imageUrl: pendingImage ? '' : imgUrl,
             hasImageData: !!pendingImage,
+            pdfUrl: pendingPdf ? '' : pdfUrl,
+            hasPdfData: !!pendingPdf,
+            pdfName: pdfName,
             startAt: startAt, endAt: endAt
         };
-        var u = {}; u['items/' + id] = item; if (pendingImage) u['images/' + id] = pendingImage;
+        var u = {}; u['items/' + id] = item;
+        if (pendingImage) u['images/' + id] = pendingImage;
+        if (pendingPdf) u['files/' + id] = pendingPdf;
 
         $('pub-btn').disabled = true;
         root.update(u).then(function () {
             var msg = startAt > now ? '✅ 已排程！到 ' + fmt(startAt) + ' 網站會自動顯示' : '✅ 已發布！使用者下次打開（或正在瀏覽）網頁就會收到彈窗';
             setMsg('pub-msg', msg, true);
             $('f-title').value = ''; $('f-content').value = ''; $('f-url').value = '';
-            clearImage();
+            clearImage(); clearPdf();
         }).catch(function (e) {
             setMsg('pub-msg', '發布失敗：' + e.message + '（請確認帳號已加入 admins，且 Firebase 規則已設定）', false);
         }).then(function () { $('pub-btn').disabled = false; });
