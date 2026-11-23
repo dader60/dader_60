@@ -584,6 +584,24 @@
         }
         @keyframes submit-fade { from { opacity: 0; } to { opacity: 1; } }
         @keyframes submit-pop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* 重要訊息 */
+        .notice-toggle { position: relative; }
+        .notice-badge { display: inline-block; font-size: 12px; font-weight: bold; padding: 2px 10px; border-radius: 50px; margin-left: 6px; vertical-align: middle; }
+        .notice-badge.new { background: #ffe5e5; color: #d32f2f; }
+        .notice-badge.seen { background: #e3f6e8; color: #1b8a3c; }
+        .notice-body { text-align: center; margin-bottom: 16px; }
+        .notice-title { font-size: 18px; font-weight: bold; color: #222; margin: 10px 0 8px; word-break: break-word; }
+        .notice-content { font-size: 15px; color: #444; line-height: 1.6; white-space: pre-wrap; word-break: break-word; text-align: left; background: #fff; border-radius: 14px; padding: 12px 14px; }
+        .notice-content:empty { display: none; }
+        .notice-time { font-size: 12px; color: #999; margin-top: 8px; }
+        .notice-viewer { display: none; position: fixed; inset: 0; z-index: 10002; background: #fff; flex-direction: column; }
+        .notice-viewer.open { display: flex; }
+        .notice-viewer-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #f0f0f0; border-bottom: 1px solid #ddd; padding-top: calc(10px + env(safe-area-inset-top, 0px)); }
+        .notice-viewer-title { flex: 1; font-size: 14px; font-weight: bold; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .notice-viewer-bar a, .notice-viewer-bar button { font-family: inherit; font-size: 13px; font-weight: bold; text-decoration: none; color: #333; background: #fff; border: 1px solid #ccc; border-radius: 50px; padding: 6px 12px; cursor: pointer; white-space: nowrap; }
+        .notice-viewer-tip { font-size: 12px; color: #888; text-align: center; padding: 4px; background: #fafafa; }
+        .notice-viewer iframe { flex: 1; width: 100%; border: none; background: #fff; }
         .owner-ig { background: #fff5f5; border: 2px solid #fd5d93; color: #fd5d93; }
         .owner-tiktok { background: #000000; color: #ffffff; border: 2px solid #25F4EE; }
         
@@ -884,6 +902,30 @@
         <div style="font-size: 10px; color: #888; margin-top: 3px; font-weight: normal;">👆 點擊切換顯示模式</div>
     </div>
 
+    <button type="button" class="card submit-toggle notice-toggle" id="notice-toggle" style="display:none" aria-haspopup="dialog" onclick="openNoticeModal()">📢 重要訊息 <span class="notice-badge" id="notice-badge"></span></button>
+    <div class="submit-modal" id="notice-modal" style="z-index:10001" role="dialog" aria-modal="true" aria-labelledby="notice-heading" onclick="if(event.target===this) closeNoticeModal()">
+        <div class="submit-modal-box">
+            <button type="button" class="submit-close" aria-label="關閉" onclick="closeNoticeModal()">✕</button>
+            <div class="submit-title" id="notice-heading">📢 重要訊息</div>
+            <div class="notice-body">
+                <span class="notice-badge" id="notice-modal-badge"></span>
+                <div class="notice-title" id="notice-title"></div>
+                <div class="notice-content" id="notice-content"></div>
+                <div class="notice-time" id="notice-time"></div>
+            </div>
+            <button type="button" class="card submit-toggle" id="notice-action" onclick="noticeAction()">👀 點擊瀏覽</button>
+        </div>
+    </div>
+    <div class="notice-viewer" id="notice-viewer" role="dialog" aria-modal="true">
+        <div class="notice-viewer-bar">
+            <div class="notice-viewer-title" id="notice-viewer-title">重要訊息</div>
+            <a id="notice-viewer-newtab" href="#" target="_blank" rel="noopener noreferrer">↗ 新分頁開啟</a>
+            <button type="button" onclick="closeNoticeViewer()">✕ 關閉</button>
+        </div>
+        <div class="notice-viewer-tip">若網頁無法顯示，請按「新分頁開啟」</div>
+        <iframe id="notice-viewer-frame" title="重要訊息" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe>
+    </div>
+
     <button type="button" class="card submit-toggle" id="submit-toggle" aria-haspopup="dialog" onclick="openSubmitModal()">📮 投稿專區</button>
     <div class="submit-modal" id="submit-modal" role="dialog" aria-modal="true" aria-labelledby="submit-title" onclick="if(event.target===this) closeSubmitModal()">
         <div class="submit-modal-box">
@@ -1058,6 +1100,7 @@
             splash.style.opacity = '0';
             setTimeout(() => {
                 splash.style.display = 'none';
+                if (window.__noticeSplashDone) window.__noticeSplashDone();
             }, 500);
         }
     }
@@ -1936,6 +1979,112 @@
             document.getElementById('total_view_display').innerText = "暫時無法顯示";
         }
     }
+</script>
+<script>
+/* ===== 📢 重要訊息：有新訊息才彈窗；按 X 下次再提醒；點過瀏覽就標示「已看過」且不再彈窗 ===== */
+(function () {
+    var KEY = 'dader_notice_seen_v1';   // 這台裝置「已點過瀏覽」的訊息編號
+    var data = null, splashDone = false, poppedId = null, memSeen = null;
+
+    function $(id) { return document.getElementById(id); }
+    function getSeen() { try { return localStorage.getItem(KEY); } catch (e) { return memSeen; } }
+    function setSeen(id) { memSeen = id; try { localStorage.setItem(KEY, id); } catch (e) {} }
+    function isSeen() { return !!data && getSeen() === data.id; }
+    function safeUrl(u) {
+        if (!u) return '';
+        try {
+            var x = new URL(u, location.href);
+            return (x.protocol === 'http:' || x.protocol === 'https:') ? x.href : '';
+        } catch (e) { return ''; }
+    }
+
+    function render() {
+        var btn = $('notice-toggle');
+        if (!btn) return;
+        if (!data) { btn.style.display = 'none'; return; }
+        btn.style.display = '';
+        var seen = isSeen();
+        var cls = 'notice-badge ' + (seen ? 'seen' : 'new');
+        var txt = seen ? '✅ 已看過' : '🔴 新';
+        $('notice-badge').className = cls;       $('notice-badge').textContent = txt;
+        $('notice-modal-badge').className = cls; $('notice-modal-badge').textContent = txt;
+        $('notice-title').textContent = data.title;
+        $('notice-content').textContent = data.content;
+        var t = Number(data.id);
+        $('notice-time').textContent = isFinite(t) && t > 0 ? '發布時間：' + new Date(t).toLocaleString('zh-TW') : '';
+        $('notice-action').textContent = safeUrl(data.url) ? '👀 點擊瀏覽' : '✅ 我知道了';
+    }
+
+    window.openNoticeModal = function () {
+        if (!data) return;
+        render();
+        $('notice-modal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    };
+    // 按 X：不算看過，下次打開網頁還會再顯示
+    window.closeNoticeModal = function () {
+        $('notice-modal').classList.remove('open');
+        document.body.style.overflow = '';
+    };
+    window.noticeAction = function () {
+        if (!data) return;
+        setSeen(data.id);
+        render();
+        var url = safeUrl(data.url), mode = data.mode, title = data.title;
+        window.closeNoticeModal();
+        if (!url) return;
+        if (mode === 'page') openViewer(url, title);
+        else window.open(url, '_blank', 'noopener');
+    };
+
+    function openViewer(url, title) {
+        $('notice-viewer-title').textContent = title || '重要訊息';
+        $('notice-viewer-newtab').href = url;
+        $('notice-viewer-frame').src = url;
+        $('notice-viewer').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    window.closeNoticeViewer = function () {
+        $('notice-viewer').classList.remove('open');
+        $('notice-viewer-frame').src = 'about:blank';
+        document.body.style.overflow = '';
+    };
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { window.closeNoticeModal(); window.closeNoticeViewer(); }
+    });
+
+    function maybePopup() {
+        if (!splashDone || !data || isSeen() || poppedId === data.id) return;
+        poppedId = data.id;
+        window.openNoticeModal();
+    }
+    window.__noticeSplashDone = function () { splashDone = true; maybePopup(); };
+
+    function start(tries) {
+        if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) {
+            if (tries < 10) setTimeout(function () { start(tries + 1); }, 1000);
+            return;
+        }
+        firebase.database().ref('announcements/current').on('value', function (snap) {
+            var v = snap.val();
+            if (v && v.active !== false && v.id && (v.title || v.content || v.url)) {
+                data = {
+                    id: String(v.id),
+                    title: String(v.title || '重要訊息'),
+                    content: String(v.content || ''),
+                    url: String(v.url || ''),
+                    mode: v.mode === 'page' ? 'page' : 'link'
+                };
+            } else {
+                data = null;
+                window.closeNoticeModal();
+            }
+            render();
+            maybePopup();
+        }, function (err) { console.warn('重要訊息讀取失敗：', err && err.message); });
+    }
+    start(0);
+})();
 </script>
 </body>
 </html>
