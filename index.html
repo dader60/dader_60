@@ -548,6 +548,42 @@
             gap: 4px;
         }
         .card, .line-section, .live-section, .shuttle-section { background: white; border-radius: 20px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: #333; display: block; font-weight: bold; box-sizing: border-box; }
+        /* 投稿區（彈出視窗） */
+        .submit-toggle { width: 100%; border: none; font-family: inherit; font-size: inherit; cursor: pointer; }
+        .submit-toggle:active { transform: scale(0.98); }
+        .submit-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(0,0,0,0.55);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .submit-modal.open { display: flex; animation: submit-fade 0.2s ease-out; }
+        .submit-modal-box {
+            position: relative;
+            width: 100%;
+            max-width: 360px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: #f5f5f5;
+            border-radius: 24px;
+            padding: 24px 18px 6px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            animation: submit-pop 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+        }
+        .submit-title { text-align: center; font-size: 20px; font-weight: bold; color: #333; margin-bottom: 18px; }
+        .submit-close {
+            position: absolute; top: 10px; right: 12px;
+            width: 32px; height: 32px; border: none; border-radius: 50%;
+            background: rgba(0,0,0,0.08); color: #555; font-size: 16px; cursor: pointer;
+        }
+        @keyframes submit-fade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes submit-pop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .owner-ig { background: #fff5f5; border: 2px solid #fd5d93; color: #fd5d93; }
         .owner-tiktok { background: #000000; color: #ffffff; border: 2px solid #25F4EE; }
         
@@ -848,24 +884,54 @@
         <div style="font-size: 10px; color: #888; margin-top: 3px; font-weight: normal;">👆 點擊切換顯示模式</div>
     </div>
 
-    <a href="https://sites.google.com/view/dader60/%E7%89%88%E8%A6%8F" target="_blank" class="card">📄 版規及簡歷冊</a>
-    <a href="https://tellonym.me/dader_.60?rel=web" target="_blank" rel="noopener noreferrer" class="card" onclick="forceWeb(event)">🔗 匿名投稿連結 🔗</a>
-    <a href="https://youtube.com/shorts/VVvFNDugpKA?feature=share" target="_blank" class="card tutorial-card">🎬 投稿匿名教學影片</a>
-    
-    <a href="https://dader60.github.io/dader/" target="_blank" class="card">🚨 投訴系統</a>
-    
-    <a href="Countdown.html" target="_blank" class="card countdown-card">📅 倒數日系統 ⏳</a>
-    
-    <div class="daily-chat-section">
-        <div class="section-title">💬 達德日常討論群</div>
-        <div class="section-content">
-            <span>📌 入群者請追蹤靠北達德版帳</span>
-            <span>✨ 也🉑追蹤版主Ig @hbingzhe10.10</span>
-            <span>🤝 達德人想進群組聊天的歡迎加入</span>
+    <button type="button" class="card submit-toggle" id="submit-toggle" aria-haspopup="dialog" onclick="openSubmitModal()">📮 投稿專區</button>
+    <div class="submit-modal" id="submit-modal" role="dialog" aria-modal="true" aria-labelledby="submit-title" onclick="if(event.target===this) closeSubmitModal()">
+        <div class="submit-modal-box">
+            <button type="button" class="submit-close" aria-label="關閉" onclick="closeSubmitModal()">✕</button>
+            <div class="submit-title" id="submit-title">📮 投稿專區</div>
+            <a href="https://sites.google.com/view/dader60/%E7%89%88%E8%A6%8F" target="_blank" class="card">📄 版規及簡歷冊</a>
+            <a href="https://youtube.com/shorts/VVvFNDugpKA?feature=share" target="_blank" class="card tutorial-card">🎬 投稿匿名教學影片</a>
+            <a href="https://tellonym.me/dader_.60?rel=web" target="_blank" rel="noopener noreferrer" class="card" onclick="forceWeb(event)">🔗 匿名投稿連結 🔗</a>
+            <a href="https://pse.is/loved" target="_blank" rel="noopener noreferrer" class="card">💌 情感語錄投稿</a>
         </div>
-        <a href="https://ig.me/j/l3p1iGOTZDJVhtjJ/" target="_blank" class="join-btn">🚀 點擊我加入群聊</a>
     </div>
     
+    <button type="button" class="card submit-toggle" id="owner-toggle" aria-haspopup="dialog" onclick="openOwnerModal()">👑 版主區</button>
+    <div class="submit-modal" id="owner-modal" role="dialog" aria-modal="true" aria-labelledby="owner-title" onclick="if(event.target===this) closeOwnerModal()">
+        <div class="submit-modal-box">
+            <button type="button" class="submit-close" aria-label="關閉" onclick="closeOwnerModal()">✕</button>
+            <div class="submit-title" id="owner-title">👑 版主區</div>
+    <a href="https://www.instagram.com/hbingzhe10.10/" target="_blank" class="card owner-ig">👤 版主個人 IG</a>
+    <a href="https://www.instagram.com/channel/AbZByxGjVLjC7N7H/" target="_blank" class="card">📸 版主專區 (IG 頻道)</a>
+    <a href="https://www.tiktok.com/@hbingzhe10.10" target="_blank" class="card owner-tiktok">🎵 版主抖音 (TikTok)</a>
+    <div class="card" style="background: linear-gradient(135deg, #25f4ee, #fe0979); color: white; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.15); padding: 15px; text-align: center; margin-bottom: 15px;">
+        <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">🎙️ 版主weplay語音房</div>
+        <div style="font-size: 15px; margin-bottom: 12px; background: rgba(0,0,0,0.2); display: inline-block; padding: 3px 12px; border-radius: 10px; letter-spacing: 1px;">房號: C820553</div>
+        <a href="https://weplay.run/C/qQrv41" target="_blank" class="card" style="background: white; color: #fe0979; border: none; padding: 10px; font-size: 15px; margin-bottom: 10px; display: block; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
+            🚀 點擊我開啟
+        </a>
+        <div id="weplay-copy-btn" onclick="copyWePlayRoom()" class="card" style="background: white; color: #25f4ee; border: none; padding: 10px; font-size: 15px; margin: 0; cursor: pointer; display: block; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
+            📋 點我複製房號
+        </div>
+    </div>
+    <div class="card owner-ig" style="text-align: center; padding: 18px; margin-bottom: 15px;">
+        <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">💬 問版主問題(目前暫停使用)</div>
+        <div style="font-size: 13.5px; color: #fd5d93; font-weight: bold; margin-bottom: 15px; line-height: 1.5;">
+            📌 追蹤版主ig在匿名，會看內容決定是否回覆
+        </div>
+        <a href="https://ngl.link/hbingzhe10.1017833" target="_blank" onclick="showPauseNotice(event)" style="background: #fd5d93; color: white; text-decoration: none; display: block; text-align: center; padding: 10px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 6px rgba(253, 93, 147, 0.2); font-size: 15px;">
+            🚀 點擊前往匿名發問
+        </a>
+    </div>
+        </div>
+    </div>
+
+    
+    <button type="button" class="card submit-toggle" id="dader-toggle" aria-haspopup="dialog" onclick="openDaderModal()">🔥 靠北達德區</button>
+    <div class="submit-modal" id="dader-modal" role="dialog" aria-modal="true" aria-labelledby="dader-title" onclick="if(event.target===this) closeDaderModal()">
+        <div class="submit-modal-box">
+            <button type="button" class="submit-close" aria-label="關閉" onclick="closeDaderModal()">✕</button>
+            <div class="submit-title" id="dader-title">🔥 靠北達德區</div>
     <div class="card" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; box-shadow: 0 4px 12px rgba(56, 239, 125, 0.25); padding: 18px; margin-bottom: 15px; text-align: center; box-sizing: border-box;">
         <div style="font-size: 18px; font-weight: bold; margin-bottom: 12px; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px;">
             📝 聘職靠達小編表單
@@ -878,35 +944,48 @@
             🚀 點擊填寫表單
         </a>
     </div>
-    
-    <div class="card" style="background: linear-gradient(135deg, #25f4ee, #fe0979); color: white; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.15); padding: 15px; text-align: center; margin-bottom: 15px;">
-        <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">🎙️ 版主weplay語音房</div>
-        <div style="font-size: 15px; margin-bottom: 12px; background: rgba(0,0,0,0.2); display: inline-block; padding: 3px 12px; border-radius: 10px; letter-spacing: 1px;">房號: C820553</div>
-        <a href="https://weplay.run/C/qQrv41" target="_blank" class="card" style="background: white; color: #fe0979; border: none; padding: 10px; font-size: 15px; margin-bottom: 10px; display: block; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
-            🚀 點擊我開啟
-        </a>
-        <div id="weplay-copy-btn" onclick="copyWePlayRoom()" class="card" style="background: white; color: #25f4ee; border: none; padding: 10px; font-size: 15px; margin: 0; cursor: pointer; display: block; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
-            📋 點我複製房號
-        </div>
-    </div>
-
     <a href="https://www.instagram.com/channel/AbaNRbRrwua33brb/" target="_blank" class="card">🔥 靠北達德專區 (IG 頻道)</a>
-    <a href="https://www.instagram.com/hbingzhe10.10/" target="_blank" class="card owner-ig">👤 版主個人 IG</a>
-    <a href="https://www.instagram.com/channel/AbZByxGjVLjC7N7H/" target="_blank" class="card">📸 版主專區 (IG 頻道)</a>
-
-    <div class="card owner-ig" style="text-align: center; padding: 18px; margin-bottom: 15px;">
-        <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">💬 問版主問題(目前暫停使用)</div>
-        <div style="font-size: 13.5px; color: #fd5d93; font-weight: bold; margin-bottom: 15px; line-height: 1.5;">
-            📌 追蹤版主ig在匿名，會看內容決定是否回覆
+    <a href="https://www.tiktok.com/@dader_.60?is_from_webapp=1&sender_device=pc" target="_blank" class="card owner-tiktok">🎵 靠北達德抖音</a>
+    <div class="daily-chat-section">
+        <div class="section-title">💬 達德日常討論群</div>
+        <div class="section-content">
+            <span>📌 入群者請追蹤靠北達德版帳</span>
+            <span>✨ 也🉑追蹤版主Ig @hbingzhe10.10</span>
+            <span>🤝 達德人想進群組聊天的歡迎加入</span>
         </div>
-        <a href="https://ngl.link/hbingzhe10.1017833" target="_blank" onclick="showPauseNotice(event)" style="background: #fd5d93; color: white; text-decoration: none; display: block; text-align: center; padding: 10px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 6px rgba(253, 93, 147, 0.2); font-size: 15px;">
-            🚀 點擊前往匿名發問
-        </a>
+        <a href="https://ig.me/j/l3p1iGOTZDJVhtjJ/" target="_blank" class="join-btn">🚀 點擊我加入群聊</a>
+    </div>
+        <a href="https://dader60.github.io/dader/" target="_blank" class="card">🚨 投訴系統</a>
+        </div>
     </div>
 
+    <button type="button" class="card submit-toggle" id="line-toggle" aria-haspopup="dialog" onclick="openLineModal()">💚 賴區</button>
+    <div class="submit-modal" id="line-modal" role="dialog" aria-modal="true" aria-labelledby="line-title" onclick="if(event.target===this) closeLineModal()">
+        <div class="submit-modal-box">
+            <button type="button" class="submit-close" aria-label="關閉" onclick="closeLineModal()">✕</button>
+            <div class="submit-title" id="line-title">💚 賴區</div>
+    <div class="line-section">
+        <strong>官方 LINE ⚡</strong><br>
+        <img src="line-qr.jpg" class="qrcode-img" loading="lazy" decoding="async" onerror="this.style.display='none'">
+        <a href="https://lin.ee/94g8LGJ" target="_blank" style="color: #00b900; text-decoration: none; display: block; margin: 10px 0;">👉 點我加入好友 👈</a>
+        <div class="line-id" onclick="copyID()">複製 ID: @768mnxcr</div>
+    </div>
+    <div class="line-section" style="border: 2px solid #06c755;">
+        <strong>靠達消息第一線賴社群 ⚡</strong><br>
+        <img src="LINE OpenChat-QR.jpg" class="qrcode-img" loading="lazy" decoding="async" onerror="this.style.display='none'">
+        <div style="font-size: 13.5px; color: #d32f2f; font-weight: bold; margin: 10px 0; line-height: 1.5;">
+            密碼為靠達創立西元年月日20230517<br>請先複製密碼再點擊我進入
+        </div>
+        <div id="openchat-copy-btn" onclick="copyOpenChatPassword()" class="line-id" style="background: #00b900; color: white; display: inline-block; cursor: pointer; margin-bottom: 12px; padding: 10px 25px;">
+            點擊我複製密碼
+        </div>
+        <a href="https://line.me/ti/g2/Wdby5SjN-wFsSrEkIu7ljopZGlxLx7Fghls74A?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" style="color: #00b900; text-decoration: none; display: block; font-weight: bold; margin-top: 5px;">👉 點擊我進入 👈</a>
+    </div>
+        </div>
+    </div>
+    
     <a href="https://www.instagram.com/love_dader?igsh=M3dpaXBrMjZmcHYw" target="_blank" class="card owner-ig">💖 情感語錄</a>
-    <a href="https://www.tiktok.com/@hbingzhe10.10" target="_blank" class="card owner-tiktok">🎵 版主抖音 (TikTok)</a>
-    <a href="https://www.tiktok.com/@dader_.60?is_from_webapp=1&sender_device=pc" target="_blank" class="card owner-tiktok">🎵 靠北達德抖音</a>
+    <a href="Countdown.html" target="_blank" class="card countdown-card">📅 倒數日系統 ⏳</a>
     
     <a href="weather.html" target="_blank" class="card weather-card">☀️ 天氣即時查詢系統 ☁️</a>
     
@@ -922,25 +1001,6 @@
             學號：校車編號 (例如 125 校車請輸入 125)<br>
             密碼：tdvs 車號 000 (例如 125 校車請輸入 125000)
         </div>
-    </div>
-
-    <div class="line-section">
-        <strong>官方 LINE ⚡</strong><br>
-        <img src="line-qr.jpg" class="qrcode-img" loading="lazy" decoding="async" onerror="this.style.display='none'">
-        <a href="https://lin.ee/94g8LGJ" target="_blank" style="color: #00b900; text-decoration: none; display: block; margin: 10px 0;">👉 點我加入好友 👈</a>
-        <div class="line-id" onclick="copyID()">複製 ID: @768mnxcr</div>
-    </div>
-
-    <div class="line-section" style="border: 2px solid #06c755;">
-        <strong>靠達消息第一線賴社群 ⚡</strong><br>
-        <img src="LINE OpenChat-QR.jpg" class="qrcode-img" loading="lazy" decoding="async" onerror="this.style.display='none'">
-        <div style="font-size: 13.5px; color: #d32f2f; font-weight: bold; margin: 10px 0; line-height: 1.5;">
-            密碼為靠達創立西元年月日20230517<br>請先複製密碼再點擊我進入
-        </div>
-        <div id="openchat-copy-btn" onclick="copyOpenChatPassword()" class="line-id" style="background: #00b900; color: white; display: inline-block; cursor: pointer; margin-bottom: 12px; padding: 10px 25px;">
-            點擊我複製密碼
-        </div>
-        <a href="https://line.me/ti/g2/Wdby5SjN-wFsSrEkIu7ljopZGlxLx7Fghls74A?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" style="color: #00b900; text-decoration: none; display: block; font-weight: bold; margin-top: 5px;">👉 點擊我進入 👈</a>
     </div>
 
     <div class="live-section">
@@ -1755,6 +1815,50 @@
     }
 
     function forceWeb(e) { e.preventDefault(); window.location.href = "https://tellonym.me/dader_.60?rel=web"; }
+    function openLineModal() {
+        document.getElementById('line-modal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeLineModal() {
+        document.getElementById('line-modal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeLineModal();
+    });
+    function openDaderModal() {
+        document.getElementById('dader-modal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeDaderModal() {
+        document.getElementById('dader-modal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeDaderModal();
+    });
+    function openOwnerModal() {
+        document.getElementById('owner-modal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeOwnerModal() {
+        document.getElementById('owner-modal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeOwnerModal();
+    });
+    function openSubmitModal() {
+        document.getElementById('submit-modal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSubmitModal() {
+        document.getElementById('submit-modal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeSubmitModal();
+    });
 
     function startLiveClock() {
         function updateTime() {
