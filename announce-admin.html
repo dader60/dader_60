@@ -8,7 +8,7 @@
 <style>
     * { box-sizing: border-box; }
     body { margin: 0; padding: 20px; font-family: "Microsoft JhengHei", sans-serif; background: #f2f4f8; color: #333; }
-    .box { max-width: 560px; margin: 0 auto; background: #fff; border-radius: 18px; padding: 22px; box-shadow: 0 4px 16px rgba(0,0,0,.08); margin-bottom: 18px; }
+    .box { max-width: 560px; margin: 0 auto 18px; background: #fff; border-radius: 18px; padding: 22px; box-shadow: 0 4px 16px rgba(0,0,0,.08); }
     h1 { font-size: 20px; margin: 0 0 16px; text-align: center; }
     h2 { font-size: 16px; margin: 0 0 12px; }
     label { display: block; font-weight: bold; font-size: 14px; margin: 14px 0 6px; }
@@ -17,27 +17,42 @@
     button { font-family: inherit; font-size: 15px; font-weight: bold; border: none; border-radius: 50px; padding: 11px 20px; cursor: pointer; margin-top: 16px; }
     .primary { background: #4285F4; color: #fff; width: 100%; }
     .danger { background: #fff; color: #d32f2f; border: 2px solid #d32f2f; width: 100%; }
+    .ghost { background: #fff; color: #555; border: 1px solid #ccc; padding: 6px 14px; font-size: 13px; margin-top: 0; }
     .hint { font-size: 12px; color: #888; margin-top: 4px; line-height: 1.5; }
     .msg { margin-top: 12px; font-size: 14px; font-weight: bold; text-align: center; min-height: 20px; }
     .ok { color: #1b8a3c; } .err { color: #d32f2f; }
     .current { background: #fafafa; border: 1px dashed #bbb; border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.6; word-break: break-word; white-space: pre-wrap; }
     .hidden { display: none; }
-    details { margin-top: 8px; font-size: 13px; color: #666; }
-    code { background: #eee; padding: 2px 6px; border-radius: 6px; word-break: break-all; display: block; margin-top: 6px; font-size: 12px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: #666; margin-bottom: 14px; word-break: break-all; }
+    code { background: #eee; padding: 4px 8px; border-radius: 6px; word-break: break-all; display: block; margin: 8px 0; font-size: 13px; user-select: all; }
 </style>
 </head>
 <body>
 
+<!-- 登入 -->
 <div class="box" id="login-box">
     <h1>🔐 重要訊息管理後台</h1>
-    <label for="pw">管理員密碼</label>
+    <label for="email">管理員 Email</label>
+    <input type="email" id="email" autocomplete="username">
+    <label for="pw">密碼</label>
     <input type="password" id="pw" autocomplete="current-password" onkeydown="if(event.key==='Enter') login()">
     <button class="primary" onclick="login()">登入</button>
     <div class="msg err" id="login-msg"></div>
 </div>
 
+<!-- 已登入但不是管理員 -->
+<div class="box hidden" id="denied-box">
+    <h1>⛔ 沒有管理權限</h1>
+    <div class="topbar"><span id="denied-email"></span><button class="ghost" onclick="logout()">登出</button></div>
+    <p style="font-size:14px;line-height:1.7;margin:0">這個帳號已登入，但還不是管理員。請到 Firebase 控制台 → Realtime Database，新增這筆資料：</p>
+    <code>admins / <span id="denied-uid"></span> = true</code>
+    <p class="hint">（路徑 <b>admins</b> 底下新增名稱為上面那串 UID、值為 <b>true</b>（布林值）的項目，完成後重新整理本頁。）</p>
+</div>
+
+<!-- 管理後台 -->
 <div id="admin-area" class="hidden">
     <div class="box">
+        <div class="topbar"><span id="admin-email"></span><button class="ghost" onclick="logout()">登出</button></div>
         <h1>📢 重要訊息管理後台</h1>
         <h2>目前線上的訊息</h2>
         <div class="current" id="current">讀取中…</div>
@@ -61,51 +76,70 @@
         <button class="primary" onclick="publish()">🚀 發布</button>
         <div class="msg" id="pub-msg"></div>
     </div>
-
-    <div class="box">
-        <details>
-            <summary>更改管理員密碼</summary>
-            <label for="new-pw">輸入新密碼</label>
-            <input type="text" id="new-pw" oninput="makeHash()">
-            <div class="hint">把下面這串貼到本檔案的 <b>PASSWORD_HASH</b>（取代原本那串）即可：</div>
-            <code id="new-hash">（輸入後顯示）</code>
-        </details>
-    </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script>
-    // 管理員密碼的 SHA-256 雜湊（預設密碼：dader2026!　請登入後立刻更改）
-    var PASSWORD_HASH = "7d9ae1875f8745a6e81d78c60daaa0aba32bfbd7f0f0de7c3e764ef3d418a81e";
-
-    firebase.initializeApp({ databaseURL: "https://total-views-969ba-default-rtdb.asia-southeast1.firebasedatabase.app/" });
+    // Firebase 設定（控制台 → 專案設定 → 一般 → 網頁應用程式 → firebaseConfig）
+    var firebaseConfig = {
+        apiKey: "AIzaSyC82pjOh0FgknrAQShr4iJBYYrFDYTNVDM",
+        authDomain: "total-views-969ba.firebaseapp.com",
+        projectId: "total-views-969ba",
+        databaseURL: "https://total-views-969ba-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
     var ref = firebase.database().ref('announcements/current');
+    var listening = false;
 
     function $(id) { return document.getElementById(id); }
+    function show(id) { ['login-box', 'denied-box', 'admin-area'].forEach(function (x) { $(x).classList.toggle('hidden', x !== id); }); }
     function setMsg(id, text, ok) { var e = $(id); e.textContent = text; e.className = 'msg ' + (ok ? 'ok' : 'err'); }
 
-    async function sha256(text) {
-        if (!(window.crypto && crypto.subtle)) throw new Error('請用 https 網址開啟此頁面');
-        var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-        return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+    var AUTH_ERR = {
+        'auth/invalid-email': 'Email 格式不正確',
+        'auth/user-not-found': '找不到這個帳號',
+        'auth/wrong-password': '密碼錯誤',
+        'auth/invalid-credential': 'Email 或密碼錯誤',
+        'auth/too-many-requests': '嘗試次數過多，請稍後再試',
+        'auth/network-request-failed': '網路連線失敗',
+        'auth/api-key-not-valid.-please-pass-a-valid-api-key.': 'apiKey 不正確，請檢查設定'
+    };
+
+    function login() {
+        if (firebaseConfig.apiKey.indexOf('請貼上') === 0) { setMsg('login-msg', '尚未設定 apiKey，請先編輯本檔案上方的 firebaseConfig', false); return; }
+        setMsg('login-msg', '登入中…', true);
+        auth.signInWithEmailAndPassword($('email').value.trim(), $('pw').value)
+            .then(function () { setMsg('login-msg', '', true); })
+            .catch(function (e) { setMsg('login-msg', AUTH_ERR[e.code] || ('登入失敗：' + e.message), false); });
+    }
+    function logout() { auth.signOut(); }
+
+    auth.onAuthStateChanged(function (user) {
+        if (!user) { show('login-box'); return; }
+        // 只有 admins/<uid> = true 的帳號才是管理員（寫入權限由 Firebase 規則強制檢查）
+        firebase.database().ref('admins/' + user.uid).once('value').then(function (snap) {
+            if (snap.val() === true) {
+                $('admin-email').textContent = user.email || '';
+                show('admin-area');
+                listen();
+            } else { deny(user); }
+        }).catch(function () { deny(user); });
+    });
+
+    function deny(user) {
+        $('denied-email').textContent = user.email || '';
+        $('denied-uid').textContent = user.uid;
+        show('denied-box');
     }
 
-    async function login() {
-        try {
-            if (await sha256($('pw').value) === PASSWORD_HASH) {
-                try { sessionStorage.setItem('notice_admin', '1'); } catch (e) {}
-                showAdmin();
-            } else { setMsg('login-msg', '密碼錯誤', false); }
-        } catch (e) { setMsg('login-msg', e.message, false); }
-    }
-
-    function showAdmin() {
-        $('login-box').classList.add('hidden');
-        $('admin-area').classList.remove('hidden');
+    function listen() {
+        if (listening) return;
+        listening = true;
         ref.on('value', function (snap) {
-            var v = snap.val();
-            var box = $('current'), btn = $('clear-btn');
+            var v = snap.val(), box = $('current'), btn = $('clear-btn');
             if (v && v.active !== false && v.id) {
                 box.textContent = '標題：' + (v.title || '') + '\n內容：' + (v.content || '（無）') + '\n連結：' + (v.url || '（無）') +
                     '\n開啟方式：' + (v.mode === 'page' ? '站內網頁' : '新分頁') +
@@ -130,20 +164,13 @@
                 setMsg('pub-msg', '✅ 已發布！使用者下次打開（或正在瀏覽）網頁就會收到彈窗', true);
                 $('f-title').value = ''; $('f-content').value = ''; $('f-url').value = '';
             })
-            .catch(function (e) { setMsg('pub-msg', '發布失敗：' + e.message + '（請確認 Firebase 規則允許寫入 announcements）', false); });
+            .catch(function (e) { setMsg('pub-msg', '發布失敗：' + e.message + '（請確認帳號已加入 admins，且 Firebase 規則已設定）', false); });
     }
 
     function clearNotice() {
         if (!confirm('確定要下架目前的重要訊息嗎？')) return;
         ref.remove().catch(function (e) { alert('下架失敗：' + e.message); });
     }
-
-    async function makeHash() {
-        var v = $('new-pw').value;
-        try { $('new-hash').textContent = v ? await sha256(v) : '（輸入後顯示）'; } catch (e) { $('new-hash').textContent = e.message; }
-    }
-
-    try { if (sessionStorage.getItem('notice_admin') === '1') showAdmin(); } catch (e) {}
 </script>
 </body>
 </html>
