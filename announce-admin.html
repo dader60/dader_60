@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>重要訊息管理後台</title>
+<style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 20px; font-family: "Microsoft JhengHei", sans-serif; background: #f2f4f8; color: #333; }
+    .box { max-width: 560px; margin: 0 auto; background: #fff; border-radius: 18px; padding: 22px; box-shadow: 0 4px 16px rgba(0,0,0,.08); margin-bottom: 18px; }
+    h1 { font-size: 20px; margin: 0 0 16px; text-align: center; }
+    h2 { font-size: 16px; margin: 0 0 12px; }
+    label { display: block; font-weight: bold; font-size: 14px; margin: 14px 0 6px; }
+    input, textarea, select { width: 100%; padding: 10px 12px; font-size: 15px; font-family: inherit; border: 1px solid #ccc; border-radius: 10px; }
+    textarea { min-height: 110px; resize: vertical; }
+    button { font-family: inherit; font-size: 15px; font-weight: bold; border: none; border-radius: 50px; padding: 11px 20px; cursor: pointer; margin-top: 16px; }
+    .primary { background: #4285F4; color: #fff; width: 100%; }
+    .danger { background: #fff; color: #d32f2f; border: 2px solid #d32f2f; width: 100%; }
+    .hint { font-size: 12px; color: #888; margin-top: 4px; line-height: 1.5; }
+    .msg { margin-top: 12px; font-size: 14px; font-weight: bold; text-align: center; min-height: 20px; }
+    .ok { color: #1b8a3c; } .err { color: #d32f2f; }
+    .current { background: #fafafa; border: 1px dashed #bbb; border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.6; word-break: break-word; white-space: pre-wrap; }
+    .hidden { display: none; }
+    details { margin-top: 8px; font-size: 13px; color: #666; }
+    code { background: #eee; padding: 2px 6px; border-radius: 6px; word-break: break-all; display: block; margin-top: 6px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="box" id="login-box">
+    <h1>🔐 重要訊息管理後台</h1>
+    <label for="pw">管理員密碼</label>
+    <input type="password" id="pw" autocomplete="current-password" onkeydown="if(event.key==='Enter') login()">
+    <button class="primary" onclick="login()">登入</button>
+    <div class="msg err" id="login-msg"></div>
+</div>
+
+<div id="admin-area" class="hidden">
+    <div class="box">
+        <h1>📢 重要訊息管理後台</h1>
+        <h2>目前線上的訊息</h2>
+        <div class="current" id="current">讀取中…</div>
+        <button class="danger" id="clear-btn" onclick="clearNotice()" style="display:none">🗑️ 下架目前訊息（不再彈窗）</button>
+    </div>
+
+    <div class="box">
+        <h2>發布新的重要訊息</h2>
+        <label for="f-title">標題 *</label>
+        <input type="text" id="f-title" maxlength="60" placeholder="例如：校慶活動公告">
+        <label for="f-content">內容</label>
+        <textarea id="f-content" maxlength="1000" placeholder="可換行，純文字"></textarea>
+        <label for="f-url">連結／網頁（選填）</label>
+        <input type="text" id="f-url" placeholder="https://...　（沒有可留空，使用者只會看到文字）">
+        <label for="f-mode">點擊後的開啟方式</label>
+        <select id="f-mode">
+            <option value="link">新分頁開啟連結</option>
+            <option value="page">在本站內開啟網頁（部分網站不允許嵌入，會顯示「新分頁開啟」按鈕備用）</option>
+        </select>
+        <div class="hint">每次發布都會產生新的編號，所有人（包含已看過舊訊息的人）都會再次收到彈窗。</div>
+        <button class="primary" onclick="publish()">🚀 發布</button>
+        <div class="msg" id="pub-msg"></div>
+    </div>
+
+    <div class="box">
+        <details>
+            <summary>更改管理員密碼</summary>
+            <label for="new-pw">輸入新密碼</label>
+            <input type="text" id="new-pw" oninput="makeHash()">
+            <div class="hint">把下面這串貼到本檔案的 <b>PASSWORD_HASH</b>（取代原本那串）即可：</div>
+            <code id="new-hash">（輸入後顯示）</code>
+        </details>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<script>
+    // 管理員密碼的 SHA-256 雜湊（預設密碼：dader2026!　請登入後立刻更改）
+    var PASSWORD_HASH = "7d9ae1875f8745a6e81d78c60daaa0aba32bfbd7f0f0de7c3e764ef3d418a81e";
+
+    firebase.initializeApp({ databaseURL: "https://total-views-969ba-default-rtdb.asia-southeast1.firebasedatabase.app/" });
+    var ref = firebase.database().ref('announcements/current');
+
+    function $(id) { return document.getElementById(id); }
+    function setMsg(id, text, ok) { var e = $(id); e.textContent = text; e.className = 'msg ' + (ok ? 'ok' : 'err'); }
+
+    async function sha256(text) {
+        if (!(window.crypto && crypto.subtle)) throw new Error('請用 https 網址開啟此頁面');
+        var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+        return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+    }
+
+    async function login() {
+        try {
+            if (await sha256($('pw').value) === PASSWORD_HASH) {
+                try { sessionStorage.setItem('notice_admin', '1'); } catch (e) {}
+                showAdmin();
+            } else { setMsg('login-msg', '密碼錯誤', false); }
+        } catch (e) { setMsg('login-msg', e.message, false); }
+    }
+
+    function showAdmin() {
+        $('login-box').classList.add('hidden');
+        $('admin-area').classList.remove('hidden');
+        ref.on('value', function (snap) {
+            var v = snap.val();
+            var box = $('current'), btn = $('clear-btn');
+            if (v && v.active !== false && v.id) {
+                box.textContent = '標題：' + (v.title || '') + '\n內容：' + (v.content || '（無）') + '\n連結：' + (v.url || '（無）') +
+                    '\n開啟方式：' + (v.mode === 'page' ? '站內網頁' : '新分頁') +
+                    '\n發布時間：' + new Date(Number(v.id)).toLocaleString('zh-TW');
+                btn.style.display = '';
+            } else { box.textContent = '目前沒有重要訊息（網站不會彈窗）'; btn.style.display = 'none'; }
+        }, function (err) { $('current').textContent = '讀取失敗：' + err.message; });
+    }
+
+    function validUrl(u) {
+        if (!u) return true;
+        try { var x = new URL(u); return x.protocol === 'http:' || x.protocol === 'https:'; } catch (e) { return false; }
+    }
+
+    function publish() {
+        var title = $('f-title').value.trim(), content = $('f-content').value.trim();
+        var url = $('f-url').value.trim(), mode = $('f-mode').value;
+        if (!title) { setMsg('pub-msg', '請填寫標題', false); return; }
+        if (!validUrl(url)) { setMsg('pub-msg', '連結格式不正確，需以 http:// 或 https:// 開頭', false); return; }
+        ref.set({ id: String(Date.now()), title: title, content: content, url: url, mode: mode, active: true })
+            .then(function () {
+                setMsg('pub-msg', '✅ 已發布！使用者下次打開（或正在瀏覽）網頁就會收到彈窗', true);
+                $('f-title').value = ''; $('f-content').value = ''; $('f-url').value = '';
+            })
+            .catch(function (e) { setMsg('pub-msg', '發布失敗：' + e.message + '（請確認 Firebase 規則允許寫入 announcements）', false); });
+    }
+
+    function clearNotice() {
+        if (!confirm('確定要下架目前的重要訊息嗎？')) return;
+        ref.remove().catch(function (e) { alert('下架失敗：' + e.message); });
+    }
+
+    async function makeHash() {
+        var v = $('new-pw').value;
+        try { $('new-hash').textContent = v ? await sha256(v) : '（輸入後顯示）'; } catch (e) { $('new-hash').textContent = e.message; }
+    }
+
+    try { if (sessionStorage.getItem('notice_admin') === '1') showAdmin(); } catch (e) {}
+</script>
+</body>
+</html>
