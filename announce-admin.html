@@ -81,8 +81,8 @@
         <textarea id="f-content" maxlength="1000" placeholder="可換行，純文字"></textarea>
 
         <label for="f-file">圖片（選填）</label>
-        <input type="file" id="f-file" accept="image/*" onchange="pickFile(this)">
-        <div class="hint">上傳的圖片會自動縮小壓縮（最長邊 800px）。動態 GIF 會變成靜態圖，需要動圖請改貼下面的圖片網址。</div>
+        <input type="file" id="f-file" accept="image/jpeg,image/png,image/gif,image/webp" onchange="pickFile(this)">
+        <div class="hint">以原圖上傳，不縮小、不壓縮（支援 JPG、PNG、GIF、WebP，動圖會保留），檔案限 5MB 以內。</div>
         <input type="text" id="f-imgurl" placeholder="或貼圖片網址 https://...（有上傳圖片時以上傳為準）" style="margin-top:8px" oninput="urlPreview()">
         <img class="preview" id="preview" alt="預覽">
         <button class="ghost" id="img-clear" style="display:none;margin-top:8px" onclick="clearImage()">移除圖片</button>
@@ -266,25 +266,13 @@
         root.update(u).catch(function (e) { alert('刪除失敗：' + e.message); });
     }
 
-    /* ---------- 圖片 ---------- */
-    function compress(file) {
+    /* ---------- 圖片（原圖上傳，只限制檔案大小） ---------- */
+    var IMG_MAX = 5 * 1024 * 1024;
+    function readFile(file) {
         return new Promise(function (resolve, reject) {
             var fr = new FileReader();
             fr.onerror = function () { reject(new Error('無法讀取檔案')); };
-            fr.onload = function () {
-                var img = new Image();
-                img.onerror = function () { reject(new Error('無法讀取這張圖片')); };
-                img.onload = function () {
-                    var max = 800, r = Math.min(1, max / Math.max(img.width, img.height));
-                    var w = Math.round(img.width * r), h = Math.round(img.height * r);
-                    var c = document.createElement('canvas'); c.width = w; c.height = h;
-                    var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
-                    var q = 0.8, d = c.toDataURL('image/jpeg', q);
-                    while (d.length > 400000 && q > 0.4) { q -= 0.1; d = c.toDataURL('image/jpeg', q); }
-                    if (d.length > 400000) reject(new Error('圖片太大，請換一張較小的圖片')); else resolve(d);
-                };
-                img.src = fr.result;
-            };
+            fr.onload = function () { resolve(String(fr.result)); };
             fr.readAsDataURL(file);
         });
     }
@@ -297,8 +285,10 @@
     function pickFile(inp) {
         var f = inp.files && inp.files[0];
         if (!f) return;
-        setMsg('pub-msg', '圖片處理中…', true);
-        compress(f).then(function (d) { pendingImage = d; showPreview(d); setMsg('pub-msg', '', true); })
+        if (!/^image\/(jpeg|png|gif|webp)$/.test(f.type)) { inp.value = ''; setMsg('pub-msg', '請選擇 JPG、PNG、GIF 或 WebP 圖片', false); return; }
+        if (f.size > IMG_MAX) { inp.value = ''; pendingImage = ''; showPreview(''); setMsg('pub-msg', '圖片超過 5MB，請換較小的圖片，或改貼圖片網址', false); return; }
+        setMsg('pub-msg', '圖片讀取中…', true);
+        readFile(f).then(function (d) { pendingImage = d; showPreview(d); setMsg('pub-msg', '', true); })
             .catch(function (e) { inp.value = ''; pendingImage = ''; showPreview(''); setMsg('pub-msg', e.message, false); });
     }
     function urlPreview() {
@@ -370,19 +360,25 @@
             pdfName: pdfName,
             startAt: startAt, endAt: endAt
         };
-        var u = {}; u['items/' + id] = item;
-        if (pendingImage) u['images/' + id] = pendingImage;
-        if (pendingPdf) u['files/' + id] = pendingPdf;
-
         $('pub-btn').disabled = true;
-        root.update(u).then(function () {
-            var msg = startAt > now ? '✅ 已排程！到 ' + fmt(startAt) + ' 網站會自動顯示' : '✅ 已發布！使用者下次打開（或正在瀏覽）網頁就會收到彈窗';
-            setMsg('pub-msg', msg, true);
-            $('f-title').value = ''; $('f-content').value = ''; $('f-url').value = '';
-            clearImage(); clearPdf();
-        }).catch(function (e) {
-            setMsg('pub-msg', '發布失敗：' + e.message + '（請確認帳號已加入 admins，且 Firebase 規則已設定）', false);
-        }).then(function () { $('pub-btn').disabled = false; });
+        setMsg('pub-msg', '上傳中，請稍候…', true);
+        var written = [];
+        function put(path, val) { return root.child(path).set(val).then(function () { written.push(path); }); }
+        var chain = Promise.resolve();
+        if (pendingImage) chain = chain.then(function () { return put('images/' + id, pendingImage); });
+        if (pendingPdf) chain = chain.then(function () { return put('files/' + id, pendingPdf); });
+        chain.then(function () { return put('items/' + id, item); })   // 檔案都傳好了，最後才讓訊息上線
+            .then(function () {
+                var msg = startAt > now ? '✅ 已排程！到 ' + fmt(startAt) + ' 網站會自動顯示' : '✅ 已發布！使用者下次打開（或正在瀏覽）網頁就會收到彈窗';
+                setMsg('pub-msg', msg, true);
+                $('f-title').value = ''; $('f-content').value = ''; $('f-url').value = '';
+                clearImage(); clearPdf();
+            })
+            .catch(function (e) {
+                written.forEach(function (path) { root.child(path).remove().catch(function () {}); });   // 失敗就把已傳的清掉
+                setMsg('pub-msg', '發布失敗：' + e.message + '（請確認帳號已加入 admins，且 Firebase 規則已設定）', false);
+            })
+            .then(function () { $('pub-btn').disabled = false; });
     }
 </script>
 </body>
