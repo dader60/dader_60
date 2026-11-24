@@ -597,6 +597,12 @@
         .notice-unread-bar { display: none; position: fixed; left: 0; top: 37px; width: 100%; z-index: 1999; box-sizing: border-box; align-items: center; justify-content: center; padding: 8px 12px; cursor: pointer; text-align: center; line-height: 1.35; font-weight: bold; font-size: clamp(13px, 3.8vw, 15px); box-shadow: 0 2px 5px rgba(0,0,0,0.12); }
         .notice-unread-bar.show { display: flex; }
         .notice-unread-bar.unread { background: #fff0f0; color: #d32f2f; border-bottom: 2px solid #ffb3b3; }
+        .submit-modal.gate { background: rgba(30, 40, 55, 0.97); }
+
+        .submit-modal.gate .submit-close { display: none; }
+
+        .notice-gate-tip { text-align: center; font-size: clamp(13px, 3.6vw, 15px); font-weight: bold; color: #d32f2f; background: #fff0f0; border: 1px solid #ffc9c9; border-radius: 12px; padding: 8px 12px; margin: -4px 0 12px; line-height: 1.5; }
+
         .notice-box { max-width: min(94vw, 460px) !important; }
         .notice-sub { text-align: center; font-size: clamp(12px, 3.4vw, 14px); color: #666; margin: -8px 0 14px; }
         .notice-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: #fff; border: none; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; font-family: inherit; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
@@ -953,11 +959,15 @@
     </div>
 
     <button type="button" class="card submit-toggle notice-toggle" id="notice-toggle" style="display:none" aria-haspopup="dialog" onclick="openNoticeModal()">📢 重要訊息 <span class="notice-badge" id="notice-badge"></span></button>
+    <div id="notice-cover" style="display:none;position:fixed;inset:0;z-index:9999;background:#87CEEB;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:bold;letter-spacing:2px">載入中…</div>
+
     <div class="submit-modal" id="notice-modal" style="z-index:10001" role="dialog" aria-modal="true" aria-labelledby="notice-heading" onclick="if(event.target===this) closeNoticeModal()">
         <div class="submit-modal-box notice-box">
             <button type="button" class="submit-close" aria-label="關閉" onclick="closeNoticeModal()">✕</button>
             <div class="submit-title" id="notice-heading">📢 重要訊息</div>
             <div id="notice-list-view">
+                <div class="notice-gate-tip" id="notice-gate-tip" style="display:none">⚠️ 請先看完所有重要訊息，才能進入網站</div>
+
                 <div class="notice-sub" id="notice-sub"></div>
                 <div id="notice-list"></div>
             </div>
@@ -2070,6 +2080,7 @@
     var itemsRaw = {}, legacy = null, active = [], splashDone = false, poppedIds = {}, detailId = null;
     var offset = 0, imgCache = {}, fileData = {}, fileBlob = {}, filePending = {}, memSeen = [], memDev = null, memPend = null, started = false;
     var pdfjsPromise = null, pdfToken = 0, pdfItemId = null;
+    var gate = false, decided = false, gotItems = false, gotLegacy = false;   // gate：進站時有沒看的重要訊息 → 必須看完才能進入主網頁
 
     function $(id) { return document.getElementById(id); }
     function readSeen() {
@@ -2191,7 +2202,11 @@
         active = Object.keys(map).map(function (k) { return map[k]; })
             .filter(function (it) { return it.startAt <= n && (!it.endAt || n < it.endAt); })
             .sort(function (a, b) { return (b.startAt - a.startAt) || (Number(b.id) - Number(a.id)); });   // 新的在上面
-        if (!active.length) { window.closeNoticeModal(); window.closePdfViewer(true); window.closeLightbox(); }
+        if (!decided && gotItems && gotLegacy) {      // 資料都到齊了，決定進站要不要上鎖
+            decided = true;
+            if (active.some(function (it) { return !isSeen(it.id); })) gate = true;
+        }
+        if (!active.length) { gate = false; window.closeNoticeModal(true); window.closePdfViewer(true); window.closeLightbox(); }
         else if (detailId && !getItem(detailId)) { detailId = null; showList(); window.closePdfViewer(true); window.closeLightbox(); }   // 正在看的那則被下架／結束了
         render();
         maybePopup();
@@ -2219,10 +2234,35 @@
             bar.classList.remove('show', 'unread');
         }
         $('notice-sub').textContent = active.length ? summary : '';
+
+        if (gate && unread === 0) { gate = false; window.closeNoticeModal(true); }    // 全部看完 → 解鎖，進入主網頁
+
+        $('notice-modal').classList.toggle('gate', gate);
+
+        $('notice-gate-tip').style.display = gate ? '' : 'none';
+
+        updateCover();
+
         layoutBar();
         renderList();
         if (detailId) renderDetail();
     }
+
+    // 遮罩：資料還沒確認前、或確定要上鎖但視窗還沒彈出前，都不讓人看到主網頁
+
+    function updateCover() {
+
+        var c = $('notice-cover');
+
+        if (!c) return;
+
+        var hold = !decided || (gate && !modalOpen());
+
+        c.style.display = hold ? 'flex' : 'none';
+
+    }
+
+
 
     // 圖片燈箱：點圖片放大，再點可切換放大／縮小
 
@@ -2498,19 +2538,36 @@
 
     /* ---------- 開關視窗 ---------- */
     window.openNoticeModal = function () {
+
         if (!active.length) return;
+
         if (!detailId) showList();
+
         render();
+
         $('notice-modal').classList.add('open');
+
         document.body.style.overflow = 'hidden';
+
+        updateCover();
+
     };
     // 按 X：不算看過，下次打開網頁還會再顯示
-    window.closeNoticeModal = function () {
+    window.closeNoticeModal = function (force) {
+
+        if (gate && force !== true) return;      // 還沒看完，不能關
+
         $('notice-modal').classList.remove('open');
         document.body.style.overflow = '';
         detailId = null;
+
         showList();
+
+        updateCover();
+
     };
+
+
 
     function openViewer(url, title) {
         $('notice-viewer-title').textContent = title || '重要訊息';
@@ -2533,7 +2590,7 @@
 
     // 有「還沒彈過、也沒看過」的訊息就彈窗（含排程時間到、新發布的）
     function maybePopup() {
-        if (!splashDone || modalOpen()) return;
+        if (!splashDone || !decided || modalOpen()) return;
         var fresh = active.filter(function (it) { return !isSeen(it.id) && !poppedIds[it.id]; });
         if (!fresh.length) return;
         fresh.forEach(function (it) { poppedIds[it.id] = true; });
@@ -2546,9 +2603,9 @@
         if (started) return;
         started = true;
         var db = firebase.database();
-        db.ref('announcements/items').on('value', function (snap) { itemsRaw = snap.val() || {}; recompute(); },
-            function (err) { console.warn('重要訊息讀取失敗：', err && err.message); });
-        db.ref('announcements/current').on('value', function (snap) { legacy = snap.val() || null; recompute(); }, function () {});
+        db.ref('announcements/items').on('value', function (snap) { itemsRaw = snap.val() || {}; gotItems = true; recompute(); },
+            function (err) { console.warn('重要訊息讀取失敗：', err && err.message); gotItems = true; recompute(); });
+        db.ref('announcements/current').on('value', function (snap) { legacy = snap.val() || null; gotLegacy = true; recompute(); }, function () { gotLegacy = true; recompute(); });
         setInterval(recompute, 30000);   // 每 30 秒檢查：排程時間到就顯示、結束時間到就收起
         document.addEventListener('visibilitychange', function () {
             if (!document.hidden) { if (!$('notice-viewer').classList.contains('open')) confirmPending(); recompute(); }
@@ -2556,6 +2613,18 @@
         window.addEventListener('pageshow', function () { if (!$('notice-viewer').classList.contains('open')) confirmPending(); });
         confirmPending();    // 上次點了連結、這次重新載入本頁 → 算看完
     }
+
+    // 進站先蓋住畫面，等確認有沒有「未看的重要訊息」；6 秒內讀不到資料就放行（避免網路問題把網站鎖死）
+
+    (function () {
+
+        var c = $('notice-cover'); if (c) c.style.display = 'flex';
+
+        setTimeout(function () { if (!decided) { decided = true; recompute(); } }, 6000);
+
+    })();
+
+
 
     function start(tries) {
         if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) {
