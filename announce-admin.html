@@ -44,8 +44,8 @@
 <!-- 登入 -->
 <div class="box" id="login-box">
     <h1>🔐 重要訊息管理後台</h1>
-    <label for="email">管理員 Email</label>
-    <input type="email" id="email" autocomplete="username">
+    <label for="email">管理員帳號</label>
+    <input type="text" id="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="輸入帳號">
     <label for="pw">密碼</label>
     <input type="password" id="pw" autocomplete="current-password" onkeydown="if(event.key==='Enter') login()">
     <button class="primary" onclick="login()">登入</button>
@@ -174,17 +174,28 @@
     db.ref('.info/serverTimeOffset').on('value', function (s) { offset = Number(s.val()) || 0; });
 
     var AUTH_ERR = {
-        'auth/invalid-email': 'Email 格式不正確',
+        'auth/invalid-email': '帳號格式不正確（只能用英文、數字）',
         'auth/user-not-found': '找不到這個帳號',
         'auth/wrong-password': '密碼錯誤',
-        'auth/invalid-credential': 'Email 或密碼錯誤',
+        'auth/invalid-credential': '帳號或密碼錯誤',
         'auth/too-many-requests': '嘗試次數過多，請稍後再試',
         'auth/network-request-failed': '網路連線失敗'
     };
 
+    // Firebase 登入需要 Email 格式，所以「帳號」會在背後自動補上固定網域（使用者只需輸入帳號）
+    var ACCOUNT_DOMAIN = '@dader-admin.local';
+    function toEmail(v) {
+        v = String(v || '').trim().toLowerCase();
+        return v.indexOf('@') >= 0 ? v : v + ACCOUNT_DOMAIN;    // 舊的 Email 帳號仍可直接輸入完整 Email 登入
+    }
+    function shownName(email) {
+        email = String(email || '');
+        return email.slice(-ACCOUNT_DOMAIN.length) === ACCOUNT_DOMAIN ? email.slice(0, -ACCOUNT_DOMAIN.length) : email;
+    }
+
     function login() {
         setMsg('login-msg', '登入中…', true);
-        auth.signInWithEmailAndPassword($('email').value.trim(), $('pw').value)
+        auth.signInWithEmailAndPassword(toEmail($('email').value), $('pw').value)
             .then(function () { setMsg('login-msg', '', true); })
             .catch(function (e) { setMsg('login-msg', AUTH_ERR[e.code] || ('登入失敗：' + e.message), false); });
     }
@@ -195,7 +206,7 @@
         // 只有 admins/<uid> = true 的帳號才是管理員（寫入權限由 Firebase 規則強制檢查）
         db.ref('admins/' + user.uid).once('value').then(function (snap) {
             if (snap.val() === true) {
-                $('admin-email').textContent = user.email || '';
+                $('admin-email').textContent = shownName(user.email);
                 show('admin-area');
                 fillGh();
                 listen();
@@ -204,7 +215,7 @@
     });
 
     function deny(user) {
-        $('denied-email').textContent = user.email || '';
+        $('denied-email').textContent = shownName(user.email);
         $('denied-uid').textContent = user.uid;
         show('denied-box');
     }
