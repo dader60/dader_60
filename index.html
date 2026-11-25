@@ -594,15 +594,22 @@
         .notice-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ff1744; box-shadow: 0 0 6px 2px rgba(255,23,68,0.75); margin-right: 6px; flex-shrink: 0; animation: notice-blink 1s ease-in-out infinite; }
         @keyframes notice-blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.2; transform: scale(0.7); } }
         /* 跑馬燈下方的重要訊息通知列（和跑馬燈一樣固定在上方，往下滑也會跟著） */
-        .notice-unread-bar { display: none; position: fixed; left: 0; top: 37px; width: 100%; z-index: 1999; box-sizing: border-box; align-items: center; justify-content: center; padding: 8px 12px; cursor: pointer; text-align: center; line-height: 1.35; font-weight: bold; font-size: clamp(13px, 3.8vw, 15px); box-shadow: 0 2px 5px rgba(0,0,0,0.12); }
+        /* 跑馬燈正下方的「您有 x 則重要訊息未查看」：固定、貼合跑馬燈，往下滑也會跟著；全部看過就不顯示 */
+        .notice-unread-bar { display: none; position: fixed; left: 0; top: 36px; width: 100%; z-index: 1999; box-sizing: border-box; align-items: center; justify-content: center; padding: 7px 12px; cursor: pointer; text-align: center; line-height: 1.35; font-weight: bold; font-size: clamp(13px, 3.8vw, 15px); background: #fff0f0; color: #d32f2f; border-bottom: 2px solid #ffb3b3; box-shadow: 0 2px 5px rgba(0,0,0,0.12); }
         .notice-unread-bar.show { display: flex; }
-        .notice-unread-bar.unread { background: #fff0f0; color: #d32f2f; border-bottom: 2px solid #ffb3b3; }
+        /* 瀏覽中發布新訊息時的小提示卡（可按 ✕，不鎖定、不擋畫面） */
+        .notice-toast { display: none; position: fixed; left: 50%; top: var(--toast-top, 90px); transform: translateX(-50%); width: min(92vw, 360px); z-index: 1998; box-sizing: border-box; align-items: center; gap: 10px; padding: 10px 12px; background: #fff; border-radius: 16px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); border: 1px solid #ffd0d0; }
+        .notice-toast.show { display: flex; animation: notice-toast-in 0.3s ease-out; }
+        @keyframes notice-toast-in { from { opacity: 0; transform: translate(-50%, -12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+        .notice-toast-main { flex: 1; min-width: 0; cursor: pointer; }
+        .notice-toast-title { font-size: clamp(13px, 3.8vw, 15px); font-weight: bold; color: #d32f2f; }
+        .notice-toast-sub { font-size: 12px; color: #666; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .notice-toast-view { font-family: inherit; font-size: 13px; font-weight: bold; color: #fff; background: #4285F4; border: none; border-radius: 50px; padding: 6px 14px; cursor: pointer; flex-shrink: 0; }
+        .notice-toast-x { font-family: inherit; font-size: 15px; color: #777; background: rgba(0,0,0,0.07); border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; flex-shrink: 0; }
+        #notice-modal, #notice-cover { top: var(--marq-h, 37px) !important; }
         .submit-modal.gate { background: rgba(30, 40, 55, 0.97); }
-
         .submit-modal.gate .submit-close { display: none; }
-
         .notice-gate-tip { text-align: center; font-size: clamp(13px, 3.6vw, 15px); font-weight: bold; color: #d32f2f; background: #fff0f0; border: 1px solid #ffc9c9; border-radius: 12px; padding: 8px 12px; margin: -4px 0 12px; line-height: 1.5; }
-
         .notice-box { max-width: min(94vw, 460px) !important; }
         .notice-sub { text-align: center; font-size: clamp(12px, 3.4vw, 14px); color: #666; margin: -8px 0 14px; }
         .notice-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: #fff; border: none; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; font-family: inherit; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
@@ -625,23 +632,14 @@
         .notice-link { background: #4285F4; color: #fff !important; }
         .notice-attach .notice-wait { background: #f0f0f0; color: #888; cursor: default; }
         .notice-img { cursor: zoom-in; }
-
         .notice-imghint { font-size: 12px; color: #999; margin: -4px 0 6px; }
-
         .img-lightbox { display: none; position: fixed; inset: 0; z-index: 10004; background: rgba(0,0,0,0.92); flex-direction: column; }
-
         .img-lightbox.open { display: flex; }
-
         .img-lightbox-scroll { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; display: flex; touch-action: pan-x pan-y pinch-zoom; }
-
         .img-lightbox-scroll img { margin: auto; max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; }
-
         .img-lightbox-scroll img.zoomed { max-width: none; max-height: none; width: 250%; cursor: zoom-out; }
-
         .img-lightbox-close { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: 12px; z-index: 2; width: 40px; height: 40px; border: none; border-radius: 50%; background: rgba(255,255,255,0.9); color: #333; font-size: 20px; font-weight: bold; cursor: pointer; }
-
         .img-lightbox-tip { position: absolute; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); left: 0; width: 100%; text-align: center; color: rgba(255,255,255,0.75); font-size: 12px; pointer-events: none; }
-
         .notice-hint { font-size: 12px; color: #888; text-align: center; line-height: 1.6; margin: 2px 0 6px; }
         .notice-done { background: #34A853; color: #fff !important; }
         .pdf-viewer { display: none; position: fixed; inset: 0; z-index: 10003; background: #525659; flex-direction: column; }
@@ -886,7 +884,13 @@
         📢 歡迎來到靠北達德多元匿名！請善用本網頁匿名投稿 💬 那些不敢當面說的話、找不到人問的問題，就交給我們吧！⚠️ 溫馨提醒：靠北是為了紓壓，不是為了傷人!匿名是保護大家，不是讓人亂來!歡迎追蹤大版主ig：hbingzhe10.10，靠達官方賴id:@768mnxcr(記得要打@), 版主weplay語音房房號:C820553，歡迎追蹤房間，會有不定時活動
     </div>
 </div>
-<div class="notice-unread-bar" id="notice-unread-bar" role="button" tabindex="0" onclick="openNoticeModal()" onkeydown="if(event.key==='Enter') openNoticeModal()"><span class="notice-dot"></span><span id="notice-unread-text"></span></div>
+<div class="notice-unread-bar" id="notice-unread-bar" role="button" tabindex="0" onclick="openNoticeModal()" onkeydown="if(event.key==='Enter') openNoticeModal()"><span class="notice-dot"></span><span id="notice-unread-text" style="margin-left:2px"></span></div>
+<div class="notice-toast" id="notice-toast" role="status" aria-live="polite">
+    <span class="notice-dot"></span>
+    <div class="notice-toast-main" onclick="openNoticeFromToast()"><div class="notice-toast-title" id="notice-toast-title"></div><div class="notice-toast-sub" id="notice-toast-sub"></div></div>
+    <button type="button" class="notice-toast-view" onclick="openNoticeFromToast()">查看</button>
+    <button type="button" class="notice-toast-x" aria-label="關閉" onclick="closeNoticeToast()">✕</button>
+</div>
 
 <div class="container">
     <div class="avatar-wrapper">
@@ -960,14 +964,12 @@
 
     <button type="button" class="card submit-toggle notice-toggle" id="notice-toggle" style="display:none" aria-haspopup="dialog" onclick="openNoticeModal()">📢 重要訊息 <span class="notice-badge" id="notice-badge"></span></button>
     <div id="notice-cover" style="display:none;position:fixed;inset:0;z-index:9999;background:#87CEEB;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:bold;letter-spacing:2px">載入中…</div>
-
     <div class="submit-modal" id="notice-modal" style="z-index:10001" role="dialog" aria-modal="true" aria-labelledby="notice-heading" onclick="if(event.target===this) closeNoticeModal()">
         <div class="submit-modal-box notice-box">
             <button type="button" class="submit-close" aria-label="關閉" onclick="closeNoticeModal()">✕</button>
             <div class="submit-title" id="notice-heading">📢 重要訊息</div>
             <div id="notice-list-view">
-                <div class="notice-gate-tip" id="notice-gate-tip" style="display:none">⚠️ 請先看完所有重要訊息，才能進入網站</div>
-
+                <div class="notice-gate-tip" id="notice-gate-tip" style="display:none">⚠️ 請先看過所有重要訊息，才能進入此系統網頁</div>
                 <div class="notice-sub" id="notice-sub"></div>
                 <div id="notice-list"></div>
             </div>
@@ -996,15 +998,10 @@
     </div>
 
     <div class="img-lightbox" id="img-lightbox" role="dialog" aria-modal="true" aria-label="圖片">
-
         <button type="button" class="img-lightbox-close" aria-label="關閉圖片" onclick="closeLightbox()">✕</button>
-
         <div class="img-lightbox-scroll" id="img-lightbox-scroll" onclick="if(event.target===this) closeLightbox()"><img id="img-lightbox-img" alt=""></div>
-
         <div class="img-lightbox-tip">點圖片可放大／縮小，點空白處或 ✕ 關閉</div>
-
     </div>
-
     <div class="pdf-viewer" id="pdf-viewer" role="dialog" aria-modal="true">
         <div class="notice-viewer-bar">
             <div class="notice-viewer-title" id="pdf-viewer-title">PDF</div>
@@ -2215,97 +2212,94 @@
     /* ---------- 畫面 ---------- */
     function render() {
         var unread = active.filter(function (it) { return !isSeen(it.id); }).length;
-        var seenCount = active.length - unread;
-        var summary = unread > 0
-            ? '已看過 ' + seenCount + ' 則，未看 ' + unread + ' 則，共 ' + active.length + ' 則'
-            : '已看過 ' + seenCount + ' 則，共 ' + active.length + ' 則';
-        var btn = $('notice-toggle'), bar = $('notice-unread-bar');
+        var summary = '共 ' + active.length + ' 則';
+        var btn = $('notice-toggle'), badge = $('notice-badge');
         if (!active.length) {
             btn.style.display = 'none';
         } else {
             btn.style.display = '';
-            setBadge($('notice-badge'), unread === 0);
-        }
-        // 通知列只在有「未查看」時出現，只有一行字
-        if (unread > 0) {
-            $('notice-unread-text').textContent = '您有 ' + unread + ' 則重要訊息未查看';
-            bar.classList.add('show', 'unread');
-        } else {
-            bar.classList.remove('show', 'unread');
+            if (unread > 0) { setBadge(badge, false); badge.style.display = ''; }   // 有未看：閃紅燈 + 新
+            else { badge.textContent = ''; badge.style.display = 'none'; }           // 都看過：不顯示任何標示
         }
         $('notice-sub').textContent = active.length ? summary : '';
-
+        // 通知列：只在有「未查看」時顯示；全部看過就消失
+        var bar = $('notice-unread-bar');
+        if (unread > 0) { $('notice-unread-text').textContent = '您有 ' + unread + ' 則重要訊息未查看'; bar.classList.add('show'); }
+        else bar.classList.remove('show');
+        if (unread === 0) closeNoticeToast();
+        else if ($('notice-toast').classList.contains('show')) fillToast(unread);
         if (gate && unread === 0) { gate = false; window.closeNoticeModal(true); }    // 全部看完 → 解鎖，進入主網頁
-
         $('notice-modal').classList.toggle('gate', gate);
-
         $('notice-gate-tip').style.display = gate ? '' : 'none';
-
         updateCover();
-
         layoutBar();
         renderList();
         if (detailId) renderDetail();
     }
 
-    // 遮罩：資料還沒確認前、或確定要上鎖但視窗還沒彈出前，都不讓人看到主網頁
-
-    function updateCover() {
-
-        var c = $('notice-cover');
-
-        if (!c) return;
-
-        var hold = !decided || (gate && !modalOpen());
-
-        c.style.display = hold ? 'flex' : 'none';
-
-    }
-
-
-
-    // 圖片燈箱：點圖片放大，再點可切換放大／縮小
-
-    window.openLightbox = function (src) {
-
-        if (!src) return;
-
-        var im = $('img-lightbox-img');
-
-        im.classList.remove('zoomed');
-
-        im.src = src;
-
-        $('img-lightbox').classList.add('open');
-
-    };
-
-    window.closeLightbox = function () {
-
-        $('img-lightbox').classList.remove('open');
-
-        $('img-lightbox-img').removeAttribute('src');
-
-        $('img-lightbox-img').classList.remove('zoomed');
-
-    };
-
-    $('notice-img').addEventListener('click', function () { window.openLightbox(this.getAttribute('src')); });
-
-    $('img-lightbox-img').addEventListener('click', function () { this.classList.toggle('zoomed'); });
-
-
-
-    // 通知列固定在跑馬燈正下方，並把頁面往下推，避免擋到內容
+    // 通知列緊貼在跑馬燈下緣（固定定位，往下滑也跟著），並把頁面內容往下推避免被擋
     var basePad = null;
     function layoutBar() {
         var m = document.querySelector('.marquee-container'), bar = $('notice-unread-bar');
         if (!m || !bar) return;
         if (basePad === null) basePad = parseFloat(getComputedStyle(document.body).paddingTop) || 0;
-        bar.style.top = m.offsetHeight + 'px';
-        document.body.style.paddingTop = bar.classList.contains('show') ? (basePad + bar.offsetHeight) + 'px' : '';
+        var mb = m.getBoundingClientRect().bottom;
+        bar.style.top = Math.max(0, mb - 1) + 'px';      // 重疊 1px，確保不留縫隙（跑馬燈在上層）
+        var on = bar.classList.contains('show'), h = on ? bar.offsetHeight : 0;
+        document.body.style.paddingTop = on ? (basePad + h) + 'px' : '';
+        document.documentElement.style.setProperty('--toast-top', (mb + h + 8) + 'px');
     }
     window.addEventListener('resize', layoutBar);
+    window.addEventListener('load', layoutBar);
+
+    // 瀏覽中發布／排程時間到：只跳出小提示卡，可按 ✕，不鎖定
+    function fillToast(unread) {
+        var un = active.filter(function (it) { return !isSeen(it.id); });
+        $('notice-toast-title').textContent = '📢 有 ' + unread + ' 則重要訊息未查看';
+        $('notice-toast-sub').textContent = un.length ? un[0].title : '';
+    }
+    function showToast() {
+        var unread = active.filter(function (it) { return !isSeen(it.id); }).length;
+        if (!unread) return;
+        fillToast(unread);
+        layoutBar();
+        $('notice-toast').classList.add('show');
+    }
+    window.closeNoticeToast = function () { $('notice-toast').classList.remove('show'); };
+    window.openNoticeFromToast = function () { window.closeNoticeToast(); window.openNoticeModal(); };
+
+    // 重要訊息視窗從跑馬燈下緣開始，跑馬燈（與網站標題）一直看得到
+    function setMarqVar() {
+        var m = document.querySelector('.marquee-container');
+        if (m) document.documentElement.style.setProperty('--marq-h', m.offsetHeight + 'px');
+    }
+    setMarqVar();
+    window.addEventListener('resize', setMarqVar);
+    window.addEventListener('load', setMarqVar);
+
+    // 遮罩：資料還沒確認前、或確定要上鎖但視窗還沒彈出前，都不讓人看到主網頁
+    function updateCover() {
+        var c = $('notice-cover');
+        if (!c) return;
+        var hold = !decided || (gate && !modalOpen());
+        c.style.display = hold ? 'flex' : 'none';
+    }
+
+    // 圖片燈箱：點圖片放大，再點可切換放大／縮小
+    window.openLightbox = function (src) {
+        if (!src) return;
+        var im = $('img-lightbox-img');
+        im.classList.remove('zoomed');
+        im.src = src;
+        $('img-lightbox').classList.add('open');
+    };
+    window.closeLightbox = function () {
+        $('img-lightbox').classList.remove('open');
+        $('img-lightbox-img').removeAttribute('src');
+        $('img-lightbox-img').classList.remove('zoomed');
+    };
+    $('notice-img').addEventListener('click', function () { window.openLightbox(this.getAttribute('src')); });
+    $('img-lightbox-img').addEventListener('click', function () { this.classList.toggle('zoomed'); });
 
     function renderList() {
         var box = $('notice-list');
@@ -2538,36 +2532,24 @@
 
     /* ---------- 開關視窗 ---------- */
     window.openNoticeModal = function () {
-
         if (!active.length) return;
-
         if (!detailId) showList();
-
         render();
-
+        setMarqVar();
+        window.closeNoticeToast();
         $('notice-modal').classList.add('open');
-
         document.body.style.overflow = 'hidden';
-
         updateCover();
-
     };
     // 按 X：不算看過，下次打開網頁還會再顯示
     window.closeNoticeModal = function (force) {
-
         if (gate && force !== true) return;      // 還沒看完，不能關
-
         $('notice-modal').classList.remove('open');
         document.body.style.overflow = '';
         detailId = null;
-
         showList();
-
         updateCover();
-
     };
-
-
 
     function openViewer(url, title) {
         $('notice-viewer-title').textContent = title || '重要訊息';
@@ -2590,11 +2572,13 @@
 
     // 有「還沒彈過、也沒看過」的訊息就彈窗（含排程時間到、新發布的）
     function maybePopup() {
-        if (!splashDone || !decided || modalOpen()) return;
+        if (!splashDone || !decided) return;
         var fresh = active.filter(function (it) { return !isSeen(it.id) && !poppedIds[it.id]; });
         if (!fresh.length) return;
         fresh.forEach(function (it) { poppedIds[it.id] = true; });
-        window.openNoticeModal();
+        if (modalOpen()) return;                     // 視窗已開著，清單會自動更新
+        if (gate) window.openNoticeModal();          // 進站有沒看過的：大視窗，要看完才能進
+        else showToast();                            // 瀏覽中發布／排程時間到：小提示卡，可關閉
     }
     window.__noticeSplashDone = function () { splashDone = true; maybePopup(); };
 
@@ -2615,16 +2599,10 @@
     }
 
     // 進站先蓋住畫面，等確認有沒有「未看的重要訊息」；6 秒內讀不到資料就放行（避免網路問題把網站鎖死）
-
     (function () {
-
         var c = $('notice-cover'); if (c) c.style.display = 'flex';
-
         setTimeout(function () { if (!decided) { decided = true; recompute(); } }, 6000);
-
     })();
-
-
 
     function start(tries) {
         if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) {
