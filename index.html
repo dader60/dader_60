@@ -594,9 +594,6 @@
         .notice-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ff1744; box-shadow: 0 0 6px 2px rgba(255,23,68,0.75); margin-right: 6px; flex-shrink: 0; animation: notice-blink 1s ease-in-out infinite; }
         @keyframes notice-blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.2; transform: scale(0.7); } }
         /* 跑馬燈下方的重要訊息通知列（和跑馬燈一樣固定在上方，往下滑也會跟著） */
-        /* 跑馬燈正下方的「您有 x 則重要訊息未查看」：固定、貼合跑馬燈，往下滑也會跟著；全部看過就不顯示 */
-        .notice-unread-bar { display: none; position: fixed; left: 0; top: 36px; width: 100%; z-index: 1999; box-sizing: border-box; align-items: center; justify-content: center; padding: 7px 12px; cursor: pointer; text-align: center; line-height: 1.35; font-weight: bold; font-size: clamp(13px, 3.8vw, 15px); background: #fff0f0; color: #d32f2f; border-bottom: 2px solid #ffb3b3; box-shadow: 0 2px 5px rgba(0,0,0,0.12); }
-        .notice-unread-bar.show { display: flex; }
         /* 瀏覽中發布新訊息時的小提示卡（可按 ✕，不鎖定、不擋畫面） */
         .notice-toast { display: none; position: fixed; left: 50%; top: var(--toast-top, 90px); transform: translateX(-50%); width: min(92vw, 360px); z-index: 1998; box-sizing: border-box; align-items: center; gap: 10px; padding: 10px 12px; background: #fff; border-radius: 16px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); border: 1px solid #ffd0d0; }
         .notice-toast.show { display: flex; animation: notice-toast-in 0.3s ease-out; }
@@ -884,7 +881,6 @@
         📢 歡迎來到靠北達德多元匿名！請善用本網頁匿名投稿 💬 那些不敢當面說的話、找不到人問的問題，就交給我們吧！⚠️ 溫馨提醒：靠北是為了紓壓，不是為了傷人!匿名是保護大家，不是讓人亂來!歡迎追蹤大版主ig：hbingzhe10.10，靠達官方賴id:@768mnxcr(記得要打@), 版主weplay語音房房號:C820553，歡迎追蹤房間，會有不定時活動
     </div>
 </div>
-<div class="notice-unread-bar" id="notice-unread-bar" role="button" tabindex="0" onclick="openNoticeModal()" onkeydown="if(event.key==='Enter') openNoticeModal()"><span class="notice-dot"></span><span id="notice-unread-text" style="margin-left:2px"></span></div>
 <div class="notice-toast" id="notice-toast" role="status" aria-live="polite">
     <span class="notice-dot"></span>
     <div class="notice-toast-main" onclick="openNoticeFromToast()"><div class="notice-toast-title" id="notice-toast-title"></div><div class="notice-toast-sub" id="notice-toast-sub"></div></div>
@@ -2222,10 +2218,6 @@
             else { badge.textContent = ''; badge.style.display = 'none'; }           // 都看過：不顯示任何標示
         }
         $('notice-sub').textContent = active.length ? summary : '';
-        // 通知列：只在有「未查看」時顯示；全部看過就消失
-        var bar = $('notice-unread-bar');
-        if (unread > 0) { $('notice-unread-text').textContent = '您有 ' + unread + ' 則重要訊息未查看'; bar.classList.add('show'); }
-        else bar.classList.remove('show');
         if (unread === 0) closeNoticeToast();
         else if ($('notice-toast').classList.contains('show')) fillToast(unread);
         if (gate && unread === 0) { gate = false; window.closeNoticeModal(true); }    // 全部看完 → 解鎖，進入主網頁
@@ -2237,17 +2229,11 @@
         if (detailId) renderDetail();
     }
 
-    // 通知列緊貼在跑馬燈下緣（固定定位，往下滑也跟著），並把頁面內容往下推避免被擋
-    var basePad = null;
+    // 小提示卡的位置：緊貼在跑馬燈下方
     function layoutBar() {
-        var m = document.querySelector('.marquee-container'), bar = $('notice-unread-bar');
-        if (!m || !bar) return;
-        if (basePad === null) basePad = parseFloat(getComputedStyle(document.body).paddingTop) || 0;
-        var mb = m.getBoundingClientRect().bottom;
-        bar.style.top = Math.max(0, mb - 1) + 'px';      // 重疊 1px，確保不留縫隙（跑馬燈在上層）
-        var on = bar.classList.contains('show'), h = on ? bar.offsetHeight : 0;
-        document.body.style.paddingTop = on ? (basePad + h) + 'px' : '';
-        document.documentElement.style.setProperty('--toast-top', (mb + h + 8) + 'px');
+        var m = document.querySelector('.marquee-container');
+        if (!m) return;
+        document.documentElement.style.setProperty('--toast-top', (m.getBoundingClientRect().bottom + 8) + 'px');
     }
     window.addEventListener('resize', layoutBar);
     window.addEventListener('load', layoutBar);
@@ -2255,7 +2241,7 @@
     // 瀏覽中發布／排程時間到：只跳出小提示卡，可按 ✕，不鎖定
     function fillToast(unread) {
         var un = active.filter(function (it) { return !isSeen(it.id); });
-        $('notice-toast-title').textContent = '📢 有 ' + unread + ' 則重要訊息未查看';
+        $('notice-toast-title').textContent = '您有 ' + unread + ' 則重要訊息未查看';
         $('notice-toast-sub').textContent = un.length ? un[0].title : '';
     }
     function showToast() {
