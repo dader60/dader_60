@@ -2039,24 +2039,26 @@
         databaseURL: "https://total-views-969ba-default-rtdb.asia-southeast1.firebasedatabase.app/" 
     };
     
+    // 瀏覽次數：每次進站／重新整理都 +1。
+    // 資料庫規則：訪客只能「剛好 +1」，不能把數字改成別的；只有管理員可以直接修改數值。
     function startRealtimeCounter() {
+        const viewElem = () => document.getElementById('total_view_display');
         try {
             firebase.initializeApp(firebaseConfig);
             const db = firebase.database();
             const viewsRef = db.ref('total_views');
-            viewsRef.transaction((currentValue) => {
-                return (currentValue || 0) + 1;
-            });
+            viewsRef.set(firebase.database.ServerValue.increment(1)).catch((e) => console.warn('瀏覽次數 +1 失敗：', e && e.message));
             viewsRef.on('value', (snapshot) => {
                 const count = snapshot.val();
-                const viewElem = document.getElementById('total_view_display');
-                if (viewElem && count !== null) {
-                    viewElem.innerText = count.toLocaleString();
-                }
+                const el = viewElem();
+                if (el && count !== null) el.innerText = Number(count).toLocaleString();
+            }, (e) => {
+                console.warn('瀏覽次數讀取失敗：', e && e.message);
+                const el = viewElem(); if (el) el.innerText = "暫時無法顯示";
             });
         } catch (err) {
             console.error("Firebase Error:", err);
-            document.getElementById('total_view_display').innerText = "暫時無法顯示";
+            const el = viewElem(); if (el) el.innerText = "暫時無法顯示";
         }
     }
 </script>
