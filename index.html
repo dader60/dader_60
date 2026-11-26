@@ -2145,11 +2145,14 @@
     }
     function fmt(t) { return new Date(t).toLocaleString('zh-TW', { hour12: false }); }
     function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+    // 標籤：只有「未看過」才顯示（紅燈＋新）；已看過不顯示任何標示
     function setBadge(node, seen) {
         node.textContent = '';
-        node.className = 'notice-badge ' + (seen ? 'seen' : 'new');
-        if (seen) node.textContent = '✅ 已看過';
-        else { node.appendChild(el('span', 'notice-dot')); node.appendChild(document.createTextNode('新')); }
+        if (seen) { node.className = 'notice-badge'; node.style.display = 'none'; return; }
+        node.className = 'notice-badge new';
+        node.style.display = '';
+        node.appendChild(el('span', 'notice-dot'));
+        node.appendChild(document.createTextNode('新'));
     }
     var UA = navigator.userAgent || '';
     var IS_IOS = /iPhone|iPad|iPod/i.test(UA);
@@ -2436,7 +2439,7 @@
                 if (it.mode === 'page') { e.preventDefault(); openViewer(url, it.title); }
             };
             box.appendChild(l);
-            if (!seen) box.appendChild(el('div', 'notice-hint', '點進連結看完後回到這裡，才會標示為「已看過」'));
+            if (!seen) box.appendChild(el('div', 'notice-hint', '點進連結看完後回到這裡，系統會自動記錄'));
         } else if (hasPdf) {
             if (!seen) box.appendChild(el('div', 'notice-hint', '請在網頁內把 PDF 看到最後一頁，系統會自動記錄'));
         } else if (!seen) {
