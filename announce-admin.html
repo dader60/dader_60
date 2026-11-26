@@ -87,29 +87,10 @@
         <img class="preview" id="preview" alt="預覽">
         <button class="ghost" id="img-clear" style="display:none;margin-top:8px" onclick="clearImage()">移除圖片</button>
 
-        <label for="f-pdf">PDF 檔案（選填）</label>
-        <input type="file" id="f-pdf" accept="application/pdf,.pdf" onchange="pickPdf(this)">
-        <div class="hint">直接上傳限 5MB 以內。檔案較大請改貼網址（可先把 PDF 放進你的 GitHub 儲存庫，再貼 https://…/檔名.pdf）。</div>
-        <input type="text" id="f-pdfurl" placeholder="或貼 PDF 網址 https://...（有上傳檔案時以上傳為準）" style="margin-top:8px">
+        <label for="f-pdfurl">PDF 檔案網址（選填）</label>
+        <input type="text" id="f-pdfurl" placeholder="https://...（可以直接打開 PDF 的網址）">
         <input type="text" id="f-pdfname" maxlength="60" placeholder="顯示的檔名（選填，例如：活動辦法.pdf）" style="margin-top:8px">
-        <div class="hint" id="pdf-info"></div>
-        <button class="primary" id="pdf-gh" style="display:none;margin-top:10px" onclick="uploadPdfToSite()">📤 上傳到網站，取得可下載的網址（建議，IG／iPhone 才能下載）</button>
-        <button class="ghost" id="pdf-clear" style="display:none;margin-top:8px" onclick="clearPdf()">移除 PDF</button>
-
-        <details style="margin-top:12px">
-            <summary style="font-size:13px;color:#555;cursor:pointer">⚙️ 上傳到網站的設定（只存在這台裝置的瀏覽器）</summary>
-            <label for="gh-owner">GitHub 帳號</label>
-            <input type="text" id="gh-owner" placeholder="例如 dader60">
-            <label for="gh-repo">儲存庫名稱</label>
-            <input type="text" id="gh-repo" placeholder="例如 dader_60">
-            <label for="gh-branch">分支</label>
-            <input type="text" id="gh-branch" placeholder="main">
-            <label for="gh-token">存取權杖（Token）</label>
-            <input type="password" id="gh-token" autocomplete="off" placeholder="github_pat_...">
-            <div class="hint">到 GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token。Repository access 選「Only select repositories」並勾這個網站的儲存庫；Permissions → Repository permissions → <b>Contents</b> 設為 <b>Read and write</b>。權杖只存在你這台裝置，不會寫進網頁，也不會傳給其他人。</div>
-            <button class="ghost" style="margin-top:10px" onclick="saveGh()">儲存設定</button>
-            <span class="hint" id="gh-saved"></span>
-        </details>
+        <div class="hint">使用者按「檢視 PDF」會直接跳轉到這個網址，不會上傳檔案。PDF 請先放到可公開開啟的地方（例如你的網站儲存庫），再貼網址。</div>
 
         <label for="f-url">連結／網頁（選填）</label>
         <input type="text" id="f-url" placeholder="https://...　（沒有可留空，使用者只會看到文字與圖片）">
@@ -159,7 +140,7 @@
     var auth = firebase.auth();
     var db = firebase.database();
     var root = db.ref('announcements');
-    var listening = false, items = {}, views = {}, offset = 0, pendingImage = '', pendingPdf = '';
+    var listening = false, items = {}, views = {}, offset = 0, pendingImage = '';
 
     function $(id) { return document.getElementById(id); }
     function show(id) { ['login-box', 'denied-box', 'admin-area'].forEach(function (x) { $(x).classList.toggle('hidden', x !== id); }); }
@@ -208,7 +189,6 @@
             if (snap.val() === true) {
                 $('admin-email').textContent = shownName(user.email);
                 show('admin-area');
-                fillGh();
                 listen();
             } else { deny(user); }
         }).catch(function () { deny(user); });
@@ -277,7 +257,7 @@
             var startAt = Number(it.startAt) || Number(it.id) || 0, endAt = Number(it.endAt) || 0;
             meta.textContent = '開始：' + fmt(startAt) + '\n結束：' + (endAt ? fmt(endAt) : '不設結束時間') +
                 '\n圖片：' + (it.hasImageData ? '已上傳' : (it.imageUrl ? '網址圖片' : '無')) +
-                '\nPDF：' + (it.hasPdfData ? '已上傳' + (it.pdfName ? '（' + it.pdfName + '）' : '') : (it.pdfUrl ? '網址' + (it.pdfName ? '（' + it.pdfName + '）' : '') : '無')) +
+                '\nPDF：' + (it.pdfUrl ? '網址' + (it.pdfName ? '（' + it.pdfName + '）' : '') : '無') +
                 '\n連結：' + (it.url || '無');
             meta.style.whiteSpace = 'pre-line';
             var vc = document.createElement('div'); vc.className = 'item-views'; vc.textContent = '👁 ' + (views[it.id] || 0) + ' 人點閱';
@@ -328,105 +308,6 @@
         pendingImage = ''; $('f-file').value = ''; $('f-imgurl').value = ''; showPreview('');
     }
 
-    /* ---------- PDF ---------- */
-    var PDF_MAX = 5 * 1024 * 1024;
-
-    /* ---------- 上傳 PDF 到網站（GitHub 儲存庫 pdfs/ 資料夾），取得真正的網址 ---------- */
-    var GH_KEY = 'dader_admin_gh';
-    function ghDefaults() {
-        var host = location.hostname, owner = '', repo = '';
-        if (/\.github\.io$/i.test(host)) {
-            owner = host.split('.')[0];
-            var seg = location.pathname.split('/').filter(Boolean)[0];
-            repo = (seg && !/\.html?$/i.test(seg)) ? seg : owner + '.github.io';
-        }
-        return { owner: owner, repo: repo, branch: 'main', token: '' };
-    }
-    function loadGh() {
-        var d = ghDefaults(), v = {};
-        try { v = JSON.parse(localStorage.getItem(GH_KEY) || '{}'); } catch (e) {}
-        return { owner: v.owner || d.owner, repo: v.repo || d.repo, branch: v.branch || d.branch, token: v.token || '' };
-    }
-    function fillGh() {
-        var g = loadGh();
-        $('gh-owner').value = g.owner; $('gh-repo').value = g.repo; $('gh-branch').value = g.branch; $('gh-token').value = g.token;
-    }
-    function saveGh() {
-        var v = { owner: $('gh-owner').value.trim(), repo: $('gh-repo').value.trim(), branch: $('gh-branch').value.trim() || 'main', token: $('gh-token').value.trim() };
-        try { localStorage.setItem(GH_KEY, JSON.stringify(v)); $('gh-saved').textContent = '　✅ 已儲存'; } catch (e) { $('gh-saved').textContent = '　無法儲存（瀏覽器禁止）'; }
-    }
-    function waitReady(url, info) {
-        // GitHub Pages 要一小段時間才會部署完成，這裡每 4 秒檢查一次（最多約 3 分鐘）
-        var tries = 0;
-        return new Promise(function (resolve) {
-            (function check() {
-                fetch(url + '?t=' + Date.now(), { method: 'HEAD', cache: 'no-store' }).then(function (r) {
-                    if (r.ok) { resolve(true); return; }
-                    throw new Error('not yet');
-                }).catch(function () {
-                    tries++;
-                    if (tries > 45) { resolve(false); return; }
-                    info('已上傳，等待網站部署完成…（' + tries * 4 + ' 秒）');
-                    setTimeout(check, 4000);
-                });
-            })();
-        });
-    }
-    function uploadPdfToSite() {
-        if (!pendingPdf) { setMsg('pub-msg', '請先選擇 PDF 檔案', false); return; }
-        saveGh();
-        var g = loadGh();
-        if (!g.owner || !g.repo || !g.token) { setMsg('pub-msg', '請先展開「上傳到網站的設定」，填好帳號、儲存庫與權杖', false); $('gh-owner').closest('details').open = true; return; }
-        var name = 'pdfs/' + Date.now() + '.pdf';
-        var b64 = pendingPdf.split(',')[1];
-        var info = function (t) { $('pdf-info').textContent = t; };
-        $('pdf-gh').disabled = true; info('上傳中…'); setMsg('pub-msg', '', true);
-        fetch('https://api.github.com/repos/' + encodeURIComponent(g.owner) + '/' + encodeURIComponent(g.repo) + '/contents/' + name, {
-            method: 'PUT',
-            headers: { 'Authorization': 'Bearer ' + g.token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: '上傳重要訊息 PDF', content: b64, branch: g.branch })
-        }).then(function (r) {
-            if (r.ok) return r.json();
-            return r.json().catch(function () { return {}; }).then(function (j) {
-                var hint = r.status === 401 ? '權杖無效或已過期' : r.status === 403 ? '權杖權限不足（需要 Contents：Read and write）' :
-                    r.status === 404 ? '找不到儲存庫或分支，請檢查帳號、儲存庫、分支名稱' : (j.message || ('錯誤 ' + r.status));
-                throw new Error(hint);
-            });
-        }).then(function () {
-            var url = new URL(name, location.href).href;       // 和本後台同一個網站底下的網址
-            $('f-pdfurl').value = url;
-            pendingPdf = ''; $('f-pdf').value = '';
-            info('已上傳，等待網站部署完成…');
-            return waitReady(url, info).then(function (ok) {
-                info(ok ? '✅ 網址已可使用：' + url : '已上傳，但網站還在部署，約 1～2 分鐘後網址才打得開。網址已填入，可以先發布：' + url);
-                $('pdf-gh').style.display = 'none';
-            });
-        }).catch(function (e) {
-            info(''); setMsg('pub-msg', '上傳失敗：' + e.message, false);
-        }).then(function () { $('pdf-gh').disabled = false; });
-    }
-    function pickPdf(inp) {
-        var f = inp.files && inp.files[0];
-        if (!f) return;
-        if (!(f.type === 'application/pdf' || /\.pdf$/i.test(f.name))) { inp.value = ''; setMsg('pub-msg', '請選擇 PDF 檔案', false); return; }
-        if (f.size > PDF_MAX) { inp.value = ''; setMsg('pub-msg', 'PDF 超過 5MB，請改貼 PDF 網址', false); return; }
-        var fr = new FileReader();
-        fr.onerror = function () { setMsg('pub-msg', '無法讀取 PDF', false); };
-        fr.onload = function () {
-            pendingPdf = String(fr.result).replace(/^data:[^;,]*/, 'data:application/pdf');
-            if (!$('f-pdfname').value) $('f-pdfname').value = f.name;
-            $('pdf-info').textContent = '已選擇：' + f.name + '（' + (f.size / 1024).toFixed(0) + ' KB）';
-            $('pdf-clear').style.display = '';
-            $('pdf-gh').style.display = '';
-            setMsg('pub-msg', '', true);
-        };
-        fr.readAsDataURL(f);
-    }
-    function clearPdf() {
-        pendingPdf = ''; $('f-pdf').value = ''; $('f-pdfurl').value = ''; $('f-pdfname').value = '';
-        $('pdf-info').textContent = ''; $('pdf-clear').style.display = 'none'; $('pdf-gh').style.display = 'none';
-    }
-
     /* ---------- 時間 ---------- */
     function toggleTime() {
         $('f-start').classList.toggle('hidden', $('f-start-mode').value !== 'custom');
@@ -441,7 +322,7 @@
         if (!validUrl(url)) { setMsg('pub-msg', '連結格式不正確，需以 http:// 或 https:// 開頭', false); return; }
         if (!pendingImage && imgUrl && !validUrl(imgUrl)) { setMsg('pub-msg', '圖片網址格式不正確', false); return; }
         var pdfUrl = $('f-pdfurl').value.trim(), pdfName = $('f-pdfname').value.trim();
-        if (!pendingPdf && pdfUrl && !validUrl(pdfUrl)) { setMsg('pub-msg', 'PDF 網址格式不正確', false); return; }
+        if (pdfUrl && !validUrl(pdfUrl)) { setMsg('pub-msg', 'PDF 網址格式不正確', false); return; }
 
         var now = nowMs(), startAt = now, endAt = 0;
         if ($('f-start-mode').value === 'custom') {
@@ -459,8 +340,7 @@
             id: id, title: title, content: content, url: url, mode: mode,
             imageUrl: pendingImage ? '' : imgUrl,
             hasImageData: !!pendingImage,
-            pdfUrl: pendingPdf ? '' : pdfUrl,
-            hasPdfData: !!pendingPdf,
+            pdfUrl: pdfUrl,
             pdfName: pdfName,
             startAt: startAt, endAt: endAt
         };
@@ -470,13 +350,12 @@
         function put(path, val) { return root.child(path).set(val).then(function () { written.push(path); }); }
         var chain = Promise.resolve();
         if (pendingImage) chain = chain.then(function () { return put('images/' + id, pendingImage); });
-        if (pendingPdf) chain = chain.then(function () { return put('files/' + id, pendingPdf); });
         chain.then(function () { return put('items/' + id, item); })   // 檔案都傳好了，最後才讓訊息上線
             .then(function () {
                 var msg = startAt > now ? '✅ 已排程！到 ' + fmt(startAt) + ' 網站會自動顯示' : '✅ 已發布！使用者下次打開（或正在瀏覽）網頁就會收到彈窗';
                 setMsg('pub-msg', msg, true);
                 $('f-title').value = ''; $('f-content').value = ''; $('f-url').value = '';
-                clearImage(); clearPdf();
+                clearImage(); $('f-pdfurl').value = ''; $('f-pdfname').value = '';
             })
             .catch(function (e) {
                 written.forEach(function (path) { root.child(path).remove().catch(function () {}); });   // 失敗就把已傳的清掉
