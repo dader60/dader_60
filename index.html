@@ -2034,20 +2034,29 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script>
     const firebaseConfig = {
+        apiKey: "AIzaSyC82pjOh0FgknrAQShr4iJBYYrFDYTNVDM",
+        authDomain: "total-views-969ba.firebaseapp.com",
+        projectId: "total-views-969ba",
+        appId: "1:724086360176:web:9bea1e2668152ec9784cb5",
         databaseURL: "https://total-views-969ba-default-rtdb.asia-southeast1.firebasedatabase.app/" 
     };
     
     // 瀏覽次數：每次進站／重新整理都 +1。
-    // 資料庫規則：訪客只能「剛好 +1」，不能把數字改成別的；只有管理員可以直接修改數值。
+    // 做法：訪客先用 Firebase「匿名帳號」登入（使用者看不到），再同時寫入「總數 +1」與「這個帳號的上次計數時間」。
+    // 資料庫規則會檢查：只能剛好 +1、必須有帳號、同一個帳號 3 秒內只算一次；直接把數字改成別的會被拒絕。
     function startRealtimeCounter() {
         const viewElem = () => document.getElementById('total_view_display');
         try {
             firebase.initializeApp(firebaseConfig);
             const db = firebase.database();
+            const auth = firebase.auth();
             const viewsRef = db.ref('total_views');
-            viewsRef.set(firebase.database.ServerValue.increment(1)).catch((e) => console.warn('瀏覽次數 +1 失敗：', e && e.message));
+            let counted = false;
+
+            // 顯示目前總數（規則允許任何人讀取）
             viewsRef.on('value', (snapshot) => {
                 const count = snapshot.val();
                 const el = viewElem();
@@ -2056,6 +2065,22 @@
                 console.warn('瀏覽次數讀取失敗：', e && e.message);
                 const el = viewElem(); if (el) el.innerText = "暫時無法顯示";
             });
+
+            const countOnce = (user) => {
+                if (counted || !user) return;
+                counted = true;
+                const updates = {};
+                updates['total_views'] = firebase.database.ServerValue.increment(1);
+                updates['viewers/' + user.uid + '/last'] = firebase.database.ServerValue.TIMESTAMP;
+                db.ref().update(updates).catch((e) => {
+                    // 3 秒內重複計數會被規則擋下（正常現象），或網路暫時失敗：不影響使用
+                    console.warn('瀏覽次數 +1 未成功：', e && e.message);
+                });
+            };
+            auth.onAuthStateChanged((user) => countOnce(user));
+            if (!auth.currentUser) {
+                auth.signInAnonymously().catch((e) => console.warn('匿名登入失敗：', e && e.message));
+            }
         } catch (err) {
             console.error("Firebase Error:", err);
             const el = viewElem(); if (el) el.innerText = "暫時無法顯示";
@@ -2065,9 +2090,10 @@
 <script>
 /* ===== 📢 重要訊息：多則依時間排序、可附圖片／PDF、可排程；未看過的會閃紅燈並顯示「新」 =====
    已看過的判斷：
-   ・有連結 → 點進連結看完回來才算
-   ・沒有連結但有 PDF → 在站內看完 PDF（關閉）才算
-   ・只有圖片／文字 → 按「我已看過」才算 */
+   ・有連結 → 點進連結看完回來就算
+   ・沒有連結但有 PDF → 在站內把 PDF 看到最後一頁就算
+   ・只有圖片／文字 → 按「✅ 我已看過」才算
+   看完所有訊息後，自動進入網站。 */
 (function () {
     var KEY = 'dader_notice_seen_v2', KEY_OLD = 'dader_notice_seen_v1', DEV = 'dader_device_id', PEND = 'dader_notice_pending';
     var PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
@@ -2075,7 +2101,9 @@
     var itemsRaw = {}, legacy = null, active = [], splashDone = false, poppedIds = {}, detailId = null;
     var offset = 0, imgCache = {}, fileData = {}, fileBlob = {}, filePending = {}, memSeen = [], memDev = null, memPend = null, started = false;
     var pdfjsPromise = null, pdfToken = 0, pdfItemId = null;
-    var gate = false, decided = false, gotItems = false, gotLegacy = false;   // gate：進站時有沒看的重要訊息 → 必須看完才能進入主網頁
+    var gate = false, decided = false, gotItems = false, gotLegacy = false;
+    // 自動判斷「看完」：讀取時間、捲動位置、PDF 是否看到最後一頁
+    var pdfElapsed = 0, pdfReady = false, pdfFailed = false;   // gate：進站時有沒看的重要訊息 → 必須看完才能進入主網頁
 
     function $(id) { return document.getElementById(id); }
     function readSeen() {
@@ -2222,7 +2250,7 @@
         $('notice-sub').textContent = active.length ? summary : '';
         if (unread === 0) closeNoticeToast();
         else if ($('notice-toast').classList.contains('show')) fillToast(unread);
-        if (gate && unread === 0) { gate = false; window.closeNoticeModal(true); }    // 全部看完 → 解鎖，進入主網頁
+        if (gate && unread === 0) tryUnlock();    // 全部看完 → 解鎖，進入主網頁
         $('notice-modal').classList.toggle('gate', gate);
         $('notice-gate-tip').style.display = gate ? '' : 'none';
         updateCover();
@@ -2264,6 +2292,23 @@
     setMarqVar();
     window.addEventListener('resize', setMarqVar);
     window.addEventListener('load', setMarqVar);
+
+    // 看完所有訊息 → 自動進入網站
+    function tryUnlock() { gate = false; window.closeNoticeModal(true); }
+
+    /* ---------- 自動判斷「有沒有看完」（不用按任何確認鈕） ---------- */
+    function tick() {
+        if (document.hidden) return;
+        // 只有 PDF 的訊息：在站內停留 3 秒以上，且捲到最後一頁
+        if ($('pdf-viewer').classList.contains('open') && pdfItemId && pdfReady) {
+            var it2 = getItem(pdfItemId);
+            if (it2 && !isSeen(it2.id) && !safeUrl(it2.url)) {
+                pdfElapsed += 0.5;
+                var pb = $('pdf-pages');
+                if (pdfElapsed >= 3 && pb.scrollTop + pb.clientHeight >= pb.scrollHeight - 40) { markSeen(it2.id); render(); }
+            }
+        }
+    }
 
     // 遮罩：資料還沒確認前、或確定要上鎖但視窗還沒彈出前，都不讓人看到主網頁
     function updateCover() {
@@ -2393,7 +2438,7 @@
             box.appendChild(l);
             if (!seen) box.appendChild(el('div', 'notice-hint', '點進連結看完後回到這裡，才會標示為「已看過」'));
         } else if (hasPdf) {
-            if (!seen) box.appendChild(el('div', 'notice-hint', '在網頁內看完 PDF 並關閉後，才會標示為「已看過」'));
+            if (!seen) box.appendChild(el('div', 'notice-hint', '請在網頁內把 PDF 看到最後一頁，系統會自動記錄'));
         } else if (!seen) {
             var ok = el('button', 'notice-done', '✅ 我已看過'); ok.type = 'button';
             ok.onclick = function () { markSeen(it.id); render(); };
@@ -2458,6 +2503,7 @@
 
     function openPdf(it) {
         pdfItemId = it.id;
+        pdfElapsed = 0; pdfReady = false; pdfFailed = false;
         var token = ++pdfToken;
         $('pdf-viewer-title').textContent = it.pdfName || it.title || 'PDF';
         $('pdf-viewer').classList.add('open');
@@ -2471,6 +2517,7 @@
             drawPages(pdf, token);
         }).catch(function () {
             if (token !== pdfToken) return;
+            pdfFailed = true;      // PDF 打不開時，關閉就算看過，避免被卡住
             pdfMessage('這份 PDF 無法在此顯示。', extUrl || fileBlob[it.id] || '');
         });
     }
@@ -2501,8 +2548,9 @@
                 box.appendChild(h); holders.push(h);
                 if (io) io.observe(h);
             }
+            pdfReady = true;
             if (!io) { var chain = Promise.resolve(); for (var k = 1; k <= pdf.numPages; k++) (function (kk) { chain = chain.then(function () { return draw(kk); }); })(k); }
-        }).catch(function () { if (token === pdfToken) pdfMessage('這份 PDF 無法在此顯示。'); });
+        }).catch(function () { if (token === pdfToken) { pdfFailed = true; pdfMessage('這份 PDF 無法在此顯示。'); } });
     }
 
     // 關閉 PDF：沒有連結、只有 PDF 的訊息，看完關閉才算已看過
@@ -2513,9 +2561,9 @@
         $('pdf-pages').textContent = '';
         if (was && silent !== true && pdfItemId) {
             var it = getItem(pdfItemId);
-            if (it && !safeUrl(it.url)) { markSeen(it.id); render(); }
+            if (it && !safeUrl(it.url) && pdfFailed) { markSeen(it.id); render(); }
         }
-        pdfItemId = null;
+        pdfItemId = null; pdfReady = false;
     };
 
     /* ---------- 開關視窗 ---------- */
@@ -2583,6 +2631,7 @@
             if (!document.hidden) { if (!$('notice-viewer').classList.contains('open')) confirmPending(); recompute(); }
         });
         window.addEventListener('pageshow', function () { if (!$('notice-viewer').classList.contains('open')) confirmPending(); });
+        setInterval(tick, 500);    // 自動判斷有沒有看完
         confirmPending();    // 上次點了連結、這次重新載入本頁 → 算看完
     }
 
