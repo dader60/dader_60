@@ -625,7 +625,6 @@
         .notice-attach { display: flex; flex-direction: column; gap: 10px; margin: 4px 0 8px; }
         .notice-attach a, .notice-attach .notice-wait { display: block; text-align: center; padding: 12px 14px; border-radius: 50px; font-weight: bold; text-decoration: none; font-size: clamp(14px, 4vw, 16px); word-break: break-word; font-family: inherit; border: none; cursor: pointer; }
         .notice-pdf { background: #fff3f0; color: #d84315 !important; border: 2px solid #ff8a65 !important; }
-        .notice-pdf-dl { background: #fff; color: #555 !important; border: 1px solid #ccc !important; font-size: 13px !important; padding: 8px 12px !important; }
         .notice-link { background: #4285F4; color: #fff !important; }
         .notice-attach .notice-wait { background: #f0f0f0; color: #888; cursor: default; }
         .notice-img { cursor: zoom-in; }
@@ -639,12 +638,6 @@
         .img-lightbox-tip { position: absolute; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); left: 0; width: 100%; text-align: center; color: rgba(255,255,255,0.75); font-size: 12px; pointer-events: none; }
         .notice-hint { font-size: 12px; color: #888; text-align: center; line-height: 1.6; margin: 2px 0 6px; }
         .notice-done { background: #34A853; color: #fff !important; }
-        .pdf-viewer { display: none; position: fixed; inset: 0; z-index: 10003; background: #525659; flex-direction: column; }
-        .pdf-viewer.open { display: flex; }
-        .pdf-pages { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; padding: 10px; touch-action: pan-x pan-y pinch-zoom; }
-        .pdf-page { margin: 0 auto 10px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.4); max-width: 100%; display: flex; align-items: center; justify-content: center; color: #999; font-size: 13px; }
-        .pdf-msg { color: #fff; text-align: center; padding: 30px 16px; font-size: 15px; line-height: 1.8; }
-        .pdf-msg a { color: #8ab4f8; font-weight: bold; }
         .notice-viewer { display: none; position: fixed; inset: 0; z-index: 10002; background: #fff; flex-direction: column; }
         .notice-viewer.open { display: flex; }
         .notice-viewer-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #f0f0f0; border-bottom: 1px solid #ddd; padding-top: calc(10px + env(safe-area-inset-top, 0px)); }
@@ -998,14 +991,6 @@
         <div class="img-lightbox-scroll" id="img-lightbox-scroll" onclick="if(event.target===this) closeLightbox()"><img id="img-lightbox-img" alt=""></div>
         <div class="img-lightbox-tip">點圖片可放大／縮小，點空白處或 ✕ 關閉</div>
     </div>
-    <div class="pdf-viewer" id="pdf-viewer" role="dialog" aria-modal="true">
-        <div class="notice-viewer-bar">
-            <div class="notice-viewer-title" id="pdf-viewer-title">PDF</div>
-            <button type="button" onclick="closePdfViewer()">✕ 關閉</button>
-        </div>
-        <div class="pdf-pages" id="pdf-pages"></div>
-    </div>
-
     <button type="button" class="card submit-toggle" id="submit-toggle" aria-haspopup="dialog" onclick="openSubmitModal()">📮 投稿專區</button>
     <div class="submit-modal" id="submit-modal" role="dialog" aria-modal="true" aria-labelledby="submit-title" onclick="if(event.target===this) closeSubmitModal()">
         <div class="submit-modal-box">
@@ -2088,22 +2073,18 @@
     }
 </script>
 <script>
-/* ===== 📢 重要訊息：多則依時間排序、可附圖片／PDF、可排程；未看過的會閃紅燈並顯示「新」 =====
+/* ===== 📢 重要訊息：多則依時間排序、可附圖片／PDF 連結、可排程；未看過的會閃紅燈並顯示「新」 =====
    已看過的判斷：
    ・有連結 → 點進連結看完回來就算
-   ・沒有連結但有 PDF → 在站內把 PDF 看到最後一頁就算
+   ・有 PDF 檔案連結 → 按「檢視 PDF」直接跳到 PDF，看完回到這裡就算
    ・只有圖片／文字 → 按「✅ 我已看過」才算
    看完所有訊息後，自動進入網站。 */
 (function () {
     var KEY = 'dader_notice_seen_v2', KEY_OLD = 'dader_notice_seen_v1', DEV = 'dader_device_id', PEND = 'dader_notice_pending';
-    var PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-    var PDFJS_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     var itemsRaw = {}, legacy = null, active = [], splashDone = false, poppedIds = {}, detailId = null;
-    var offset = 0, imgCache = {}, fileData = {}, fileBlob = {}, filePending = {}, memSeen = [], memDev = null, memPend = null, started = false;
-    var pdfjsPromise = null, pdfToken = 0, pdfItemId = null;
+    var offset = 0, imgCache = {}, memSeen = [], memDev = null, memPend = null, started = false;
     var gate = false, decided = false, gotItems = false, gotLegacy = false;
-    // 自動判斷「看完」：讀取時間、捲動位置、PDF 是否看到最後一頁
-    var pdfElapsed = 0, pdfReady = false, pdfFailed = false;   // gate：進站時有沒看的重要訊息 → 必須看完才能進入主網頁
+    // gate：進站時有沒看的重要訊息 → 必須看完才能進入主網頁
 
     function $(id) { return document.getElementById(id); }
     function readSeen() {
@@ -2154,47 +2135,6 @@
         node.appendChild(el('span', 'notice-dot'));
         node.appendChild(document.createTextNode('新'));
     }
-    var UA = navigator.userAgent || '';
-    var IS_IOS = /iPhone|iPad|iPod/i.test(UA);
-    var IN_APP = /Instagram|FBAN|FBAV|FB_IAB|FBIOS|Line\/|MicroMessenger|TikTok|musical_ly|Snapchat|Twitter|Threads/i.test(UA);
-    function pageUrl() { return location.href.split('#')[0]; }
-    function copyText(t) {
-        function fallback() {
-            return new Promise(function (resolve, reject) {
-                try {
-                    var ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', '');
-                    ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta);
-                    ta.select(); ta.setSelectionRange(0, t.length);
-                    var ok = document.execCommand('copy'); document.body.removeChild(ta);
-                    ok ? resolve() : reject();
-                } catch (e) { reject(e); }
-            });
-        }
-        if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t).catch(fallback);
-        return fallback();
-    }
-    function copyPageLink() {
-        copyText(pageUrl()).then(function () { alert('已複製網址，可以貼到瀏覽器開啟'); })
-            .catch(function () { prompt('請長按複製這串網址，貼到瀏覽器開啟：', pageUrl()); });
-    }
-    // 內建瀏覽器（IG／LINE…）跳去系統瀏覽器：Android 用 intent，iPhone 沒有官方做法，改成複製網址＋說明
-    function openInBrowser() {
-        var u = pageUrl();
-        if (/Android/i.test(UA)) {
-            copyText(u).catch(function () {});
-            location.href = 'intent://' + u.replace(/^https?:\/\//, '') + '#Intent;scheme=' + (u.indexOf('https') === 0 ? 'https' : 'http') + ';action=android.intent.action.VIEW;end';
-        } else {
-            copyText(u).then(function () {
-                alert('已複製網址。\n請點右上角「⋯」選「在 Safari 開啟」，或打開 Safari 貼上網址。');
-            }).catch(function () { prompt('請複製這串網址，貼到 Safari 開啟：', u); });
-        }
-    }
-    function canShareFile() {
-        try {
-            return !!(navigator.canShare && window.File && navigator.canShare({ files: [new File([new Uint8Array(1)], 'a.pdf', { type: 'application/pdf' })] }));
-        } catch (e) { return false; }
-    }
-
     function getItem(id) { for (var i = 0; i < active.length; i++) if (active[i].id === id) return active[i]; return null; }
     function modalOpen() { return $('notice-modal').classList.contains('open'); }
 
@@ -2203,7 +2143,7 @@
         if (!v || typeof v !== 'object') return null;
         if (isLegacy && v.active === false) return null;
         var id = String(v.id || k);
-        if (!(v.title || v.content || v.url || v.imageUrl || v.hasImageData || v.pdfUrl || v.hasPdfData)) return null;
+        if (!(v.title || v.content || v.url || v.imageUrl || v.hasImageData || v.pdfUrl)) return null;
         return {
             id: id,
             title: String(v.title || '重要訊息'),
@@ -2213,7 +2153,6 @@
             imageUrl: String(v.imageUrl || ''),
             hasImageData: v.hasImageData === true,
             pdfUrl: String(v.pdfUrl || ''),
-            hasPdfData: v.hasPdfData === true,
             pdfName: String(v.pdfName || ''),
             startAt: Number(v.startAt) || Number(id) || 0,
             endAt: Number(v.endAt) || 0
@@ -2232,8 +2171,8 @@
             decided = true;
             if (active.some(function (it) { return !isSeen(it.id); })) gate = true;
         }
-        if (!active.length) { gate = false; window.closeNoticeModal(true); window.closePdfViewer(true); window.closeLightbox(); }
-        else if (detailId && !getItem(detailId)) { detailId = null; showList(); window.closePdfViewer(true); window.closeLightbox(); }   // 正在看的那則被下架／結束了
+        if (!active.length) { gate = false; window.closeNoticeModal(true); window.closeLightbox(); }
+        else if (detailId && !getItem(detailId)) { detailId = null; showList(); window.closeLightbox(); }   // 正在看的那則被下架／結束了
         render();
         maybePopup();
     }
@@ -2298,20 +2237,6 @@
 
     // 看完所有訊息 → 自動進入網站
     function tryUnlock() { gate = false; window.closeNoticeModal(true); }
-
-    /* ---------- 自動判斷「有沒有看完」（不用按任何確認鈕） ---------- */
-    function tick() {
-        if (document.hidden) return;
-        // 只有 PDF 的訊息：在站內停留 3 秒以上，且捲到最後一頁
-        if ($('pdf-viewer').classList.contains('open') && pdfItemId && pdfReady) {
-            var it2 = getItem(pdfItemId);
-            if (it2 && !isSeen(it2.id) && !safeUrl(it2.url)) {
-                pdfElapsed += 0.5;
-                var pb = $('pdf-pages');
-                if (pdfElapsed >= 3 && pb.scrollTop + pb.clientHeight >= pb.scrollHeight - 40) { markSeen(it2.id); render(); }
-            }
-        }
-    }
 
     // 遮罩：資料還沒確認前、或確定要上鎖但視窗還沒彈出前，都不讓人看到主網頁
     function updateCover() {
@@ -2383,54 +2308,13 @@
         $('notice-imghint').style.display = src ? '' : 'none';
 
         var box = $('notice-attach'); box.textContent = '';
-        var url = safeUrl(it.url), hasPdf = !!(it.hasPdfData || safeUrl(it.pdfUrl));
-
+        var url = safeUrl(it.url), pdfHref = safeUrl(it.pdfUrl), hasPdf = !!pdfHref;
         if (hasPdf) {
-            var ready = !it.hasPdfData || !!fileData[it.id];
-            if (ready) {
-                var pb = el('button', 'notice-pdf', '📄 檢視 PDF' + (it.pdfName ? '：' + it.pdfName : '')); pb.type = 'button';
-                pb.onclick = function () { openPdf(it); };
-                box.appendChild(pb);
-                var href = it.hasPdfData ? fileBlob[it.id] : safeUrl(it.pdfUrl);
-                function shareFile() {
-                    var f = new File([dataUrlToBytes(fileData[it.id])], (it.pdfName || 'file.pdf').replace(/(\.pdf)?$/i, '.pdf'), { type: 'application/pdf' });
-                    return navigator.share({ files: [f], title: it.title });
-                }
-                if (!IN_APP) {
-                    if (href) {
-                        var d = el('a', 'notice-pdf-dl', it.hasPdfData ? '⬇ 下載 PDF' : '↗ 開啟／下載 PDF'); d.href = href; d.target = '_blank'; d.rel = 'noopener noreferrer';
-                        if (it.pdfName) d.download = it.pdfName;
-                        box.appendChild(d);
-                    }
-                    if (it.hasPdfData && canShareFile()) {      // 手機的「分享／儲存」選單
-                        var sh = el('button', 'notice-pdf-dl', '📤 分享／儲存 PDF'); sh.type = 'button';
-                        sh.onclick = function () { try { shareFile().catch(function () {}); } catch (e) {} };
-                        box.appendChild(sh);
-                    }
-                } else {
-                    // IG／LINE 等內建瀏覽器：依序嘗試「分享選單」→「直接在本頁開啟 PDF」，都不行再引導到系統瀏覽器
-                    if (it.hasPdfData) {
-                        var dl = el('button', 'notice-pdf-dl', '⬇ 下載／儲存 PDF'); dl.type = 'button';
-                        dl.onclick = function () {
-                            function nav() { if (fileBlob[it.id]) location.href = fileBlob[it.id]; }
-                            if (canShareFile()) {
-                                try { shareFile().catch(function (err) { if (!err || err.name !== 'AbortError') nav(); }); } catch (e) { nav(); }
-                            } else nav();
-                        };
-                        box.appendChild(dl);
-                    } else if (href) {
-                        var ex = el('a', 'notice-pdf-dl', '↗ 開啟／下載 PDF'); ex.href = href; ex.target = '_self';
-                        box.appendChild(ex);
-                    }
-                    box.appendChild(el('div', 'notice-hint', IS_IOS
-                        ? '您正在 IG／LINE 等內建瀏覽器，iPhone 在這裡無法下載。請點畫面角落的「⋯」（或分享圖示），選「在 Safari 開啟」，再下載 PDF。'
-                        : '您正在 IG／LINE 等內建瀏覽器，下載常被擋住。若沒有反應，請按下面的按鈕改用手機瀏覽器開啟本頁，再下載。'));
-                    var ob = el('button', 'notice-pdf-dl', IS_IOS ? '🌐 用 Safari 開啟（先複製網址）' : '🌐 用瀏覽器開啟本頁'); ob.type = 'button'; ob.onclick = openInBrowser; box.appendChild(ob);
-                    var cb = el('button', 'notice-pdf-dl', '📋 複製本頁網址'); cb.type = 'button'; cb.onclick = copyPageLink; box.appendChild(cb);
-                }
-            } else {
-                box.appendChild(el('div', 'notice-wait', '📄 PDF 載入中…'));
-            }
+            // 直接跳轉到 PDF 檔案（用目前視窗開啟，IG／LINE 內建瀏覽器也一樣）
+            var pb = el('a', 'notice-pdf', '📄 檢視 PDF' + (it.pdfName ? '：' + it.pdfName : ''));
+            pb.href = pdfHref; pb.target = '_self';
+            pb.onclick = function () { setPending(it.id); };
+            box.appendChild(pb);
         }
         if (url) {
             var l = el('a', 'notice-link', '👀 點擊瀏覽'); l.href = url; l.target = '_blank'; l.rel = 'noopener noreferrer';
@@ -2439,9 +2323,9 @@
                 if (it.mode === 'page') { e.preventDefault(); openViewer(url, it.title); }
             };
             box.appendChild(l);
-            if (!seen) box.appendChild(el('div', 'notice-hint', '點進連結看完後回到這裡，系統會自動記錄'));
-        } else if (hasPdf) {
-            if (!seen) box.appendChild(el('div', 'notice-hint', '請在網頁內把 PDF 看到最後一頁，系統會自動記錄'));
+        }
+        if (url || hasPdf) {
+            if (!seen) box.appendChild(el('div', 'notice-hint', '點進去看完後回到這裡，系統會自動記錄'));
         } else if (!seen) {
             var ok = el('button', 'notice-done', '✅ 我已看過'); ok.type = 'button';
             ok.onclick = function () { markSeen(it.id); render(); };
@@ -2449,125 +2333,16 @@
         }
     }
 
-    // 上傳型的圖片／PDF 另外讀取（點進去才下載，不拖慢首頁）
-    function dataUrlToBytes(d) {
-        var bin = atob(d.split(',')[1]), u8 = new Uint8Array(bin.length);
-        for (var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
-        return u8;
-    }
+    // 上傳型的圖片另外讀取（點進去才下載，不拖慢首頁）
     function loadAssets(it) {
         var id = it.id, db = firebase.database();
-        function again() { if (detailId === id) renderDetail(); }
         if (it.hasImageData && !imgCache[id]) {
             db.ref('announcements/images/' + id).once('value').then(function (s) {
                 var v = s.val();
                 if (typeof v === 'string' && v.indexOf('data:image/') === 0) imgCache[id] = v;
-            }).catch(function () {}).then(again);
-        }
-        if (it.hasPdfData && !fileData[id] && !filePending[id]) {
-            filePending[id] = true;
-            db.ref('announcements/files/' + id).once('value').then(function (s) {
-                var v = s.val();
-                if (typeof v === 'string' && v.indexOf('data:application/pdf') === 0) {
-                    fileData[id] = v;
-                    try { fileBlob[id] = URL.createObjectURL(new Blob([dataUrlToBytes(v)], { type: 'application/pdf' })); } catch (e) {}
-                }
-            }).catch(function () {}).then(function () { filePending[id] = false; again(); });
+            }).catch(function () {}).then(function () { if (detailId === id) renderDetail(); });
         }
     }
-
-    /* ---------- 站內 PDF 檢視（用 PDF.js 畫在頁面上，IG／LINE 內建瀏覽器也能看） ---------- */
-    function ensurePdfJs() {
-        if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
-        if (pdfjsPromise) return pdfjsPromise;
-        pdfjsPromise = new Promise(function (resolve, reject) {
-            var sc = document.createElement('script');
-            sc.src = PDFJS;
-            sc.onload = function () {
-                var lib = window.pdfjsLib;
-                if (!lib) { pdfjsPromise = null; reject(new Error('no lib')); return; }
-                fetch(PDFJS_WORKER).then(function (r) { return r.text(); }).then(function (t) {
-                    lib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([t], { type: 'text/javascript' }));
-                    resolve(lib);
-                }).catch(function () { lib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER; resolve(lib); });
-            };
-            sc.onerror = function () { pdfjsPromise = null; reject(new Error('load fail')); };
-            document.head.appendChild(sc);
-        });
-        return pdfjsPromise;
-    }
-
-    function pdfMessage(text, href) {
-        var box = $('pdf-pages'); box.textContent = '';
-        var m = el('div', 'pdf-msg', text);
-        if (href) { m.appendChild(document.createElement('br')); var a = el('a', null, '↗ 改用瀏覽器開啟'); a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer'; m.appendChild(a); }
-        box.appendChild(m);
-    }
-
-    function openPdf(it) {
-        pdfItemId = it.id;
-        pdfElapsed = 0; pdfReady = false; pdfFailed = false;
-        var token = ++pdfToken;
-        $('pdf-viewer-title').textContent = it.pdfName || it.title || 'PDF';
-        $('pdf-viewer').classList.add('open');
-        pdfMessage('PDF 載入中…');
-        var extUrl = it.hasPdfData ? '' : safeUrl(it.pdfUrl);
-        ensurePdfJs().then(function (lib) {
-            var task = it.hasPdfData ? lib.getDocument({ data: dataUrlToBytes(fileData[it.id]) }) : lib.getDocument({ url: extUrl });
-            return task.promise;
-        }).then(function (pdf) {
-            if (token !== pdfToken) return;
-            drawPages(pdf, token);
-        }).catch(function () {
-            if (token !== pdfToken) return;
-            pdfFailed = true;      // PDF 打不開時，關閉就算看過，避免被卡住
-            pdfMessage('這份 PDF 無法在此顯示。', extUrl || fileBlob[it.id] || '');
-        });
-    }
-
-    function drawPages(pdf, token) {
-        var box = $('pdf-pages'); box.textContent = '';
-        var width = Math.max(240, Math.min(box.clientWidth - 20, 900));
-        var dpr = Math.min(window.devicePixelRatio || 1, 2);
-        pdf.getPage(1).then(function (p1) {
-            var vp1 = p1.getViewport({ scale: 1 }), scale = width / vp1.width, holders = [];
-            function draw(n) {
-                if (token !== pdfToken) return Promise.resolve();
-                return pdf.getPage(n).then(function (pg) {
-                    var vp = pg.getViewport({ scale: scale * dpr });
-                    var c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
-                    c.style.width = '100%'; c.style.height = 'auto'; c.style.display = 'block';
-                    return pg.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise.then(function () {
-                        if (token !== pdfToken) return;
-                        var h = holders[n - 1]; h.style.height = 'auto'; h.textContent = ''; h.appendChild(c);
-                    });
-                }).catch(function () {});
-            }
-            var io = ('IntersectionObserver' in window) ? new IntersectionObserver(function (entries) {
-                entries.forEach(function (e) { if (e.isIntersecting) { io.unobserve(e.target); draw(e.target._n); } });
-            }, { root: box, rootMargin: '600px' }) : null;
-            for (var n = 1; n <= pdf.numPages; n++) {
-                var h = el('div', 'pdf-page', '第 ' + n + ' 頁'); h.style.width = width + 'px'; h.style.height = Math.round(vp1.height * scale) + 'px'; h._n = n;
-                box.appendChild(h); holders.push(h);
-                if (io) io.observe(h);
-            }
-            pdfReady = true;
-            if (!io) { var chain = Promise.resolve(); for (var k = 1; k <= pdf.numPages; k++) (function (kk) { chain = chain.then(function () { return draw(kk); }); })(k); }
-        }).catch(function () { if (token === pdfToken) { pdfFailed = true; pdfMessage('這份 PDF 無法在此顯示。'); } });
-    }
-
-    // 關閉 PDF：沒有連結、只有 PDF 的訊息，看完關閉才算已看過
-    window.closePdfViewer = function (silent) {
-        var was = $('pdf-viewer').classList.contains('open');
-        pdfToken++;
-        $('pdf-viewer').classList.remove('open');
-        $('pdf-pages').textContent = '';
-        if (was && silent !== true && pdfItemId) {
-            var it = getItem(pdfItemId);
-            if (it && !safeUrl(it.url) && pdfFailed) { markSeen(it.id); render(); }
-        }
-        pdfItemId = null; pdfReady = false;
-    };
 
     /* ---------- 開關視窗 ---------- */
     window.openNoticeModal = function () {
@@ -2604,7 +2379,6 @@
     document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;
         if ($('img-lightbox').classList.contains('open')) window.closeLightbox();
-        else if ($('pdf-viewer').classList.contains('open')) window.closePdfViewer();
         else if ($('notice-viewer').classList.contains('open')) window.closeNoticeViewer();
         else window.closeNoticeModal();
     });
@@ -2634,7 +2408,6 @@
             if (!document.hidden) { if (!$('notice-viewer').classList.contains('open')) confirmPending(); recompute(); }
         });
         window.addEventListener('pageshow', function () { if (!$('notice-viewer').classList.contains('open')) confirmPending(); });
-        setInterval(tick, 500);    // 自動判斷有沒有看完
         confirmPending();    // 上次點了連結、這次重新載入本頁 → 算看完
     }
 
