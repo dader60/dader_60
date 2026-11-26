@@ -624,6 +624,7 @@
         .notice-time { font-size: 12px; color: #999; margin-top: 8px; line-height: 1.6; }
         .notice-attach { display: flex; flex-direction: column; gap: 10px; margin: 4px 0 8px; }
         .notice-attach a, .notice-attach .notice-wait { display: block; text-align: center; padding: 12px 14px; border-radius: 50px; font-weight: bold; text-decoration: none; font-size: clamp(14px, 4vw, 16px); word-break: break-word; font-family: inherit; border: none; cursor: pointer; }
+        .notice-pdf-open { background: #fff; color: #555 !important; border: 1px solid #ccc !important; font-size: 14px !important; }
         .notice-pdf { background: #fff3f0; color: #d84315 !important; border: 2px solid #ff8a65 !important; }
         .notice-link { background: #4285F4; color: #fff !important; }
         .notice-attach .notice-wait { background: #f0f0f0; color: #888; cursor: default; }
@@ -2076,13 +2077,13 @@
 /* ===== 📢 重要訊息：多則依時間排序、可附圖片／PDF 連結、可排程；未看過的會閃紅燈並顯示「新」 =====
    已看過的判斷：
    ・有連結 → 點進連結看完回來就算
-   ・有 PDF 檔案連結 → 按「檢視 PDF」直接跳到 PDF，看完回到這裡就算
+   ・沒有連結的訊息（文字／圖片／PDF）→ 可按「✅ 我已看過」；PDF 按「檢視」跳過去看完回來也會自動記錄
    ・只有圖片／文字 → 按「✅ 我已看過」才算
    看完所有訊息後，自動進入網站。 */
 (function () {
     var KEY = 'dader_notice_seen_v2', KEY_OLD = 'dader_notice_seen_v1', DEV = 'dader_device_id', PEND = 'dader_notice_pending';
     var itemsRaw = {}, legacy = null, active = [], splashDone = false, poppedIds = {}, detailId = null;
-    var offset = 0, imgCache = {}, memSeen = [], memDev = null, memPend = null, started = false;
+    var offset = 0, imgCache = {}, fileBlob = {}, filePending = {}, fileFail = {}, memSeen = [], memDev = null, memPend = null, started = false;
     var gate = false, decided = false, gotItems = false, gotLegacy = false;
     // gate：進站時有沒看的重要訊息 → 必須看完才能進入主網頁
 
@@ -2143,7 +2144,7 @@
         if (!v || typeof v !== 'object') return null;
         if (isLegacy && v.active === false) return null;
         var id = String(v.id || k);
-        if (!(v.title || v.content || v.url || v.imageUrl || v.hasImageData || v.pdfUrl)) return null;
+        if (!(v.title || v.content || v.url || v.imageUrl || v.hasImageData || v.pdfUrl || v.hasPdfData)) return null;
         return {
             id: id,
             title: String(v.title || '重要訊息'),
@@ -2153,6 +2154,7 @@
             imageUrl: String(v.imageUrl || ''),
             hasImageData: v.hasImageData === true,
             pdfUrl: String(v.pdfUrl || ''),
+            hasPdfData: v.hasPdfData === true,
             pdfName: String(v.pdfName || ''),
             startAt: Number(v.startAt) || Number(id) || 0,
             endAt: Number(v.endAt) || 0
@@ -2308,13 +2310,27 @@
         $('notice-imghint').style.display = src ? '' : 'none';
 
         var box = $('notice-attach'); box.textContent = '';
-        var url = safeUrl(it.url), pdfHref = safeUrl(it.pdfUrl), hasPdf = !!pdfHref;
+        var url = safeUrl(it.url);
+        var hasPdf = !!(it.hasPdfData || safeUrl(it.pdfUrl));
+        var pdfHref = it.hasPdfData ? fileBlob[it.id] : safeUrl(it.pdfUrl);
         if (hasPdf) {
-            // 直接跳轉到 PDF 檔案（用目前視窗開啟，IG／LINE 內建瀏覽器也一樣）
-            var pb = el('a', 'notice-pdf', '📄 檢視 PDF' + (it.pdfName ? '：' + it.pdfName : ''));
-            pb.href = pdfHref; pb.target = '_self';
-            pb.onclick = function () { setPending(it.id); };
-            box.appendChild(pb);
+            if (pdfHref) {
+                var label = it.pdfName ? '：' + it.pdfName : '';
+                // 檢視：直接用目前視窗跳到 PDF 檔案
+                var pb = el('a', 'notice-pdf', '📄 檢視 PDF' + label);
+                pb.href = pdfHref; pb.target = '_self';
+                pb.onclick = function () { setPending(it.id); };
+                box.appendChild(pb);
+                // 開啟：用新分頁開啟
+                var po = el('a', 'notice-pdf-open', '↗ 開啟 PDF');
+                po.href = pdfHref; po.target = '_blank'; po.rel = 'noopener noreferrer';
+                po.onclick = function () { setPending(it.id); };
+                box.appendChild(po);
+            } else if (fileFail[it.id]) {
+                box.appendChild(el('div', 'notice-wait', '⚠️ PDF 載入失敗，請稍後再試'));
+            } else {
+                box.appendChild(el('div', 'notice-wait', '📄 PDF 載入中…'));
+            }
         }
         if (url) {
             var l = el('a', 'notice-link', '👀 點擊瀏覽'); l.href = url; l.target = '_blank'; l.rel = 'noopener noreferrer';
@@ -2323,24 +2339,38 @@
                 if (it.mode === 'page') { e.preventDefault(); openViewer(url, it.title); }
             };
             box.appendChild(l);
-        }
-        if (url || hasPdf) {
-            if (!seen) box.appendChild(el('div', 'notice-hint', '點進去看完後回到這裡，系統會自動記錄'));
+            if (!seen) box.appendChild(el('div', 'notice-hint', '點進連結看完後回到這裡，系統會自動記錄'));
         } else if (!seen) {
+            // 沒有連結的訊息（文字、圖片、PDF）：可以按「我已看過」
             var ok = el('button', 'notice-done', '✅ 我已看過'); ok.type = 'button';
             ok.onclick = function () { markSeen(it.id); render(); };
             box.appendChild(ok);
         }
     }
 
-    // 上傳型的圖片另外讀取（點進去才下載，不拖慢首頁）
+    // 上傳型的圖片／PDF 另外讀取（點進去才下載，不拖慢首頁）
+    function dataUrlToBytes(d) {
+        var bin = atob(d.split(',')[1]), u8 = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+        return u8;
+    }
     function loadAssets(it) {
         var id = it.id, db = firebase.database();
+        function again() { if (detailId === id) renderDetail(); }
         if (it.hasImageData && !imgCache[id]) {
             db.ref('announcements/images/' + id).once('value').then(function (s) {
                 var v = s.val();
                 if (typeof v === 'string' && v.indexOf('data:image/') === 0) imgCache[id] = v;
-            }).catch(function () {}).then(function () { if (detailId === id) renderDetail(); });
+            }).catch(function () {}).then(again);
+        }
+        if (it.hasPdfData && !fileBlob[id] && !filePending[id]) {
+            filePending[id] = true; fileFail[id] = false;
+            db.ref('announcements/files/' + id).once('value').then(function (s) {
+                var v = s.val();
+                if (typeof v === 'string' && v.indexOf('data:application/pdf') === 0) {
+                    fileBlob[id] = URL.createObjectURL(new Blob([dataUrlToBytes(v)], { type: 'application/pdf' }));
+                } else fileFail[id] = true;
+            }).catch(function () { fileFail[id] = true; }).then(function () { filePending[id] = false; again(); });
         }
     }
 
